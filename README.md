@@ -57,6 +57,7 @@ Or concatenate them into one big file:
 >>> r.download_to_file("data/raw.csv")
 Generating CSV download links...
 100%|██████████| 2/2 [00:12<00:00,  7.40s/it]
+Generated 2029 CSV links ready for downloading
 Writing data to data/raw.csv...
 100%|██████████| 2029/2029 [31:23<00:00,  1.04it/s]
 ```
