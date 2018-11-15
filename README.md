@@ -2,11 +2,11 @@
 
 An easy downloader for the AirBase air quality data.
 
-Airbase is an air-quality database provided by the European Environment Agency
+AirBase is an air quality database provided by the European Environment Agency
 (EEA). The data is available for download at
 [the portal](http://discomap.eea.europa.eu/map/fme/AirQualityExport.htm), but
 the interface makes it a bit time consuming to do bulk downloads. Hence, an easy
-Python-baesd interface.
+Python-based interface.
 
 ## Installation
 
@@ -54,7 +54,7 @@ Or concatenate them into one big file:
 
 ```python
 >>> r = client.request(country="FR", pl=["O3", "PM10"], year_to=2014)
->>> r.download_to_file('data/raw.csv')
+>>> r.download_to_file("data/raw.csv")
 Generating CSV download links...
 100%|██████████| 2/2 [00:12<00:00,  7.40s/it]
 Writing data to data/raw.csv...
@@ -64,7 +64,7 @@ Writing data to data/raw.csv...
 Don't forget to get the metadata about the measurement stations:
 
 ```python
->>> client.download_metadata('data/metadata.csv')
+>>> client.download_metadata("data/metadata.csv")
 Writing metadata to data/metadata.csv...
 ```
 
