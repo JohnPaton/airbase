@@ -43,6 +43,8 @@ Request download links from the server and save the resulting CSVs into a direct
 ```python
 >>> r = client.request(country=["NL", "DE"], pl="NO3", year_from=2015)
 >>> r.download_to_directory(dir="data", skip_existing=True)
+```
+```
 Generating CSV download links...
 100%|██████████| 2/2 [00:03<00:00,  2.03s/it]
 Generated 12 CSV links ready for downloading
@@ -55,11 +57,27 @@ Or concatenate them into one big file:
 ```python
 >>> r = client.request(country="FR", pl=["O3", "PM10"], year_to=2014)
 >>> r.download_to_file("data/raw.csv")
+```
+```
 Generating CSV download links...
 100%|██████████| 2/2 [00:12<00:00,  7.40s/it]
 Generated 2029 CSV links ready for downloading
 Writing data to data/raw.csv...
 100%|██████████| 2029/2029 [31:23<00:00,  1.04it/s]
+```
+
+Download the entire dataset (not for the faint of heart):
+
+```python
+>>> r = client.request()
+>>> r.download_to_directory("data")
+```
+```
+Generating CSV download links...
+100%|██████████| 40/40 [03:38<00:00,  2.29s/it]
+Generated 146993 CSV links ready for downloading
+Downloading CSVs to data...
+  0%|          | 299/146993 [01:50<17:15:06,  2.36it/s]
 ```
 
 Don't forget to get the metadata about the measurement stations:
