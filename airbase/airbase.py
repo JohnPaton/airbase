@@ -357,7 +357,7 @@ class AirbaseRequest:
 
         if self.verbose:
             print(
-                "Generated {} CSV links ready for downloading".format(
+                "Generated {:,} CSV links ready for downloading".format(
                     len(self._csv_links)
                 ),
                 file=sys.stderr,
@@ -365,7 +365,9 @@ class AirbaseRequest:
 
         return self
 
-    def download_to_directory(self, dir, skip_existing=True):
+    def download_to_directory(
+        self, dir, skip_existing=True, raise_for_status=True
+    ):
         """
         Download into a directory, preserving original file structure.
 
@@ -373,6 +375,9 @@ class AirbaseRequest:
         :param bool skip_existing: (optional) Don't re-download files if
             they exist in `dir`. If False, existing files in `dir` may
             be overwritten. Default True.
+        :param bool raise_for_status: (optional) Raise exceptions if
+            download links return "bad" HTTP status codes. If False,
+            a warning will be printed instead. Default True.
 
         :return: self
         """
@@ -398,20 +403,31 @@ class AirbaseRequest:
                 continue
 
             r = requests.get(url)
-            r.raise_for_status()
+
+            try:
+                r.raise_for_status()
+            except Exception as e:
+                if raise_for_status:
+                    raise
+                else:
+                    print("Warning: " + str(e), file=sys.stderr)
+                    continue
 
             with open(fpath, "w") as h:
                 h.write(r.text)
 
         return self
 
-    def download_to_file(self, filepath):
+    def download_to_file(self, filepath, raise_for_status=True):
         """
         Download data into one large CSV.
 
         Directory where the new CSV will be created must exist.
 
         :param str filepath: The path to the new CSV.
+        :param bool raise_for_status: (optional) Raise exceptions if
+            download links return "bad" HTTP status codes. If False,
+            a warning will be printed instead. Default True.
 
         :return: self
         """
@@ -432,7 +448,15 @@ class AirbaseRequest:
             self._csv_links, disable=not self.verbose, leave=True
         ):
             r = requests.get(url)
-            r.raise_for_status()
+
+            try:
+                r.raise_for_status()
+            except Exception as e:
+                if raise_for_status:
+                    raise
+                else:
+                    print("Warning: " + str(e), file=sys.stderr)
+                    continue
 
             lines = r.text.split("\n")
 
