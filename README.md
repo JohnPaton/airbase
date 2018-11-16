@@ -74,4 +74,4 @@ Writing metadata to data/metadata.csv...
 * **Tests**
 * Parallel CSV downloads (in progress)
 * CLI to avoid using Python all together
-* Data munging library for wrangling AirBase output data
+* Data wrangling module for AirBase output data
