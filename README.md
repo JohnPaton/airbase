@@ -61,7 +61,7 @@ Or concatenate them into one big file:
 ```
 Generating CSV download links...
 100%|██████████| 2/2 [00:12<00:00,  7.40s/it]
-Generated 2029 CSV links ready for downloading
+Generated 2,029 CSV links ready for downloading
 Writing data to data/raw.csv...
 100%|██████████| 2029/2029 [31:23<00:00,  1.04it/s]
 ```
@@ -75,7 +75,7 @@ Download the entire dataset (not for the faint of heart):
 ```
 Generating CSV download links...
 100%|██████████| 40/40 [03:38<00:00,  2.29s/it]
-Generated 146993 CSV links ready for downloading
+Generated 146,993 CSV links ready for downloading
 Downloading CSVs to data...
   0%|          | 299/146993 [01:50<17:15:06,  2.36it/s]
 ```
