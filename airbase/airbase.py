@@ -96,10 +96,10 @@ class AirbaseClient:
             requested. See `self.all_countries`.
         :param str|list pl: (optional) The pollutant(s) to request data
             for. Must be one of the pollutants in `self.all_pollutants`.
-            Cannot be used in conjunction will `plshort`.
+            Cannot be used in conjunction with `plshort`.
         :param str|list plshort: (optional). The pollutant code(s) to
             request data for. Will be applied to each country requested.
-            Cannot be used in conjunction will `plshort`.
+            Cannot be used in conjunction with `pl`.
         :param str year_from: (optional) The first year of data. Can
             not be earlier than 2013. Default 2013.
         :param str year_to: (optional) The last year of data. Can not be
