@@ -1,6 +1,9 @@
 ---
 language: python
-
+install:
+  - pip install .
+script:
+  - echo "skipping tests"
 matrix:
   include:
     - python: 3.6
