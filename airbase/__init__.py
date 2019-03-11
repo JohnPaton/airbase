@@ -1,2 +1,4 @@
 from . import resources, util
-from .airbase import *
+from .airbase import AirbaseClient, AirbaseRequest
+
+__all__ = ['AirbaseClient', 'AirbaseRequest', 'resources', 'util']

@@ -18,7 +18,7 @@ class AirbaseClient:
             If False, `.connect()` must be called before making data
             requests. Default True.
 
-        .. example::
+        :example:
             >>> client = AirbaseClient()
             >>> r = client.request(["NL", "DE"], pl=["O3", "NO2"])
             >>> r.download_to_directory("data/raw")
@@ -66,7 +66,7 @@ class AirbaseClient:
         self,
         country=None,
         pl=None,
-        plshort=None,
+        shortpl=None,
         year_from="2013",
         year_to=CURRENT_YEAR,
         source="All",
@@ -78,7 +78,7 @@ class AirbaseClient:
         Initialize an AirbaseRequest for a query.
 
         Pollutants can be specified either by name (`pl`) or by code
-        (`plshort`). If no pollutants are specified, data for all
+        (`shortpl`). If no pollutants are specified, data for all
         available pollutants will be requested. If a pollutant is not
         available for a country, then we simply do not try to download
         those CSVs.
@@ -96,8 +96,8 @@ class AirbaseClient:
             requested. See `self.all_countries`.
         :param str|list pl: (optional) The pollutant(s) to request data
             for. Must be one of the pollutants in `self.all_pollutants`.
-            Cannot be used in conjunction with `plshort`.
-        :param str|list plshort: (optional). The pollutant code(s) to
+            Cannot be used in conjunction with `shortpl`.
+        :param str|list shortpl: (optional). The pollutant code(s) to
             request data for. Will be applied to each country requested.
             Cannot be used in conjunction with `pl`.
         :param str year_from: (optional) The first year of data. Can
@@ -117,9 +117,10 @@ class AirbaseClient:
             download links from the Airbase server at object
             initialization. Default False.
 
-        :return AirbaseRequest: the initialized AirbaseRequest.
+        :return AirbaseRequest:
+            The initialized AirbaseRequest.
 
-        .. example::
+        :example:
             >>> client = AirbaseClient()
             >>> r = client.request(["NL", "DE"], pl=["O3", "NO2"])
             >>> r.download_to_directory("data/raw")
@@ -138,16 +139,16 @@ class AirbaseClient:
         else:
             country = self.all_countries
 
-        if pl is not None and plshort is not None:
-            raise ValueError("You cannot specify both 'pl' and 'plshort'")
+        if pl is not None and shortpl is not None:
+            raise ValueError("You cannot specify both 'pl' and 'shortpl'")
 
-        # construct plshort form pl if applicable
+        # construct shortpl form pl if applicable
         if pl is not None:
             pl_list = util.string_safe_list(pl)
-            plshort = []
+            shortpl = []
             for p in pl_list:
                 try:
-                    plshort.append(self.all_pollutants[p])
+                    shortpl.append(self.all_pollutants[p])
                 except KeyError:
                     raise ValueError(
                         "'{}' is not a valid pollutant name".format(p)
@@ -155,7 +156,7 @@ class AirbaseClient:
 
         r = AirbaseRequest(
             country,
-            plshort,
+            shortpl,
             year_from,
             year_to,
             source,
@@ -169,17 +170,17 @@ class AirbaseClient:
 
     def search_pollutant(self, query, limit=None):
         """
-        Search for a pollutant's `plshort` number based on its name.
+        Search for a pollutant's `shortpl` number based on its name.
 
         :param str query: The pollutant to search for.
         :param int limit: (optional) Max number of results.
 
         :return list[dict]: The best pollutant matches. Pollutants
-            are dicts with keys "pl" and "plshort".
+            are dicts with keys "pl" and "shortpl".
 
-        .. example::
+        :example:
             >>> AirbaseClient().search_pollutant("o3", limit=2)
-            >>> [{"pl": "O3", "plshort": "7"}, {"pl": "NO3", "plshort": "46"}]
+            >>> [{"pl": "O3", "shortpl": "7"}, {"pl": "NO3", "shortpl": "46"}]
 
         """
         names = list(self.all_pollutants.keys())
@@ -193,7 +194,7 @@ class AirbaseClient:
             results = results[:limit]
 
         return [
-            {"pl": name, "plshort": self.all_pollutants[name]}
+            {"pl": name, "shortpl": self.all_pollutants[name]}
             for name in results
         ]
 
@@ -227,6 +228,7 @@ class AirbaseClient:
 
     @property
     def all_countries(self):
+        """All countries available from AirBase."""
         if self._all_countries is None:
             raise AttributeError(
                 "Country list has not yet been downloaded. "
@@ -236,6 +238,7 @@ class AirbaseClient:
 
     @property
     def all_pollutants(self):
+        """All pollutants available from AirBase."""
         if self._all_pollutants is None:
             raise AttributeError(
                 "Pollutant list has not yet been downloaded. "
@@ -245,6 +248,7 @@ class AirbaseClient:
 
     @property
     def pollutants_per_country(self):
+        """The pollutants available in each country from AirBase."""
         if self._pollutants_per_country is None:
             raise AttributeError(
                 "Country-Pollutant map has not yet been downloaded. "
@@ -257,14 +261,13 @@ class AirbaseRequest:
     def __init__(
         self,
         country=None,
-        plshort=None,
+        shortpl=None,
         year_from="2013",
         year_to=CURRENT_YEAR,
         source="All",
         update_date=None,
         verbose=True,
         preload_csv_links=False,
-        n_jobs=1,
     ):
         """
         Handler for Airbase data requests.
@@ -277,7 +280,7 @@ class AirbaseRequest:
 
         :param str|list country: 2-letter country code or a list of
             them. If a list, data will be requested for each country.
-        :param str|list plshort: (optional). The pollutant code to
+        :param str|list shortpl: (optional). The pollutant code to
             request data for. Will be applied to each country requested.
             If None, all available pollutants will be requested. If a
             pollutant is not available for a country, then we simply
@@ -300,7 +303,7 @@ class AirbaseRequest:
             initialization. Default False.
         """
         self.country = country
-        self.plshort = plshort
+        self.shortpl = shortpl
         self.year_from = year_from
         self.year_to = year_to
         self.source = source
@@ -308,11 +311,11 @@ class AirbaseRequest:
         self.verbose = verbose
 
         self._country_list = util.string_safe_list(country)
-        self._plshort_list = util.string_safe_list(plshort)
+        self._shortpl_list = util.string_safe_list(shortpl)
         self._download_links = []
 
         for c in self._country_list:
-            for p in self._plshort_list:
+            for p in self._shortpl_list:
                 self._download_links.append(
                     util.link_list_url(
                         c, p, year_from, year_to, source, update_date

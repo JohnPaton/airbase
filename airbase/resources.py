@@ -7,7 +7,7 @@ LINK_LIST_URL_TEMPLATE = (
     "AirQualityDownload/AQData_Extract.fmw"
     "?CountryCode={country}"
     "&CityName="
-    "&Pollutant={plshort}"
+    "&Pollutant={shortpl}"
     "&Year_from={year_from}"
     "&Year_to={year_to}"
     "&Station="

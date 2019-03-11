@@ -1,0 +1,13 @@
+---
+language: python
+
+matrix:
+  include:
+    - python: 3.6
+      deploy:
+        provider: pypi
+        user: johnpaton
+        password: $PYPI_PASSWORD
+        on:
+          branch: master
+          tags: true

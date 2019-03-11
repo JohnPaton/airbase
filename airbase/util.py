@@ -40,7 +40,7 @@ def pollutants_from_summary(summary):
     :param list[dict] summary: The E1a summary.
 
     :return dict: The available pollutants, with name ("pl") as key
-        and pollutant number ("plshort") as value.
+        and pollutant number ("shortpl") as value.
     """
     return {d["pl"]: d["shortpl"] for d in summary}
 
@@ -68,7 +68,7 @@ def pollutants_per_country(summary):
 
 def link_list_url(
     country,
-    plshort=None,
+    shortpl=None,
     year_from="2013",
     year_to=CURRENT_YEAR,
     source="All",
@@ -79,7 +79,7 @@ def link_list_url(
 
     :param str country: The 2-letter country code. See
         AirbaseClient.countries for options.
-    :param str plshort: (optional) The pollutant number. Leave blank to
+    :param str shortpl: (optional) The pollutant number. Leave blank to
         get all pollutants. See AirbaseClient.pollutants_per_country for
         options.
     :param str year_from: (optional) The first year of data. Can not be
@@ -97,7 +97,7 @@ def link_list_url(
     :return str: The URL which will yield the list of relevant CSV
         download links.
     """
-    plshort = plshort or ""
+    shortpl = shortpl or ""
 
     if int(year_from) < 2013:
         raise ValueError("'year_from' must be at least 2013")
@@ -117,7 +117,7 @@ def link_list_url(
 
     return LINK_LIST_URL_TEMPLATE.format(
         country=country,
-        plshort=plshort,
+        shortpl=shortpl,
         year_from=year_from,
         year_to=year_to,
         source=source,
