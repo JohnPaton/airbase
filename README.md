@@ -10,12 +10,10 @@ Python-based interface.
 
 ## Installation
 
-To install `airbase`, just clone this repository and install the Python package.
+To install `airbase`, simply run
 
 ```bash
-$ git clone https://github.com/johnpaton/airbase
-$ cd airbase
-$ pip install .
+$ pip install airbase
 ```
 
 ## Getting Started
