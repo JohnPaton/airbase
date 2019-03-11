@@ -1,11 +1,8 @@
+"""Utility functions for processing the raw Portal responses, url templating, etc."""
+
 import datetime
 
-from .resources import (
-    LINK_LIST_URL_TEMPLATE,
-    CURRENT_YEAR,
-    DATE_FMT,
-    ALL_SOURCES,
-)
+from .resources import LINK_LIST_URL_TEMPLATE, CURRENT_YEAR, DATE_FMT, ALL_SOURCES
 
 
 def string_safe_list(obj):
@@ -16,7 +13,7 @@ def string_safe_list(obj):
     :param obj:
     :return list:
     """
-    if isinstance(obj, str) or not hasattr(obj, '__iter__'):
+    if isinstance(obj, str) or not hasattr(obj, "__iter__"):
         return [obj]
     else:
         return list(obj)
@@ -128,5 +125,5 @@ def link_list_url(
 def extract_csv_links(text):
     """Get a list of csv links from the download link response text"""
     links = text.replace("\r", "").split("\n")
-    links.remove('')
+    links.remove("")
     return links

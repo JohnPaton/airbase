@@ -9,14 +9,6 @@ airbase package
 Submodules
 ----------
 
-airbase.airbase module
-----------------------
-
-.. automodule:: airbase.airbase
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 airbase.resources module
 ------------------------
 

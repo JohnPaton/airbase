@@ -15,7 +15,7 @@ Welcome to AirBase's documentation!
 
 AirBase is an air quality database provided by the European Environment Agency
 (EEA). The data is available for download at
-`the Portal <http://discomap.eea.europa.eu/map/fme/AirQualityExport.htm/>`_, but
+`the Portal <http://discomap.eea.europa.eu/map/fme/AirQualityExport.htm>`_, but
 the interface makes it a bit time consuming to do bulk downloads. Hence, an easy
 Python-based interface.
 
