@@ -8,6 +8,8 @@ AirBase is an air quality database provided by the European Environment Agency
 the interface makes it a bit time consuming to do bulk downloads. Hence, an easy
 Python-based interface.
 
+Read the full documentation at https://airbase.readthedocs.io.
+
 ## Installation
 
 To install `airbase`, simply run
