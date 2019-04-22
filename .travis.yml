@@ -10,7 +10,7 @@ python:
 install:
   - pip install -r requirements.txt
   - pip install .
-script: pytest -lk 'not integration'
+script: pytest -lvk 'not integration'
 jobs:
   include:
     - stage: lint
