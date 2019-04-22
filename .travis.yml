@@ -16,10 +16,12 @@ matrix:
     - python: 3.6
       script:
         - pytest --full-trace -lv
-deploy:
-  provider: pypi
-  user: johnpaton
-  password: $PYPI_PASSWORD
-  on:
-    branch: master
-    tags: true
+    - python: 3.6
+      deploy:
+        provider: pypi
+        user: johnpaton
+        password: $PYPI_PASSWORD
+        on:
+          branch: master
+          tags: true
+
