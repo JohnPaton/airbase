@@ -1,24 +1,27 @@
 ---
 dist: xenial   # required for Python >= 3.7
 language: python
-python:
-  - 3.4
-  - 3.5
-  - 3.6
-  - 3.7
-  - 3.8-dev
 install:
   - pip install .
-script:
-  - pytest --full-trace -lk 'not integration'
-matrix:
+jobs:
   include:
-    - python:
-      - 3.4
-      - 3.8-dev
-      script:
-        - pytest --full-trace -lv
-    - python: 3.6
+    - stage: unit test
+      python:
+        - 3.4
+        - 3.5
+        - 3.6
+        - 3.7
+        - 3.8-dev
+      script: pytest --full-trace -lk 'not integration'
+
+    - stage: integration test
+      python:
+        - 3.4
+        - 3.8-dev
+      script: pytest --full-trace -lv
+      
+    - stage: deploy
+      python: 3.6
       deploy:
         provider: pypi
         user: johnpaton
@@ -26,4 +29,3 @@ matrix:
         on:
           branch: master
           tags: true
-
