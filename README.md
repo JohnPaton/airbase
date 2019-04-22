@@ -1,3 +1,7 @@
+[![Build Status](https://travis-ci.com/JohnPaton/airbase.svg?branch=master)](https://travis-ci.com/JohnPaton/airbase)
+[![Documentation Status](https://readthedocs.org/projects/airbase/badge/?version=latest)](https://airbase.readthedocs.io/en/latest/?badge=latest)
+
+
 # AirBase
 
 An easy downloader for the AirBase air quality data.
