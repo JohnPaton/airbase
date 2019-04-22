@@ -20,18 +20,18 @@ def test_client_connects(client):
 @pytest.mark.withoutresponses
 def test_download_to_directory(client, tmpdir):
     r = client.request(country=["AD", "BE"], pl="CO", year_from="2017", year_to="2017")
-    r.download_to_directory(dir=tmpdir, skip_existing=True)
+    r.download_to_directory(dir=str(tmpdir), skip_existing=True)
     assert os.listdir(str(tmpdir)) != []
 
 
 @pytest.mark.withoutresponses
 def test_download_to_file(client, tmpdir):
     r = client.request(country="MT", pl=["NO", "NO2"], year_from="2014", year_to="2014")
-    r.download_to_file(tmpdir / "raw.csv")
+    r.download_to_file(str(tmpdir / "raw.csv"))
     assert os.path.exists(str(tmpdir / "raw.csv"))
 
 
 @pytest.mark.withoutresponses
 def test_download_metadata(client, tmpdir):
-    client.download_metadata(tmpdir / "metadata.csv")
+    client.download_metadata(str(tmpdir / "metadata.csv"))
     assert os.path.exists(str(tmpdir / "metadata.csv"))
