@@ -1,4 +1,5 @@
 from airbase import util
+from .resources import SUMMARY, CSV_LINKS_RESPONSE_TEXT
 
 import pytest
 
@@ -20,23 +21,23 @@ class TestStringSafeList:
         assert util.string_safe_list(input) == output
 
 
-def test_countries_from_summary(summary):
-    output = util.countries_from_summary(summary)
+def test_countries_from_summary():
+    output = util.countries_from_summary(SUMMARY)
     assert type(output) is list
     assert len(output) > 0
     assert type(output[0]) is str
 
 
-def test_pollutants_from_summary(summary):
-    output = util.pollutants_from_summary(summary)
+def test_pollutants_from_summary():
+    output = util.pollutants_from_summary(SUMMARY)
     assert type(output) is dict
     assert len(output) > 0
     assert "PM10" in output
     assert type(output["PM10"]) is str
 
 
-def test_pollutants_per_country(summary):
-    output = util.pollutants_per_country(summary)
+def test_pollutants_per_country():
+    output = util.pollutants_per_country(SUMMARY)
     assert type(output) is dict
     assert len(output) > 0
     assert "AD" in output
@@ -46,8 +47,8 @@ def test_pollutants_per_country(summary):
     assert "shortpl" in output["AD"][0]
 
 
-def test_extract_csv_links(csv_links_response_text):
-    output = util.extract_csv_links(csv_links_response_text)
+def test_extract_csv_links():
+    output = util.extract_csv_links(CSV_LINKS_RESPONSE_TEXT)
     assert len(output) > 0
     assert len(output[-1]) > 0
     assert "\n" not in output[0]
