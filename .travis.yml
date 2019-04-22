@@ -9,10 +9,9 @@ python:
   - 3.8-dev
 install:
   - pip install .
+script: pytest --full-trace -lk 'not integration'
 jobs:
   include:
-    - stage: unit test
-      script: pytest --full-trace -lk 'not integration'
     - stage: integration test
       python: 3.4
       script: pytest --full-trace -lv
