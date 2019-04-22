@@ -92,7 +92,7 @@ class AirbaseClient:
         :param str|list country: (optional), 2-letter country code or a
             list of them. If a list, data will be requested for each
             country. Will raise ValueError if a country is not available
-            on the server. If None, data for all conutries will be
+            on the server. If None, data for all countries will be
             requested. See `self.all_countries`.
         :param str|list pl: (optional) The pollutant(s) to request data
             for. Must be one of the pollutants in `self.all_pollutants`.
@@ -221,7 +221,7 @@ class AirbaseClient:
         """
         country_list = util.string_safe_list(country)
         for c in country_list:
-            if c not in self._all_countries:
+            if c not in self.all_countries:
                 raise ValueError(
                     "'{}' is not an available 2-letter country code.".format(c)
                 )
