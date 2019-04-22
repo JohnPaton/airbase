@@ -18,7 +18,7 @@ URL = "https://github.com/johnpaton/airbase-downloader"
 EMAIL = "john@johnpaton.net"
 AUTHOR = "John Paton"
 REQUIRES_PYTHON = ">=3.4.0"
-VERSION = "0.1.0"
+VERSION = "0.2.2"
 
 # What packages are required for this module to be executed?
 REQUIRED = ["requests", "tqdm"]
