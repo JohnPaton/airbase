@@ -1,16 +1,25 @@
 ---
+dist: xenial   # required for Python >= 3.7
 language: python
+python:
+  - 3.4
+  - 3.5
+  - 3.6
+  - 3.7
+  - 3.8-dev
 install:
   - pip install .
 script:
-  - echo "skipping tests"
+  - pytest --full-trace -lk 'not integration'
 matrix:
   include:
     - python: 3.6
-      deploy:
-        provider: pypi
-        user: johnpaton
-        password: $PYPI_PASSWORD
-        on:
-          branch: master
-          tags: true
+      script:
+        - pytest --full-trace -lv
+deploy:
+  provider: pypi
+  user: johnpaton
+  password: $PYPI_PASSWORD
+  on:
+    branch: master
+    tags: true
