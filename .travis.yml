@@ -16,8 +16,8 @@ jobs:
     - stage: lint
       python: 3.6
       install: pip install black
-      script: black --check
-    - stage: integration test
+      script: black --check .
+    - stage: integration
       python: 3.4
       script: pytest -lvk integration
     - python: 3.8-dev
@@ -32,3 +32,9 @@ jobs:
         on:
           branch: master
           tags: true
+stages:
+  - lint
+  - test
+  - integration
+  - name: deploy
+    if: branch = master
