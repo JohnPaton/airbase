@@ -12,6 +12,9 @@ install:
 script: pytest -lk 'not integration'
 jobs:
   include:
+    - stage: lint
+      python: 3.6
+      script: black --check
     - stage: integration test
       python: 3.4
       script: pytest -lvk integration
@@ -27,3 +30,9 @@ jobs:
         on:
           branch: master
           tags: true
+- stages:
+    - lint
+    - test
+    - integration test
+    - name: deploy
+      if: branch = master

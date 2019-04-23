@@ -1,2 +1,5 @@
--e .
+black
 pytest
+responses
+pytest-responses
+pytest-mock
