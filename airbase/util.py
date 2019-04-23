@@ -2,7 +2,12 @@
 
 import datetime
 
-from .resources import LINK_LIST_URL_TEMPLATE, CURRENT_YEAR, DATE_FMT, ALL_SOURCES
+from .resources import (
+    LINK_LIST_URL_TEMPLATE,
+    CURRENT_YEAR,
+    DATE_FMT,
+    ALL_SOURCES,
+)
 
 
 def string_safe_list(obj):

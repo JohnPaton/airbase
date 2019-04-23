@@ -18,7 +18,9 @@ LINK_LIST_URL_TEMPLATE = (
     "&UpdateDate={update_date}"
 )
 
-METADATA_URL = "https://ereporting.blob.core.windows.net/downloadservice/metadata.csv"
+METADATA_URL = (
+    "https://ereporting.blob.core.windows.net/downloadservice/metadata.csv"
+)
 
 CURRENT_YEAR = str(datetime.datetime.today().year)
 
