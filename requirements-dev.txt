@@ -1,0 +1,2 @@
+# requirements for developing the package
+-r requirements-test.txt
