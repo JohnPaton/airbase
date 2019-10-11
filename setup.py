@@ -23,6 +23,11 @@ VERSION = "0.2.4"
 # What packages are required for this module to be executed?
 REQUIRED = ["requests", "tqdm"]
 
+# What packages are optional?
+EXTRAS = {
+    # 'fancy feature': ['django'],
+}
+
 # The rest you shouldn't have to touch too much :)
 # ------------------------------------------------
 # Except, perhaps the License and Trove Classifiers!
