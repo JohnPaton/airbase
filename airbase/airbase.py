@@ -351,6 +351,7 @@ class AirbaseRequest:
             self._download_links, leave=True, disable=not self.verbose
         ):
             r = requests.get(url)
+            r.encoding = "utf-8-sig"
             r.raise_for_status()
 
             csv_links += util.extract_csv_links(r.text)
@@ -440,9 +441,9 @@ class AirbaseRequest:
             print("Writing data to {}...".format(filepath), file=sys.stderr)
 
         # ensure the path is valid
-        if not os.path.exists(os.path.dirname(filepath)):
+        if not os.path.exists(os.path.dirname(os.path.realpath(filepath))):
             raise NotADirectoryError(
-                os.path.dirname(filepath) + " does not exist."
+                os.path.dirname(os.path.realpath(filepath)) + " does not exist."
             )
 
         first = False  # flag to keep header
