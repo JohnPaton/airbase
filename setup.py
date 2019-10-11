@@ -14,11 +14,11 @@ from setuptools import find_packages, setup, Command
 # Package meta-data.
 NAME = "airbase"
 DESCRIPTION = "An easy downloader for the AirBase air quality data."
-URL = "https://github.com/johnpaton/airbase-downloader"
+URL = "https://github.com/johnpaton/airbase"
 EMAIL = "john@johnpaton.net"
 AUTHOR = "John Paton"
 REQUIRES_PYTHON = ">=3.4.0"
-VERSION = "0.2.2"
+VERSION = "0.2.3"
 
 # What packages are required for this module to be executed?
 REQUIRED = ["requests", "tqdm"]
