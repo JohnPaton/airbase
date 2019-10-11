@@ -351,6 +351,7 @@ class AirbaseRequest:
             self._download_links, leave=True, disable=not self.verbose
         ):
             r = requests.get(url)
+            r.encoding = "utf-8-sig"
             r.raise_for_status()
 
             csv_links += util.extract_csv_links(r.text)
