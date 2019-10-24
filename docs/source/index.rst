@@ -15,7 +15,6 @@ Welcome to AirBase's documentation!
 .. toctree::
    :maxdepth: 2
 
-   index
    airbase
 
 `An easy downloader for the AirBase air quality data.`
