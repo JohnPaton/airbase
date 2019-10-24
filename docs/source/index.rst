@@ -14,8 +14,9 @@ Welcome to AirBase's documentation!
 
 .. toctree::
    :maxdepth: 2
-   :hidden:
 
+   index
+   airbase
 
 `An easy downloader for the AirBase air quality data.`
 
@@ -25,10 +26,6 @@ AirBase is an air quality database provided by the European Environment Agency
 the interface makes it a bit time consuming to do bulk downloads. Hence, an easy
 Python-based interface.
 
-.. contents::
-	:depth: 2
-
-.. :caption: Contents:
 
 
 Installation
@@ -141,8 +138,6 @@ as these are required for constructing the requests and communicating with the A
 Portal.
 
 
-
-.. include:: ./airbase.rst
 
 
 Indices and tables
