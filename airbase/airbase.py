@@ -1,5 +1,7 @@
 import os
 import sys
+import multiprocessing as mp
+import queue
 
 import requests
 import tqdm
@@ -369,8 +371,35 @@ class AirbaseRequest:
 
         return self
 
+    def _download_one_to_directory(
+        self, url, dir, skip_existing, raise_for_status, progress_bar
+    ):
+        # filepath matches filenmae in url
+        fpath = os.path.join(dir, os.path.basename(url))
+
+        # skip before downloading if we already have the file
+        if os.path.exists(fpath) and skip_existing:
+            progress_bar.update()
+            return
+
+        r = requests.get(url)
+
+        try:
+            r.raise_for_status()
+        except Exception as e:
+            if raise_for_status:
+                raise
+            else:
+                print("Warning: " + str(e), file=sys.stderr)
+                progress_bar.update()
+                return
+
+        with open(fpath, "w") as h:
+            progress_bar.update()
+            h.write(r.text)
+
     def download_to_directory(
-        self, dir, skip_existing=True, raise_for_status=True
+        self, dir, skip_existing=True, raise_for_status=True, num_threads=1
     ):
         """
         Download into a directory, preserving original file structure.
@@ -382,6 +411,8 @@ class AirbaseRequest:
         :param bool raise_for_status: (optional) Raise exceptions if
             download links return "bad" HTTP status codes. If False,
             a warning will be printed instead. Default True.
+        :param int num_threads: The number of threads to use for
+            parallel downloading. Use 1 for a single thread.
 
         :return: self
         """
@@ -396,29 +427,20 @@ class AirbaseRequest:
         if self.verbose:
             print("Downloading CSVs to {}...".format(dir), file=sys.stderr)
 
-        for url in tqdm.tqdm(
-            self._csv_links, disable=not self.verbose, leave=True
-        ):
-            # filepath matches filenmae in url
-            fpath = os.path.join(dir, os.path.basename(url))
+        progress_bar = tqdm.tqdm(
+            total=len(self._csv_links), disable=not self.verbose, leave=True
+        )
 
-            # skip before downloading if we already have the file
-            if os.path.exists(fpath) and skip_existing:
-                continue
+        download_args = (
+            (url, dir, skip_existing, raise_for_status, progress_bar)
+            for url in self._csv_links
+        )
 
-            r = requests.get(url)
+        pool = util.InterruptablePool(
+            num_threads, self._download_one_to_directory, download_args
+        )
 
-            try:
-                r.raise_for_status()
-            except Exception as e:
-                if raise_for_status:
-                    raise
-                else:
-                    print("Warning: " + str(e), file=sys.stderr)
-                    continue
-
-            with open(fpath, "w") as h:
-                h.write(r.text)
+        pool.run()
 
         return self
 

@@ -1,6 +1,9 @@
 """Utility functions for processing the raw Portal responses, url templating, etc."""
 
 import datetime
+import queue
+import time
+import multiprocessing.dummy as mp
 
 from .resources import (
     LINK_LIST_URL_TEMPLATE,
@@ -8,6 +11,17 @@ from .resources import (
     DATE_FMT,
     ALL_SOURCES,
 )
+
+
+def raise_for_error(e):
+    """
+    Raises an exception if passed.
+
+    Useful as an error_callback for async operations.
+
+    :param Exception e: the Exception in question
+    """
+    raise e
 
 
 def string_safe_list(obj):
@@ -132,3 +146,69 @@ def extract_csv_links(text):
     links = text.replace("\r", "").split("\n")
     links.remove("")
     return links
+
+
+class _InterruptablePoolStopper:
+    ...
+
+
+def _func_apply_woker(func, input_q, error_q):
+    while True:
+        args = input_q.get()
+        if args is _InterruptablePoolStopper:
+            return
+        try:
+            func(*args)
+        except Exception as e:
+            error_q.put(e)
+
+
+class InterruptablePool:
+    def __init__(self, num_workers, func, func_args_iter):
+        self._error_q = queue.Queue()
+        self._args_q = queue.Queue(1)
+        self._workers = []
+
+        self.num_workers = num_workers
+        self.func = func
+        self.func_args_iter = func_args_iter
+
+    def run(self):
+        """Apply func to func_args_iter in parallel"""
+        try:
+            self._start()
+            for args in self.func_args_iter:
+                self._args_q.put(args)
+                if not self._error_q.empty():
+                    e = self._error_q.get()
+                    self._stop()
+                    raise ChildProcessError from e
+        finally:
+            self._stop()
+
+    def _num_alive(self):
+        """Current number of alive workers"""
+        return sum([w.is_alive() for w in self._workers])
+
+    def _start(self):
+        """Start workers"""
+        self._workers = [
+            mp.Process(
+                target=_func_apply_woker,
+                args=(self.func, self._args_q, self._error_q),
+            )
+            for _ in range(self.num_workers)
+        ]
+        [w.start() for w in self._workers]
+
+    def _stop(self):
+        """Stop all alive workers"""
+        try:
+            self._args_q.get(block=False)
+        except queue.Empty:
+            pass
+
+        [
+            self._args_q.put(_InterruptablePoolStopper)
+            for _ in range(self._num_alive())
+        ]
