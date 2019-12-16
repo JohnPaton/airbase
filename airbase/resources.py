@@ -19,7 +19,7 @@ LINK_LIST_URL_TEMPLATE = (
 )
 
 METADATA_URL = (
-    "https://ereporting.blob.core.windows.net/downloadservice/metadata.csv"
+    "http://discomap.eea.europa.eu/map/fme/metadata/PanEuropean_metadata.csv"
 )
 
 CURRENT_YEAR = str(datetime.datetime.today().year)
