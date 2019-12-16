@@ -481,7 +481,7 @@ class AirbaseRequest:
 
         See http://discomap.eea.europa.eu/map/fme/AirQualityExport.htm.
 
-        :param str filepath:
+        :param str filepath: Where to save the CSV
         """
         # ensure the path is valid
         if not os.path.exists(os.path.dirname(filepath)):
