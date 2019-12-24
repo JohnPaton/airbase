@@ -93,7 +93,6 @@ Writing metadata to data/metadata.csv...
 
 ## Roadmap
 
-* **Tests**
 * Parallel CSV downloads (in progress)
 * CLI to avoid using Python all together
 * Data wrangling module for AirBase output data
