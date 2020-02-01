@@ -2,7 +2,7 @@
 [![Documentation Status](https://readthedocs.org/projects/airbase/badge/?version=latest)](https://airbase.readthedocs.io/en/latest/?badge=latest)
 
 
-# AirBase
+# 🌬 AirBase
 
 An easy downloader for the AirBase air quality data.
 
@@ -14,7 +14,7 @@ Python-based interface.
 
 Read the full documentation at https://airbase.readthedocs.io.
 
-## Installation
+## 🔌 Installation
 
 To install `airbase`, simply run
 
@@ -22,7 +22,7 @@ To install `airbase`, simply run
 $ pip install airbase
 ```
 
-## Getting Started
+## 🚀 Getting Started
 
 Get info about available countries and pollutants:
 
@@ -91,7 +91,7 @@ Don't forget to get the metadata about the measurement stations:
 Writing metadata to data/metadata.tsv...
 ```
 
-## Roadmap
+## 🛣 Roadmap
 
 * Parallel CSV downloads (in progress)
 * CLI to avoid using Python all together
