@@ -7,7 +7,6 @@ import airbase
 
 class TestAirbaseClient:
     def test_init_connect_false(self, summary_response):
-        responses.add(summary_response)
         client = airbase.AirbaseClient(connect=False)
         with pytest.raises(AttributeError):
             client.all_countries
@@ -22,15 +21,13 @@ class TestAirbaseClient:
         assert client.pollutants_per_country is not None
 
     def test_init_connect(self, summary_response):
-        responses.add(summary_response)
         client = airbase.AirbaseClient()
         assert client.all_countries is not None
         assert client.all_pollutants is not None
         assert client.pollutants_per_country is not None
 
-    def test_download_metadata(self, tmpdir, metadata_response):
+    def test_download_metadata(self, tmpdir, metadata_response, capsys):
         fpath = str(tmpdir / "meta.csv")
-        responses.add(metadata_response)
         airbase.AirbaseClient.download_metadata(fpath)
         assert os.path.exists(fpath)
         with open(fpath) as h:

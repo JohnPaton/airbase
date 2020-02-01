@@ -1,10 +1,22 @@
-import airbase
 import os
+
 import pytest
+import responses as rsps
+
+import airbase
+
+
+from ..resources import CSV_RESPONSE, METADATA_RESPONSE
 
 
 @pytest.fixture(scope="module")
-def client():
+def withoutresponses():
+    with rsps.RequestsMock(passthru_prefixes="http"):
+        yield
+
+
+@pytest.fixture(scope="module")
+def client(withoutresponses):
     """Return an initialized AirbaseClient"""
     return airbase.AirbaseClient(connect=True)
 
@@ -29,13 +41,27 @@ def test_download_to_directory(client, tmpdir):
 @pytest.mark.withoutresponses
 def test_download_to_file(client, tmpdir):
     r = client.request(
-        country="MT", pl=["NO", "NO2"], year_from="2014", year_to="2014"
+        country="CY", pl=["As", "NO2"], year_from="2014", year_to="2014"
     )
     r.download_to_file(str(tmpdir / "raw.csv"))
     assert os.path.exists(str(tmpdir / "raw.csv"))
 
+    # make sure data format hasn't changed
+    with open(str(tmpdir / "raw.csv")) as h:
+        headers_downloaded = h.readline().strip()
+    headers_expected = CSV_RESPONSE.split("\n")[0]
+
+    assert headers_downloaded == headers_expected
+
 
 @pytest.mark.withoutresponses
 def test_download_metadata(client, tmpdir):
-    client.download_metadata(str(tmpdir / "metadata.csv"))
-    assert os.path.exists(str(tmpdir / "metadata.csv"))
+    client.download_metadata(str(tmpdir / "metadata.tsv"))
+    assert os.path.exists(str(tmpdir / "metadata.tsv"))
+
+    # make sure metadata format hasn't changed
+    with open(str(tmpdir / "metadata.tsv")) as h:
+        headers_downloaded = h.readline().strip()
+    headers_expected = METADATA_RESPONSE.split("\n")[0]
+
+    assert headers_downloaded == headers_expected
