@@ -446,7 +446,7 @@ class AirbaseRequest:
                 os.path.dirname(os.path.realpath(filepath)) + " does not exist."
             )
 
-        first = False  # flag to keep header
+        first = True  # flag to keep header
 
         for url in tqdm.tqdm(
             self._csv_links, disable=not self.verbose, leave=True
@@ -464,11 +464,11 @@ class AirbaseRequest:
 
             lines = r.text.split("\n")
 
-            if not first:
-                # drop header line
-                lines = lines[1:]
-            else:
+            if first:
+                # keep header line
                 first = False
+            else:
+                lines = lines[1:]
 
             with open(filepath, "a") as h:
                 h.write("\n".join(lines))
@@ -477,11 +477,11 @@ class AirbaseRequest:
 
     def download_metadata(self, filepath):
         """
-        Download the metadata file.
+        Download the metadata TSV file.
 
         See http://discomap.eea.europa.eu/map/fme/AirQualityExport.htm.
 
-        :param str filepath: Where to save the CSV
+        :param str filepath: Where to save the TSV
         """
         # ensure the path is valid
         if not os.path.exists(os.path.dirname(filepath)):
