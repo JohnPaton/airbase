@@ -87,8 +87,8 @@ Downloading CSVs to data...
 Don't forget to get the metadata about the measurement stations:
 
 ```python
->>> client.download_metadata("data/metadata.csv")
-Writing metadata to data/metadata.csv...
+>>> client.download_metadata("data/metadata.tsv")
+Writing metadata to data/metadata.tsv...
 ```
 
 ## Roadmap
