@@ -98,8 +98,8 @@ Don't forget to get the metadata about the measurement stations:
 
 .. code-block:: python
 
-   >>> client.download_metadata("data/metadata.csv")
-   Writing metadata to data/metadata.csv...
+   >>> client.download_metadata("data/metadata.tsv")
+   Writing metadata to data/metadata.tsv...
 
 Key Concepts
 ============
