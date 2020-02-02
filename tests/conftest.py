@@ -1,3 +1,5 @@
+import re
+
 import pytest
 import responses as rsps  # avoid name collision with fixture
 
@@ -38,7 +40,9 @@ def csv_response(responses):
 
     r = rsps.Response(
         method="GET",
-        url="https://ereporting.blob.core.windows.net/downloadservice/.*",
+        url=re.compile(
+            r"https://ereporting\.blob\.core\.windows\.net/downloadservice/.*"
+        ),
         body=CSV_RESPONSE,
     )
     responses.add(r)
@@ -58,8 +62,8 @@ def metadata_response(responses):
     responses.remove(r)
 
 
-@pytest.fixture
-def mocked_client(
-    summary_response, metadata_response, csv_response, csv_links_response
+@pytest.fixture()
+def all_responses(
+    summary_response, csv_links_response, csv_response, metadata_response
 ):
-    return airbase.AirbaseClient(connect=True)
+    return

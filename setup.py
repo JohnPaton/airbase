@@ -18,7 +18,7 @@ URL = "https://github.com/johnpaton/airbase"
 EMAIL = "john@johnpaton.net"
 AUTHOR = "John Paton"
 REQUIRES_PYTHON = ">=3.4.0"
-VERSION = "0.2.6"
+VERSION = "0.2.7"
 
 # What packages are required for this module to be executed?
 REQUIRED = ["requests", "tqdm"]

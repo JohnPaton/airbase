@@ -484,7 +484,7 @@ class AirbaseRequest:
         :param str filepath: Where to save the TSV
         """
         # ensure the path is valid
-        if not os.path.exists(os.path.dirname(filepath)):
+        if not os.path.exists(os.path.dirname(os.path.realpath(filepath))):
             raise NotADirectoryError(
                 os.path.dirname(filepath) + " does not exist."
             )
