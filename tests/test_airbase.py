@@ -58,6 +58,17 @@ class TestAirbaseClient:
             client.request(year_from="9999")
             client.request(year_to="9999")
 
+    def test_request_pl(self):
+        client = airbase.AirbaseClient()
+        r = client.request(pl="NO")
+        assert len(r.shortpl) == 1
+
+        r = client.request(pl=["NO", "NO3"])
+        assert len(r.shortpl) == 2
+
+        with pytest.raises(ValueError):
+            r = client.request(pl=["NO", "NO3", "Not a pl"])
+
     def test_request_response_generated(self,):
         client = airbase.AirbaseClient()
         r = client.request()
@@ -67,6 +78,33 @@ class TestAirbaseClient:
         client = airbase.AirbaseClient()
         with pytest.raises(ValueError):
             client.request(pl="O3", shortpl="123")
+
+    def test_search_pl_exact(self):
+        client = airbase.AirbaseClient()
+        result = client.search_pollutant("NO3")
+        assert result[0]["pl"] == "NO3"
+
+    def test_search_pl_shortest_first(self):
+        client = airbase.AirbaseClient()
+        result = client.search_pollutant("N")
+        names = [r["pl"] for r in result]
+        assert len(names[0]) <= len(names[1])
+        assert len(names[0]) <= len(names[-1])
+
+    def test_search_pl_limit(self):
+        client = airbase.AirbaseClient()
+        result = client.search_pollutant("N", limit=1)
+        assert len(result) == 1
+
+    def test_search_pl_no_result(self):
+        client = airbase.AirbaseClient()
+        result = client.search_pollutant("Definitely not a pollutant")
+        assert result == []
+
+    def test_saerch_pl_case_insensitive(self):
+        client = airbase.AirbaseClient()
+        result = client.search_pollutant("no3")
+        assert result[0]["pl"] == "NO3"
 
 
 @pytest.mark.usefixtures("all_responses")
@@ -134,6 +172,10 @@ class TestAirbaseRequest:
 
     def test_download_metadata(self, tmpdir):
         r = airbase.AirbaseRequest()
+
+        with pytest.raises(NotADirectoryError):
+            r.download_metadata("does/not/exist.tsv")
+
         r.download_metadata(str(tmpdir / "meta.tsv"))
         assert os.path.exists(str(tmpdir / "meta.tsv"))
 
