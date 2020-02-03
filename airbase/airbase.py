@@ -27,8 +27,8 @@ class AirbaseClient:
             Generated 5164 CSV links ready for downloading
             Downloading CSVs to data/raw...
             100%|██████████| 5164/5164 [43:39<00:00,  1.95it/s]
-            >>> r.download_metadata("data/metadata.csv")
-            Writing metadata to data/metadata.csv...
+            >>> r.download_metadata("data/metadata.tsv")
+            Writing metadata to data/metadata.tsv...
 
         """
         self._all_countries = None
@@ -129,8 +129,8 @@ class AirbaseClient:
             Generated 5164 CSV links ready for downloading
             Downloading CSVs to data/raw...
             100%|██████████| 5164/5164 [43:39<00:00,  1.95it/s]
-            >>> r.download_metadata("data/metadata.csv")
-            Writing metadata to data/metadata.csv...
+            >>> r.download_metadata("data/metadata.tsv")
+            Writing metadata to data/metadata.tsv...
         """
         # validation
         if country:
