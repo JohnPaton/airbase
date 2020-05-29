@@ -38,7 +38,7 @@ class TestAirbaseClient:
         client.download_metadata(fpath)
         assert os.path.exists(fpath)
         with open(fpath) as h:
-            assert h.read() == metadata_response.body.decode()
+            assert h.read() == metadata_response.body
 
     def test_request_raises_bad_country(self):
         client = airbase.AirbaseClient()
