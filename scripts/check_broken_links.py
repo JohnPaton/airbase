@@ -30,9 +30,9 @@ def main(output_file, retries, ignore_errors=False):
             response = session.head(url, timeout=1)
             return response.status_code == 404
         except:
-            if retries == 0 and not ignore_errors:
+            if r == 0 and not ignore_errors:
                 raise
-            elif retries == 0 and ignore_errors:
+            elif r == 0 and ignore_errors:
                 return None
             else:
                 return is_404(url, r - 1)
