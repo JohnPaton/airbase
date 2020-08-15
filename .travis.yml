@@ -1,12 +1,11 @@
 ---
-dist: xenial   # required for Python >= 3.7
 language: python
 python:
   - 3.4
   - 3.5
   - 3.6
   - 3.7
-  - 3.8-dev
+  - 3.8
 install:
   - pip install -r requirements-test.txt
   - pip install .
@@ -20,7 +19,7 @@ jobs:
     - stage: integration
       python: 3.4
       script: pytest -lvk "integration" --cov-append --cov=airbase --cov-report=xml --cov-report=term
-    - python: 3.8-dev
+    - python: 3.8
       script: pytest -lvk "integration" --cov-append --cov=airbase --cov-report=xml --cov-report=term
     - stage: deploy
       python: 3.6
