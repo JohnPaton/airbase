@@ -2,7 +2,6 @@
 dist: xenial   # required for Python >= 3.7
 language: python
 python:
-  - 3.4
   - 3.5
   - 3.6
   - 3.7
@@ -18,9 +17,9 @@ jobs:
       install: pip install black
       script: black --check .
     - stage: integration
-      python: 3.4
+      python: 3.5
       script: pytest -lvk "integration" --cov-append --cov=airbase --cov-report=xml --cov-report=term
-    - python: 3.8-dev
+    - python: 3.9
       script: pytest -lvk "integration" --cov-append --cov=airbase --cov-report=xml --cov-report=term
     - stage: deploy
       python: 3.6
