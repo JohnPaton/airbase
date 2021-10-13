@@ -69,7 +69,9 @@ class TestAirbaseClient:
         with pytest.raises(ValueError):
             r = client.request(pl=["NO", "NO3", "Not a pl"])
 
-    def test_request_response_generated(self,):
+    def test_request_response_generated(
+        self,
+    ):
         client = airbase.AirbaseClient()
         r = client.request()
         assert isinstance(r, airbase.AirbaseRequest)
