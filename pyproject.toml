@@ -29,7 +29,6 @@ extend_skip = ["scripts"]
 
 [tool.mypy]
 python_version = "3.7"
-install_types = true
 warn_unused_configs = true
 warn_unused_ignores = true
 warn_no_return = true
@@ -38,8 +37,8 @@ warn_unreachable = true
 show_error_codes = true
 pretty = true
 sqlite_cache = true
-exclude = "docs"
+exclude = "docs|scripts"
 
 [[tool.mypy.overrides]]
-module = ["setuptools", "tqdm"]
+module = ["tqdm"]
 ignore_missing_imports = true
