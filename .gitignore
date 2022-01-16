@@ -110,6 +110,9 @@ activate
 # PyCharm
 .idea
 
+# vscode
+.vscode
+
 # custom
 data
 !**/.gitkeep
