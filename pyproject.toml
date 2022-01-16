@@ -1,7 +1,16 @@
 [tool.pytest.ini_options]
 minversion = "6.0"
-addopts = "-l --cov=airbase --cov-report=html --cov-report=term"
+required_plugins = "pytest-responses pytest-mock pytest-cov"
+addopts = "--showlocals --cov --cov-report=html --cov-report=term"
 testpaths = ["tests"]
+
+[tool.coverage.run]
+source = ["airbase"]
+
+[tool.coverage.report]
+skip_covered = true
+skip_empty = true
+show_missing= true
 
 [tool.black]
 line-length = 80
