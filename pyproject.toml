@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [tool.pytest.ini_options]
 minversion = "6.0"
 required_plugins = "pytest-responses pytest-mock pytest-cov"
-addopts = "--showlocals --cov --cov-report=html --cov-report=term"
+addopts = "--showlocals"
 testpaths = ["tests"]
 
 [tool.coverage.run]
@@ -42,3 +42,42 @@ exclude = "docs|scripts"
 [[tool.mypy.overrides]]
 module = ["tqdm"]
 ignore_missing_imports = true
+
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+envlist = py37, py38, py39, py310, format, lint, docs
+skip_missing_interpreters = True
+isolated_build = True
+
+[testenv]
+commands_pre =
+    python --version
+commands =
+    pytest -ra -q {posargs:--cov}
+extras = 
+    test
+
+[testenv:format]
+skipsdist=True
+commands =
+    black --check .
+    isort --check .
+extras = 
+    format
+
+[testenv:lint]
+skipsdist=True
+commands =
+    mypy .
+extras =
+    test
+    lint
+
+[testenv:docs]
+skipsdist=True
+commands =
+    make -C docs html
+extras = 
+    docs
+"""
