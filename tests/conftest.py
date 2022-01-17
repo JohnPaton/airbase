@@ -1,17 +1,23 @@
 import re
 
 import pytest
-import responses as rsps  # avoid name collision with fixture
+from responses import Response
 
 import airbase
+from tests.resources import (
+    SUMMARY,
+    CSV_LINKS_RESPONSE_TEXT,
+    CSV_RESPONSE,
+    METADATA_RESPONSE,
+)
 
 
 @pytest.fixture()
 def summary_response(responses):
-    from .resources import SUMMARY
-
-    r = rsps.Response(
-        method="GET", url=airbase.resources.E1A_SUMMARY_URL, json=SUMMARY
+    r = Response(
+        method="GET",
+        url=airbase.resources.E1A_SUMMARY_URL,
+        json=SUMMARY,
     )
     responses.add(r)
     yield r
@@ -20,14 +26,14 @@ def summary_response(responses):
 
 @pytest.fixture()
 def csv_links_response(responses):
-    from .resources import CSV_LINKS_RESPONSE_TEXT
-
-    r = rsps.Response(
+    r = Response(
         method="GET",
-        url="http://fme.discomap.eea.europa.eu/fmedatastreaming/"
-        "AirQualityDownload/AQData_Extract.fmw",
+        url=(
+            "http://fme.discomap.eea.europa.eu/fmedatastreaming/"
+            "AirQualityDownload/AQData_Extract.fmw"
+        ),
         body=CSV_LINKS_RESPONSE_TEXT,
-        match_querystring=False,
+        # match_querystring=False, # deprecated option
     )
     responses.add(r)
     yield r
@@ -36,9 +42,7 @@ def csv_links_response(responses):
 
 @pytest.fixture()
 def csv_response(responses):
-    from .resources import CSV_RESPONSE
-
-    r = rsps.Response(
+    r = Response(
         method="GET",
         url=re.compile(
             r"https://ereporting\.blob\.core\.windows\.net/downloadservice/.*"
@@ -52,10 +56,10 @@ def csv_response(responses):
 
 @pytest.fixture()
 def metadata_response(responses):
-    from .resources import METADATA_RESPONSE
-
-    r = rsps.Response(
-        method="GET", url=airbase.resources.METADATA_URL, body=METADATA_RESPONSE
+    r = Response(
+        method="GET",
+        url=airbase.resources.METADATA_URL,
+        body=METADATA_RESPONSE,
     )
     responses.add(r)
     yield r
