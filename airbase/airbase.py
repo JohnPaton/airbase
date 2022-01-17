@@ -1,11 +1,11 @@
-import os
+from __future__ import annotations
+
 import sys
+from pathlib import Path
 
-import requests
-import tqdm
-
-from .resources import E1A_SUMMARY_URL, METADATA_URL, CURRENT_YEAR
 from . import util
+from ._fetch import fetch_urls
+from .resources import CURRENT_YEAR, E1A_SUMMARY_URL, METADATA_URL
 
 
 class AirbaseClient:
@@ -49,7 +49,7 @@ class AirbaseClient:
 
         :return: self
         """
-        summary_request = requests.get(E1A_SUMMARY_URL, timeout=timeout)
+        summary_request, *_ = fetch_urls(E1A_SUMMARY_URL, timeout=timeout)
 
         if not summary_request.ok:
             summary_request.raise_for_status()
@@ -83,7 +83,7 @@ class AirbaseClient:
         available for a country, then we simply do not try to download
         those CSVs.
 
-        Requests proceed in two steps: First, links to inividual CSVs
+        Requests proceed in two steps: First, links to individual CSVs
         are requested from the Airbase server. Then these links are
         used to download the individual CSVs.
 
@@ -199,7 +199,7 @@ class AirbaseClient:
         ]
 
     @staticmethod
-    def download_metadata(filepath, verbose=True):
+    def download_metadata(filepath: str, verbose: bool = True):
         """
         Download the metadata file.
 
@@ -272,7 +272,7 @@ class AirbaseRequest:
         """
         Handler for Airbase data requests.
 
-        Requests proceed in two steps: First, links to inividual CSVs
+        Requests proceed in two steps: First, links to individual CSVs
         are requested from the Airbase server. Then these links are
         used to download the individual CSVs.
 
@@ -347,10 +347,7 @@ class AirbaseRequest:
         if self.verbose:
             print("Generating CSV download links...", file=sys.stderr)
 
-        for url in tqdm.tqdm(
-            self._download_links, leave=True, disable=not self.verbose
-        ):
-            r = requests.get(url)
+        for r in fetch_urls(*self._download_links, progress=self.verbose):
             r.encoding = "utf-8-sig"
             r.raise_for_status()
 
@@ -370,7 +367,10 @@ class AirbaseRequest:
         return self
 
     def download_to_directory(
-        self, dir, skip_existing=True, raise_for_status=True
+        self,
+        dir: str,
+        skip_existing: bool = True,
+        raise_for_status: bool = True,
     ):
         """
         Download into a directory, preserving original file structure.
@@ -386,43 +386,37 @@ class AirbaseRequest:
         :return: self
         """
         # ensure the directory exists
-        if not os.path.isdir(dir):
-            raise NotADirectoryError(
-                os.path.realpath(dir) + " is not a directory."
-            )
+        root = Path(dir)
+        if not root.is_dir():
+            raise NotADirectoryError(f"{root.absolute()} is not a directory.")
 
         self._get_csv_links()
 
         if self.verbose:
-            print("Downloading CSVs to {}...".format(dir), file=sys.stderr)
+            print(f"Downloading CSVs to {dir}...", file=sys.stderr)
 
-        for url in tqdm.tqdm(
-            self._csv_links, disable=not self.verbose, leave=True
-        ):
-            # filepath matches filenmae in url
-            fpath = os.path.join(dir, os.path.basename(url))
+        def dowload_path(url: str) -> Path:
+            return root / Path(url).name
 
-            # skip before downloading if we already have the file
-            if os.path.exists(fpath) and skip_existing:
-                continue
+        urls = self._csv_links
+        if skip_existing:  # skip urls for files already downloaded
+            urls = [url for url in urls if not dowload_path(url).exists()]
 
-            r = requests.get(url)
-
+        for r in fetch_urls(*urls, progress=self.verbose):
             try:
                 r.raise_for_status()
             except Exception as e:
-                if raise_for_status:
-                    raise
-                else:
-                    print("Warning: " + str(e), file=sys.stderr)
+                if not raise_for_status:
+                    print(f"Warning: {e}", file=sys.stderr)
                     continue
+                raise
 
-            with open(fpath, "w") as h:
-                h.write(r.text)
+            path = dowload_path(r.url)
+            path.write_text(r.text)
 
         return self
 
-    def download_to_file(self, filepath, raise_for_status=True):
+    def download_to_file(self, filepath: str, raise_for_status: bool = True):
         """
         Download data into one large CSV.
 
@@ -438,44 +432,40 @@ class AirbaseRequest:
         self._get_csv_links()
 
         if self.verbose:
-            print("Writing data to {}...".format(filepath), file=sys.stderr)
+            print(f"Writing data to {filepath}...", file=sys.stderr)
 
         # ensure the path is valid
-        if not os.path.exists(os.path.dirname(os.path.realpath(filepath))):
+        path = Path(filepath)
+        if not path.parent.is_dir():
             raise NotADirectoryError(
-                os.path.dirname(os.path.realpath(filepath)) + " does not exist."
+                f"{path.parent.absolute()} does not exist."
             )
 
         first = True  # flag to keep header
 
-        for url in tqdm.tqdm(
-            self._csv_links, disable=not self.verbose, leave=True
-        ):
-            r = requests.get(url)
-
+        for r in fetch_urls(*self._csv_links, progress=self.verbose):
             try:
                 r.raise_for_status()
             except Exception as e:
-                if raise_for_status:
-                    raise
-                else:
-                    print("Warning: " + str(e), file=sys.stderr)
+                if not raise_for_status:
+                    print(f"Warning: {e}", file=sys.stderr)
                     continue
+                raise
 
-            lines = r.text.split("\n")
-
+            lines = r.text.splitlines(keepends=True)
             if first:
                 # keep header line
                 first = False
             else:
+                # drop the 1st line
                 lines = lines[1:]
 
-            with open(filepath, "a") as h:
-                h.write("\n".join(lines))
+            with path.open("a") as f:
+                f.writelines(lines)
 
         return self
 
-    def download_metadata(self, filepath):
+    def download_metadata(self, filepath: str):
         """
         Download the metadata TSV file.
 
@@ -484,16 +474,16 @@ class AirbaseRequest:
         :param str filepath: Where to save the TSV
         """
         # ensure the path is valid
-        if not os.path.exists(os.path.dirname(os.path.realpath(filepath))):
+        path = Path(filepath)
+        if not path.parent.is_dir():
             raise NotADirectoryError(
-                os.path.dirname(filepath) + " does not exist."
+                f"{path.parent.absolute()} does not exist."
             )
 
         if self.verbose:
-            print("Writing metadata to {}...".format(filepath), file=sys.stderr)
+            print(f"Writing metadata to {filepath}...", file=sys.stderr)
 
-        r = requests.get(METADATA_URL)
+        r, *_ = fetch_urls(METADATA_URL)
         r.raise_for_status()
 
-        with open(filepath, "w") as h:
-            h.write(r.text)
+        path.write_text(r.text)
