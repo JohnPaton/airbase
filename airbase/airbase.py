@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 import sys
+from datetime import datetime
 from pathlib import Path
 
 from . import util
-from ._fetch import fetch_urls
+from ._fetch import fetch_all_text, fetch_json, fetch_text
 from .resources import CURRENT_YEAR, E1A_SUMMARY_URL, METADATA_URL
 
 
@@ -49,13 +50,7 @@ class AirbaseClient:
 
         :return: self
         """
-        summary_request, *_ = fetch_urls(E1A_SUMMARY_URL, timeout=timeout)
-
-        if not summary_request.ok:
-            summary_request.raise_for_status()
-
-        summary = summary_request.json()
-
+        summary = fetch_json(E1A_SUMMARY_URL, timeout=timeout)
         self._all_countries = util.countries_from_summary(summary)
         self._all_pollutants = util.pollutants_from_summary(summary)
         self._pollutants_per_country = util.pollutants_per_country(summary)
@@ -260,14 +255,14 @@ class AirbaseClient:
 class AirbaseRequest:
     def __init__(
         self,
-        country=None,
-        shortpl=None,
-        year_from="2013",
-        year_to=CURRENT_YEAR,
-        source="All",
-        update_date=None,
-        verbose=True,
-        preload_csv_links=False,
+        country: str | list[str] | None = None,
+        shortpl: str | list[str] | None = None,
+        year_from: str = "2013",
+        year_to: str = CURRENT_YEAR,
+        source: str = "All",
+        update_date: str | datetime | None = None,
+        verbose: bool = True,
+        preload_csv_links: bool = False,
     ):
         """
         Handler for Airbase data requests.
@@ -312,7 +307,7 @@ class AirbaseRequest:
 
         self._country_list = util.string_safe_list(country)
         self._shortpl_list = util.string_safe_list(shortpl)
-        self._download_links = []
+        self._download_links: list[str] = []
 
         for c in self._country_list:
             for p in self._shortpl_list:
@@ -322,12 +317,12 @@ class AirbaseRequest:
                     )
                 )
 
-        self._csv_links = []
+        self._csv_links: list[str] = []
 
         if preload_csv_links:
             self._get_csv_links()
 
-    def _get_csv_links(self, force=False):
+    def _get_csv_links(self, force: bool = False):
         """
         Request all relevant CSV links from the server.
 
@@ -347,20 +342,17 @@ class AirbaseRequest:
         if self.verbose:
             print("Generating CSV download links...", file=sys.stderr)
 
-        for r in fetch_urls(*self._download_links, progress=self.verbose):
-            r.encoding = "utf-8-sig"
-            r.raise_for_status()
-
-            csv_links += util.extract_csv_links(r.text)
+        for text, url in fetch_all_text(
+            *self._download_links, progress=self.verbose, encoding="utf-8-sig"
+        ):
+            csv_links += util.extract_csv_links(text)
 
         # remove duplicates
         self._csv_links = list(set(csv_links))
 
         if self.verbose:
             print(
-                "Generated {:,} CSV links ready for downloading".format(
-                    len(self._csv_links)
-                ),
+                f"Generated {len(self._csv_links):,} CSV links ready for downloading",
                 file=sys.stderr,
             )
 
@@ -402,17 +394,11 @@ class AirbaseRequest:
         if skip_existing:  # skip urls for files already downloaded
             urls = [url for url in urls if not dowload_path(url).exists()]
 
-        for r in fetch_urls(*urls, progress=self.verbose):
-            try:
-                r.raise_for_status()
-            except Exception as e:
-                if not raise_for_status:
-                    print(f"Warning: {e}", file=sys.stderr)
-                    continue
-                raise
-
-            path = dowload_path(r.url)
-            path.write_text(r.text)
+        for text, url in fetch_all_text(
+            *urls, progress=self.verbose, raise_for_status=raise_for_status
+        ):
+            path = dowload_path(url)
+            path.write_text(text)
 
         return self
 
@@ -443,16 +429,12 @@ class AirbaseRequest:
 
         first = True  # flag to keep header
 
-        for r in fetch_urls(*self._csv_links, progress=self.verbose):
-            try:
-                r.raise_for_status()
-            except Exception as e:
-                if not raise_for_status:
-                    print(f"Warning: {e}", file=sys.stderr)
-                    continue
-                raise
-
-            lines = r.text.splitlines(keepends=True)
+        for text, url in fetch_all_text(
+            *self._csv_links,
+            progress=self.verbose,
+            raise_for_status=raise_for_status,
+        ):
+            lines = text.splitlines(keepends=True)
             if first:
                 # keep header line
                 first = False
@@ -483,7 +465,5 @@ class AirbaseRequest:
         if self.verbose:
             print(f"Writing metadata to {filepath}...", file=sys.stderr)
 
-        r, *_ = fetch_urls(METADATA_URL)
-        r.raise_for_status()
-
-        path.write_text(r.text)
+        text = fetch_text(METADATA_URL)
+        path.write_text(text)
