@@ -1,17 +1,15 @@
-import os
+from pathlib import Path
 
 import pytest
-import responses as rsps
+from responses import RequestsMock
 
 import airbase
-
-
-from ..resources import CSV_RESPONSE, METADATA_RESPONSE
+from tests.resources import CSV_RESPONSE, METADATA_RESPONSE
 
 
 @pytest.fixture(scope="module")
 def withoutresponses():
-    with rsps.RequestsMock(passthru_prefixes="http"):
+    with RequestsMock(passthru_prefixes="http"):
         yield
 
 
@@ -30,24 +28,25 @@ def test_client_connects(client):
 
 
 @pytest.mark.withoutresponses
-def test_download_to_directory(client, tmpdir):
+def test_download_to_directory(client, tmp_path: Path):
     r = client.request(
         country=["AD", "BE"], pl="CO", year_from="2017", year_to="2017"
     )
-    r.download_to_directory(dir=str(tmpdir), skip_existing=True)
-    assert os.listdir(str(tmpdir)) != []
+    r.download_to_directory(dir=str(tmp_path), skip_existing=True)
+    assert list(tmp_path.iterdir())
 
 
 @pytest.mark.withoutresponses
-def test_download_to_file(client, tmpdir):
+def test_download_to_file(client, tmp_path: Path):
     r = client.request(
         country="CY", pl=["As", "NO2"], year_from="2014", year_to="2014"
     )
-    r.download_to_file(str(tmpdir / "raw.csv"))
-    assert os.path.exists(str(tmpdir / "raw.csv"))
+    path = tmp_path / "raw.csv"
+    r.download_to_file(str(path))
+    assert path.exists()
 
     # make sure data format hasn't changed
-    with open(str(tmpdir / "raw.csv")) as h:
+    with open(str(tmp_path / "raw.csv")) as h:
         headers_downloaded = h.readline().strip()
     headers_expected = CSV_RESPONSE.split("\n")[0]
 
@@ -55,13 +54,13 @@ def test_download_to_file(client, tmpdir):
 
 
 @pytest.mark.withoutresponses
-def test_download_metadata(client, tmpdir):
-    client.download_metadata(str(tmpdir / "metadata.tsv"))
-    assert os.path.exists(str(tmpdir / "metadata.tsv"))
+def test_download_metadata(client, tmp_path: Path):
+    path = tmp_path / "metadata.tsv"
+    client.download_metadata(str(path))
+    assert path.exists()
 
     # make sure metadata format hasn't changed
-    with open(str(tmpdir / "metadata.tsv")) as h:
-        headers_downloaded = h.readline().strip()
-    headers_expected = METADATA_RESPONSE.split("\n")[0]
+    headers_downloaded = path.read_text().splitlines()[0]
+    headers_expected = METADATA_RESPONSE.splitlines()[0]
 
     assert headers_downloaded == headers_expected
