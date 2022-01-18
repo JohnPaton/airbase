@@ -1,44 +1,53 @@
-import json
-import re
-from typing import Iterator
+from __future__ import annotations
 
 import pytest
-from responses import Response
 
-from airbase._fetch import fetch_json, fetch_text, fetch_urls
+from airbase._fetch import fetch_all_text, fetch_json, fetch_text
 
-JSON_PAYLOAD = {"payload": "test"}
+JSON_PAYLOAD = [{"payload": "test"}]
+TEXT_PAYLOAD = "this is a test"
 
 
 @pytest.fixture
-def echo_url(responses) -> Iterator[str]:
-    r = Response(
-        method="GET",
-        url=re.compile(r"https://echo\.test/.*"),
-        json=JSON_PAYLOAD,
-    )
-    responses.add(r)
-    yield "https://echo.test"
-    responses.remove(r)
+def json_url(response):
+    """mock website w/json payload"""
+    url = "https://echo.test/json"
+    response.get(url=url, payload=JSON_PAYLOAD)
+    yield url
 
 
-def test_fetch_urls(echo_url: str):
-    urls = [
-        f"{echo_url}/this/is/a.test",
-        f"{echo_url}/this/is/another.test",
-    ]
-    responses = list(fetch_urls(*urls))
-    assert len(responses) == len(urls)
-    assert [r.url for r in responses] == urls
+@pytest.fixture
+def text_url(response):
+    """mock website w/text body"""
+    url = "https://echo.test/text"
+    response.get(url=url, body=TEXT_PAYLOAD)
+    yield url
 
 
-def test_fetch_json(echo_url: str):
-    url = f"{echo_url}/this/is/test.json"
-    json = fetch_json(url)
-    assert json == JSON_PAYLOAD
+def test_fetch_json(json_url: str):
+    assert fetch_json(json_url) == JSON_PAYLOAD
 
 
-def test_fetch_text(echo_url: str):
-    url = f"{echo_url}/this/is/test.txt"
-    text = fetch_text(url)
-    assert json.loads(text) == JSON_PAYLOAD
+def test_fetch_text(text_url: str):
+    assert fetch_text(text_url) == TEXT_PAYLOAD
+
+
+@pytest.fixture
+def test_urls(response):
+    """mock several websites w/text body"""
+    urls = {
+        "https://echo.test/this_is_a_test": "a.test",
+        "https://echo.test/this_is_another_test": "another.test",
+    }
+    for url, body in urls.items():
+        response.get(url=url, body=body)
+    yield urls
+
+
+@pytest.mark.asyncio()
+async def test_fetch_all_text(test_urls: dict[str, str]):
+    results = []
+    async for r in fetch_all_text(test_urls):
+        assert r.text == test_urls[r.url]
+        results.append(r.url)
+    assert sorted(results) == sorted(test_urls)
