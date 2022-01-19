@@ -5,10 +5,10 @@ from responses import Response
 
 import airbase
 from tests.resources import (
-    SUMMARY,
     CSV_LINKS_RESPONSE_TEXT,
     CSV_RESPONSE,
     METADATA_RESPONSE,
+    SUMMARY,
 )
 
 
@@ -64,10 +64,3 @@ def metadata_response(responses):
     responses.add(r)
     yield r
     responses.remove(r)
-
-
-@pytest.fixture()
-def all_responses(
-    summary_response, csv_links_response, csv_response, metadata_response
-):
-    return
