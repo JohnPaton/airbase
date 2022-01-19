@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -41,7 +42,7 @@ class AirbaseClient:
         if connect:
             self.connect()
 
-    def connect(self, timeout=None):
+    def connect(self, timeout: float | None = None):
         """
         Download the available countries and pollutants for validation.
 
@@ -342,10 +343,15 @@ class AirbaseRequest:
         if self.verbose:
             print("Generating CSV download links...", file=sys.stderr)
 
-        for text, url in fetch_all_text(
-            *self._download_links, progress=self.verbose, encoding="utf-8-sig"
-        ):
-            csv_links += util.extract_csv_links(text)
+        async def fetch_links():
+            async for r in fetch_all_text(
+                self._download_links,
+                progress=self.verbose,
+                encoding="utf-8-sig",
+            ):
+                csv_links.extend(util.extract_csv_links(r.text))
+
+        asyncio.run(fetch_links())
 
         # remove duplicates
         self._csv_links = list(set(csv_links))
@@ -394,11 +400,14 @@ class AirbaseRequest:
         if skip_existing:  # skip urls for files already downloaded
             urls = [url for url in urls if not dowload_path(url).exists()]
 
-        for text, url in fetch_all_text(
-            *urls, progress=self.verbose, raise_for_status=raise_for_status
-        ):
-            path = dowload_path(url)
-            path.write_text(text)
+        async def fetch_all():
+            async for r in fetch_all_text(
+                urls, progress=self.verbose, raise_for_status=raise_for_status
+            ):
+                path = dowload_path(r.url)
+                path.write_text(r.text)
+
+        asyncio.run(fetch_all())
 
         return self
 
@@ -427,23 +436,22 @@ class AirbaseRequest:
                 f"{path.parent.absolute()} does not exist."
             )
 
-        first = True  # flag to keep header
+        async def fetch_all():
+            async for r in fetch_all_text(
+                self._csv_links,
+                progress=self.verbose,
+                raise_for_status=raise_for_status,
+            ):
+                if not path.exists():
+                    # keep header line
+                    path.write_text(r.text)
+                else:
+                    # drop the 1st line
+                    lines = r.text.splitlines(keepends=True)[1:]
+                    with path.open("a") as f:
+                        f.writelines(lines)
 
-        for text, url in fetch_all_text(
-            *self._csv_links,
-            progress=self.verbose,
-            raise_for_status=raise_for_status,
-        ):
-            lines = text.splitlines(keepends=True)
-            if first:
-                # keep header line
-                first = False
-            else:
-                # drop the 1st line
-                lines = lines[1:]
-
-            with path.open("a") as f:
-                f.writelines(lines)
+        asyncio.run(fetch_all())
 
         return self
 
