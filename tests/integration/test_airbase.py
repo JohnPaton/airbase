@@ -1,34 +1,33 @@
 from pathlib import Path
 
 import pytest
-from responses import RequestsMock
+from aioresponses import aioresponses
 
 import airbase
 from tests.resources import CSV_RESPONSE, METADATA_RESPONSE
 
 
 @pytest.fixture(scope="module")
-def withoutresponses():
-    with RequestsMock(passthru_prefixes="http"):
-        yield
-
-
-@pytest.fixture(scope="module")
-def client(withoutresponses):
+def client():
     """Return an initialized AirbaseClient"""
-    return airbase.AirbaseClient(connect=True)
+    prefixes = [
+        airbase.resources.E1A_SUMMARY_URL,
+        "http://fme.discomap.eea.europa.eu/",
+        "https://ereporting.blob.core.windows.net/",
+        airbase.resources.METADATA_URL,
+    ]
+    with aioresponses(passthrough=prefixes):
+        yield airbase.AirbaseClient(connect=True)
 
 
-@pytest.mark.withoutresponses
-def test_client_connects(client):
+def test_client_connects(client: airbase.AirbaseClient):
     assert client.all_countries is not None
     assert client.all_pollutants is not None
     assert client.pollutants_per_country is not None
     assert client.search_pollutant("O3") is not None
 
 
-@pytest.mark.withoutresponses
-def test_download_to_directory(client, tmp_path: Path):
+def test_download_to_directory(client: airbase.AirbaseClient, tmp_path: Path):
     r = client.request(
         country=["AD", "BE"], pl="CO", year_from="2017", year_to="2017"
     )
@@ -36,8 +35,7 @@ def test_download_to_directory(client, tmp_path: Path):
     assert list(tmp_path.iterdir())
 
 
-@pytest.mark.withoutresponses
-def test_download_to_file(client, tmp_path: Path):
+def test_download_to_file(client: airbase.AirbaseClient, tmp_path: Path):
     r = client.request(
         country="CY", pl=["As", "NO2"], year_from="2014", year_to="2014"
     )
@@ -53,8 +51,7 @@ def test_download_to_file(client, tmp_path: Path):
     assert headers_downloaded == headers_expected
 
 
-@pytest.mark.withoutresponses
-def test_download_metadata(client, tmp_path: Path):
+def test_download_metadata(client: airbase.AirbaseClient, tmp_path: Path):
     path = tmp_path / "metadata.tsv"
     client.download_metadata(str(path))
     assert path.exists()
