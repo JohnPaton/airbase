@@ -3,10 +3,10 @@
 import datetime
 
 from .resources import (
-    LINK_LIST_URL_TEMPLATE,
+    ALL_SOURCES,
     CURRENT_YEAR,
     DATE_FMT,
-    ALL_SOURCES,
+    LINK_LIST_URL_TEMPLATE,
 )
 
 
@@ -71,8 +71,8 @@ def pollutants_per_country(summary):
 def link_list_url(
     country,
     shortpl=None,
-    year_from="2013",
-    year_to=CURRENT_YEAR,
+    year_from: str = "2013",
+    year_to: str = CURRENT_YEAR,
     source="All",
     update_date=None,
 ):
@@ -101,12 +101,16 @@ def link_list_url(
     """
     shortpl = shortpl or ""
 
-    if int(year_from) < 2013:
-        raise ValueError("'year_from' must be at least 2013")
+    if not (2013 <= int(year_from) <= int(CURRENT_YEAR)):
+        raise ValueError(
+            f"'year_from' most contain a year between '2013' and '{CURRENT_YEAR}'"
+        )
     year_from = str(int(year_from))
 
-    if int(year_to) > int(CURRENT_YEAR):
-        raise ValueError("'year_to' must be at most " + str(CURRENT_YEAR))
+    if not (2013 <= int(year_to) <= int(CURRENT_YEAR)):
+        raise ValueError(
+            f"'year_to' most contain a year between '2013' and '{CURRENT_YEAR}'"
+        )
     year_to = str(int(year_to))
 
     if isinstance(update_date, datetime.datetime):

@@ -54,14 +54,13 @@ def test_request_raises_bad_country(client: airbase.AirbaseClient):
         client.request(["NL", "lol123"])
 
 
-def test_request_raises_bad_year(client: airbase.AirbaseClient):
+@pytest.mark.parametrize("year", ["not an int", "1234", "9999"])
+def test_request_raises_bad_year(client: airbase.AirbaseClient, year: str):
     with pytest.raises(ValueError):
-        client.request(year_from="1234")
-        client.request(year_to="1234")
+        client.request(year_from=year)
 
     with pytest.raises(ValueError):
-        client.request(year_from="9999")
-        client.request(year_to="9999")
+        client.request(year_to=year)
 
 
 def test_request_pl(client: airbase.AirbaseClient):
