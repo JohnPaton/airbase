@@ -14,23 +14,17 @@ class TextResponse(NamedTuple):
     text: str
 
 
-async def _fetch_text(
-    url: str,
-    encoding: str | None = None,
-    timeout: float | None = None,
-) -> str:
-
-    _timeout = aiohttp.ClientTimeout(total=timeout)
-    async with aiohttp.ClientSession(timeout=_timeout) as session:
-        async with session.get(url, ssl=False) as r:
-            r.raise_for_status()
-            return await r.text(encoding=encoding)
-
-
 def fetch_text(
     url: str, *, timeout: float | None = None, encoding: str | None = None
 ) -> str:
-    text = asyncio.run(_fetch_text(url, encoding=encoding, timeout=timeout))
+    async def fetch() -> str:
+        timeout_ = aiohttp.ClientTimeout(total=timeout)
+        async with aiohttp.ClientSession(timeout=timeout_) as session:
+            async with session.get(url, ssl=False) as r:
+                r.raise_for_status()
+                return await r.text(encoding=encoding)
+
+    text = asyncio.run(fetch())
     return text
 
 
