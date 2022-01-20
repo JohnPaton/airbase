@@ -61,27 +61,19 @@ async def fetch_all_text(
 ) -> AsyncIterator[TextResponse]:
 
     async with aiohttp.ClientSession() as session:
-        tasks = {
-            asyncio.create_task(
-                _fetch_url(url, session=session, encoding=encoding)
-            )
-            for url in urls
-        }
-        with tqdm(total=len(tasks), leave=True, disable=not progress) as p_bar:
-            while tasks:
-                done, tasks = await asyncio.wait(
-                    tasks, timeout=None, return_when=asyncio.FIRST_COMPLETED
-                )
-
-                for future in done:
-                    try:
-                        yield await future
-                    except asyncio.CancelledError:
+        jobs = [
+            _fetch_url(url, session=session, encoding=encoding) for url in urls
+        ]
+        with tqdm(total=len(jobs), leave=True, disable=not progress) as p_bar:
+            for result in asyncio.as_completed(jobs):
+                try:
+                    yield await result
+                except asyncio.CancelledError:
+                    continue
+                except aiohttp.client.ClientResponseError as e:
+                    if not raise_for_status:
+                        print(f"Warning: {e}", file=sys.stderr)
                         continue
-                    except aiohttp.client.ClientResponseError as e:
-                        if not raise_for_status:
-                            print(f"Warning: {e}", file=sys.stderr)
-                            continue
-                        raise
-                    finally:
-                        p_bar.update(1)
+                    raise
+                finally:
+                    p_bar.update(1)
