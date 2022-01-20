@@ -1,6 +1,7 @@
 """Utility functions for processing the raw Portal responses, url templating, etc."""
 
 import datetime
+from copy import deepcopy
 
 from .resources import (
     ALL_SOURCES,
@@ -32,7 +33,7 @@ def countries_from_summary(summary):
 
     :return list[str]: The available countries.
     """
-    return list({d["ct"] for d in summary})
+    return list(set(d["ct"] for d in summary))
 
 
 def pollutants_from_summary(summary):
@@ -57,7 +58,7 @@ def pollutants_per_country(summary):
     """
     output = dict()
 
-    for d in summary.copy():
+    for d in deepcopy(summary):
         country = d.pop("ct")
 
         if country in output:
