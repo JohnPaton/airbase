@@ -14,15 +14,6 @@ class TextResponse(NamedTuple):
     text: str
 
 
-async def _fetch_url(
-    url: str, *, session: aiohttp.ClientSession, encoding: str | None = None
-) -> TextResponse:
-    async with session.get(url, ssl=False) as r:
-        r.raise_for_status()
-        text = await r.text(encoding=encoding)
-        return TextResponse(url, text)
-
-
 async def _fetch_text(
     url: str,
     encoding: str | None = None,
@@ -58,14 +49,23 @@ async def fetch_all_text(
     progress: bool = False,
     encoding: str | None = None,
     raise_for_status: bool = True,
+    max_concurrent: int = 10,
 ) -> AsyncIterator[TextResponse]:
 
     async with aiohttp.ClientSession() as session:
-        jobs = [
-            _fetch_url(url, session=session, encoding=encoding) for url in urls
-        ]
+        semaphore = asyncio.Semaphore(max_concurrent)
+
+        async def fetch(url: str) -> TextResponse:
+            async with semaphore:
+                async with session.get(url, ssl=False) as r:
+                    r.raise_for_status()
+                    text = await r.text(encoding=encoding)
+                    return TextResponse(url, text)
+
+        jobs = [fetch(url) for url in urls]
         with tqdm(total=len(jobs), leave=True, disable=not progress) as p_bar:
             for result in asyncio.as_completed(jobs):
+                p_bar.update(1)
                 try:
                     yield await result
                 except asyncio.CancelledError:
@@ -75,5 +75,3 @@ async def fetch_all_text(
                         print(f"Warning: {e}", file=sys.stderr)
                         continue
                     raise
-                finally:
-                    p_bar.update(1)
