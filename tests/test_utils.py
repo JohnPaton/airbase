@@ -1,7 +1,8 @@
-from airbase import util
-from .resources import SUMMARY, CSV_LINKS_RESPONSE_TEXT
-
 import pytest
+
+from airbase import util
+
+from .resources import CSV_LINKS_RESPONSE_TEXT, SUMMARY
 
 
 class TestStringSafeList:
