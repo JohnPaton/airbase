@@ -6,6 +6,8 @@ from aioresponses import aioresponses
 import airbase
 from tests.resources import CSV_RESPONSE, METADATA_RESPONSE
 
+pytestmark = pytest.mark.integration
+
 
 @pytest.fixture(scope="module")
 def client():

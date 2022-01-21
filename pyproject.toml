@@ -8,7 +8,9 @@ required_plugins = "pytest-asyncio"
 addopts = "--showlocals"
 testpaths = ["tests"]
 asyncio_mode = "auto"
-
+markers = [
+    "integration: tests that need access to external servers",
+]
 [tool.coverage.run]
 source = ["airbase"]
 
