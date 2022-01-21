@@ -6,6 +6,7 @@ import sys
 from pathlib import Path
 from typing import AsyncIterator, Iterable, NamedTuple
 
+import aiofiles
 import aiohttp
 from tqdm import tqdm
 
@@ -76,17 +77,12 @@ async def fetch_all_text(
 async def fetch_to_path(
     url_paths: dict[str, Path],
     *,
-    skip_existing: bool = False,
     append: bool = False,
     progress: bool = False,
     raise_for_status: bool = True,
     max_concurrent: int = 10,
 ) -> None:
 
-    if skip_existing:
-        url_paths = {
-            url: path for url, path in url_paths.items() if not path.exists()
-        }
     async for r in fetch_all_text(
         url_paths,
         progress=progress,
@@ -97,8 +93,9 @@ async def fetch_to_path(
         if append and path.exists():
             # drop the 1st line
             lines = r.text.splitlines(keepends=True)[1:]
-            with path.open("a") as f:
-                f.writelines(lines)
+            async with aiofiles.open(str(path), mode="a") as f:
+                await f.writelines(lines)
         else:
             # keep header line
-            path.write_text(r.text)
+            async with aiofiles.open(str(path), mode="w") as f:
+                await f.write(r.text)

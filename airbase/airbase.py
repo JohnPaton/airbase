@@ -396,11 +396,15 @@ class AirbaseRequest:
         url_paths: dict[str, Path] = {
             url: root / Path(url).name for url in self._csv_links
         }
+        if skip_existing:
+            url_paths = {
+                url: path
+                for url, path in url_paths.items()
+                if not path.exists()
+            }
+
         fetch_all = fetch_to_path(
-            url_paths,
-            skip_existing=skip_existing,
-            progress=self.verbose,
-            raise_for_status=raise_for_status,
+            url_paths, progress=self.verbose, raise_for_status=raise_for_status
         )
         asyncio.run(fetch_all)
 
