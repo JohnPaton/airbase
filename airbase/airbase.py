@@ -4,14 +4,18 @@ import asyncio
 import sys
 from datetime import datetime
 from pathlib import Path
+from typing import Dict, List
 
 from . import util
 from ._fetch import fetch_all_text, fetch_json, fetch_text, fetch_to_path
 from .resources import CURRENT_YEAR, E1A_SUMMARY_URL, METADATA_URL
 
+PollutantsType = Dict[str, str]
+PollutantsPerCountryType = Dict[str, List[PollutantsType]]
+
 
 class AirbaseClient:
-    def __init__(self, connect=True):
+    def __init__(self, connect: bool = True) -> None:
         """
         The central point for requesting Airbase data.
 
@@ -33,16 +37,18 @@ class AirbaseClient:
             Writing metadata to data/metadata.tsv...
 
         """
-        self._all_countries = None
+        self._all_countries: list[str] | None = None
+        self._all_pollutants: PollutantsType | None
         self._all_pollutants = None
+        self._pollutants_per_country: PollutantsPerCountryType | None
         self._pollutants_per_country = None
         self._cities_per_country = None
-        self._current_request = None
+        self._current_request: AirbaseRequest | None = None
 
         if connect:
             self.connect()
 
-    def connect(self, timeout: float | None = None):
+    def connect(self, timeout: float | None = None) -> AirbaseClient:
         """
         Download the available countries and pollutants for validation.
 
@@ -60,16 +66,16 @@ class AirbaseClient:
 
     def request(
         self,
-        country=None,
-        pl=None,
-        shortpl=None,
-        year_from="2013",
-        year_to=CURRENT_YEAR,
-        source="All",
-        update_date=None,
-        verbose=True,
-        preload_csv_links=False,
-    ):
+        country: str | list[str] | None = None,
+        pl: str | list[str] | None = None,
+        shortpl: str | list[str] | None = None,
+        year_from: str = "2013",
+        year_to: str = CURRENT_YEAR,
+        source: str = "All",
+        update_date: str | datetime | None = None,
+        verbose: bool = True,
+        preload_csv_links: bool = False,
+    ) -> AirbaseRequest:
         """
         Initialize an AirbaseRequest for a query.
 
@@ -129,7 +135,8 @@ class AirbaseClient:
             Writing metadata to data/metadata.tsv...
         """
         # validation
-        if country:
+
+        if country is not None:
             country = util.string_safe_list(country)
             self._validate_country(country)
         else:
@@ -164,7 +171,9 @@ class AirbaseClient:
         self._current_request = r
         return r
 
-    def search_pollutant(self, query, limit=None):
+    def search_pollutant(
+        self, query: str, limit: int | None = None
+    ) -> List[PollutantsType]:
         """
         Search for a pollutant's `shortpl` number based on its name.
 
@@ -179,7 +188,7 @@ class AirbaseClient:
             >>> [{"pl": "O3", "shortpl": "7"}, {"pl": "NO3", "shortpl": "46"}]
 
         """
-        names = list(self.all_pollutants.keys())
+        names = list(self.all_pollutants)
         # substring search
         results = [n for n in names if query.lower() in n.lower()]
 
@@ -195,7 +204,7 @@ class AirbaseClient:
         ]
 
     @staticmethod
-    def download_metadata(filepath: str, verbose: bool = True):
+    def download_metadata(filepath: str, verbose: bool = True) -> None:
         """
         Download the metadata file.
 
@@ -206,7 +215,7 @@ class AirbaseClient:
         """
         AirbaseRequest(verbose=verbose).download_metadata(filepath)
 
-    def _validate_country(self, country):
+    def _validate_country(self, country: str | list[str]) -> None:
         """
         Ensure that a country or list of countries exists on the server.
 
@@ -219,11 +228,11 @@ class AirbaseClient:
         for c in country_list:
             if c not in self.all_countries:
                 raise ValueError(
-                    "'{}' is not an available 2-letter country code.".format(c)
+                    f"'{c}' is not an available 2-letter country code."
                 )
 
     @property
-    def all_countries(self):
+    def all_countries(self) -> list[str]:
         """All countries available from AirBase."""
         if self._all_countries is None:
             raise AttributeError(
@@ -233,7 +242,7 @@ class AirbaseClient:
         return self._all_countries
 
     @property
-    def all_pollutants(self):
+    def all_pollutants(self) -> PollutantsType:
         """All pollutants available from AirBase."""
         if self._all_pollutants is None:
             raise AttributeError(
@@ -243,7 +252,7 @@ class AirbaseClient:
         return self._all_pollutants
 
     @property
-    def pollutants_per_country(self):
+    def pollutants_per_country(self) -> PollutantsPerCountryType:
         """The pollutants available in each country from AirBase."""
         if self._pollutants_per_country is None:
             raise AttributeError(
@@ -264,7 +273,7 @@ class AirbaseRequest:
         update_date: str | datetime | None = None,
         verbose: bool = True,
         preload_csv_links: bool = False,
-    ):
+    ) -> None:
         """
         Handler for Airbase data requests.
 
@@ -323,7 +332,7 @@ class AirbaseRequest:
         if preload_csv_links:
             self._get_csv_links()
 
-    def _get_csv_links(self, force: bool = False):
+    def _get_csv_links(self, force: bool = False) -> AirbaseRequest:
         """
         Request all relevant CSV links from the server.
 
@@ -337,13 +346,13 @@ class AirbaseRequest:
         :return: self
         """
         if self._csv_links and not force:
-            return self._csv_links
+            return self
 
         csv_links = []
         if self.verbose:
             print("Generating CSV download links...", file=sys.stderr)
 
-        async def fetch_links():
+        async def fetch_links() -> None:
             async for r in fetch_all_text(
                 self._download_links,
                 progress=self.verbose,
@@ -369,7 +378,7 @@ class AirbaseRequest:
         dir: str,
         skip_existing: bool = True,
         raise_for_status: bool = True,
-    ):
+    ) -> AirbaseRequest:
         """
         Download into a directory, preserving original file structure.
 
@@ -410,7 +419,9 @@ class AirbaseRequest:
 
         return self
 
-    def download_to_file(self, filepath: str, raise_for_status: bool = True):
+    def download_to_file(
+        self, filepath: str, raise_for_status: bool = True
+    ) -> AirbaseRequest:
         """
         Download data into one large CSV.
 
@@ -449,7 +460,7 @@ class AirbaseRequest:
 
         return self
 
-    def download_metadata(self, filepath: str):
+    def download_metadata(self, filepath: str) -> None:
         """
         Download the metadata TSV file.
 

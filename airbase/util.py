@@ -1,7 +1,9 @@
 """Utility functions for processing the raw Portal responses, url templating, etc."""
+from __future__ import annotations
 
 import datetime
 from copy import deepcopy
+from typing import Iterable
 
 from .resources import (
     ALL_SOURCES,
@@ -11,7 +13,7 @@ from .resources import (
 )
 
 
-def string_safe_list(obj):
+def string_safe_list(obj: str | Iterable[str] | None) -> list[str | None]:
     """
     Turn an (iterable) object into a list. If it is a string or not
     iterable, put the whole object into a list of length 1.
@@ -19,13 +21,12 @@ def string_safe_list(obj):
     :param obj:
     :return list:
     """
-    if isinstance(obj, str) or not hasattr(obj, "__iter__"):
+    if isinstance(obj, str) or obj is None:
         return [obj]
-    else:
-        return list(obj)
+    return list(obj)
 
 
-def countries_from_summary(summary):
+def countries_from_summary(summary: list[dict[str, str]]) -> list[str]:
     """
     Get the list of unique countries from the summary.
 
@@ -36,7 +37,7 @@ def countries_from_summary(summary):
     return list(set(d["ct"] for d in summary))
 
 
-def pollutants_from_summary(summary):
+def pollutants_from_summary(summary: list[dict[str, str]]) -> dict[str, str]:
     """
     Get the list of unique pollutants from the summary.
 
@@ -48,7 +49,9 @@ def pollutants_from_summary(summary):
     return {d["pl"]: d["shortpl"] for d in summary}
 
 
-def pollutants_per_country(summary):
+def pollutants_per_country(
+    summary: list[dict[str, str]]
+) -> dict[str, list[dict[str, str]]]:
     """
     Get the available pollutants per country from the summary.
 
@@ -56,7 +59,7 @@ def pollutants_per_country(summary):
 
     :return dict[list[dict]]: All available pollutants per country.
     """
-    output = dict()
+    output: dict[str, list[dict[str, str]]] = dict()
 
     for d in deepcopy(summary):
         country = d.pop("ct")
@@ -70,13 +73,13 @@ def pollutants_per_country(summary):
 
 
 def link_list_url(
-    country,
-    shortpl=None,
+    country: str,
+    shortpl: str | None = None,
     year_from: str = "2013",
     year_to: str = CURRENT_YEAR,
-    source="All",
-    update_date=None,
-):
+    source: str = "All",
+    update_date: str | datetime.datetime | None = None,
+) -> str:
     """
     Generate the URL where the download links for a query can be found.
 
@@ -132,7 +135,7 @@ def link_list_url(
     )
 
 
-def extract_csv_links(text):
+def extract_csv_links(text: str) -> list[str]:
     """Get a list of csv links from the download link response text"""
     links = text.replace("\r", "").split("\n")
     links.remove("")

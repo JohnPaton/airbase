@@ -31,7 +31,6 @@ src_paths = ["airbase", "tests"]
 extend_skip = ["scripts"]
 
 [tool.mypy]
-python_version = "3.7"
 warn_unused_configs = true
 warn_unused_ignores = true
 warn_no_return = true

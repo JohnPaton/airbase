@@ -32,8 +32,9 @@ def fetch_text(
 
 def fetch_json(
     url: str, *, timeout: float | None = None, encoding: str | None = None
-) -> list[dict]:
+) -> list[dict[str, str]]:
     text = fetch_text(url, timeout=timeout, encoding=encoding)
+    payload: dict[str, str] | list[dict[str, str]]
     payload = json.loads(text)
     if isinstance(payload, dict):
         return [payload]
