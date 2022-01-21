@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import json
 import sys
+from pathlib import Path
 from typing import AsyncIterator, Iterable, NamedTuple
 
 import aiohttp
@@ -40,6 +41,7 @@ def fetch_json(
 
 async def fetch_all_text(
     urls: Iterable[str],
+    *,
     progress: bool = False,
     encoding: str | None = None,
     raise_for_status: bool = True,
@@ -69,3 +71,34 @@ async def fetch_all_text(
                         print(f"Warning: {e}", file=sys.stderr)
                         continue
                     raise
+
+
+async def fetch_to_path(
+    url_paths: dict[str, Path],
+    *,
+    skip_existing: bool = False,
+    append: bool = False,
+    progress: bool = False,
+    raise_for_status: bool = True,
+    max_concurrent: int = 10,
+) -> None:
+
+    if skip_existing:
+        url_paths = {
+            url: path for url, path in url_paths.items() if not path.exists()
+        }
+    async for r in fetch_all_text(
+        url_paths,
+        progress=progress,
+        raise_for_status=raise_for_status,
+        max_concurrent=max_concurrent,
+    ):
+        path = url_paths[r.url]
+        if append and path.exists():
+            # drop the 1st line
+            lines = r.text.splitlines(keepends=True)[1:]
+            with path.open("a") as f:
+                f.writelines(lines)
+        else:
+            # keep header line
+            path.write_text(r.text)
