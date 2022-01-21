@@ -6,7 +6,7 @@ from datetime import datetime
 from pathlib import Path
 
 from . import util
-from ._fetch import fetch_all_text, fetch_json, fetch_text
+from ._fetch import fetch_all_text, fetch_json, fetch_text, fetch_to_path
 from .resources import CURRENT_YEAR, E1A_SUMMARY_URL, METADATA_URL
 
 
@@ -393,21 +393,16 @@ class AirbaseRequest:
         if self.verbose:
             print(f"Downloading CSVs to {dir}...", file=sys.stderr)
 
-        def dowload_path(url: str) -> Path:
-            return root / Path(url).name
-
-        urls = self._csv_links
-        if skip_existing:  # skip urls for files already downloaded
-            urls = [url for url in urls if not dowload_path(url).exists()]
-
-        async def fetch_all():
-            async for r in fetch_all_text(
-                urls, progress=self.verbose, raise_for_status=raise_for_status
-            ):
-                path = dowload_path(r.url)
-                path.write_text(r.text)
-
-        asyncio.run(fetch_all())
+        url_paths: dict[str, Path] = {
+            url: root / Path(url).name for url in self._csv_links
+        }
+        fetch_all = fetch_to_path(
+            url_paths,
+            skip_existing=skip_existing,
+            progress=self.verbose,
+            raise_for_status=raise_for_status,
+        )
+        asyncio.run(fetch_all)
 
         return self
 
@@ -435,23 +430,18 @@ class AirbaseRequest:
             raise NotADirectoryError(
                 f"{path.parent.absolute()} does not exist."
             )
+        # do not append to existing file
+        if path.exists():
+            path.unlink()
 
-        async def fetch_all():
-            async for r in fetch_all_text(
-                self._csv_links,
-                progress=self.verbose,
-                raise_for_status=raise_for_status,
-            ):
-                if not path.exists():
-                    # keep header line
-                    path.write_text(r.text)
-                else:
-                    # drop the 1st line
-                    lines = r.text.splitlines(keepends=True)[1:]
-                    with path.open("a") as f:
-                        f.writelines(lines)
-
-        asyncio.run(fetch_all())
+        url_paths = dict.fromkeys(self._csv_links, path)
+        fetch_all = fetch_to_path(
+            url_paths,
+            append=True,
+            progress=self.verbose,
+            raise_for_status=raise_for_status,
+        )
+        asyncio.run(fetch_all)
 
         return self
 
