@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import datetime
 from copy import deepcopy
-from typing import Iterable
+from typing import Iterable, overload
 
 from .resources import (
     ALL_SOURCES,
@@ -13,7 +13,17 @@ from .resources import (
 )
 
 
-def string_safe_list(obj: str | Iterable[str] | None) -> list[str | None]:
+@overload
+def string_safe_list(obj: None) -> list[None]:
+    ...
+
+
+@overload
+def string_safe_list(obj: str | Iterable[str]) -> list[str]:
+    ...
+
+
+def string_safe_list(obj):  # type:ignore[no-untyped-def]
     """
     Turn an (iterable) object into a list. If it is a string or not
     iterable, put the whole object into a list of length 1.
@@ -103,7 +113,8 @@ def link_list_url(
     :return str: The URL which will yield the list of relevant CSV
         download links.
     """
-    shortpl = shortpl or ""
+    if shortpl is None:
+        shortpl = ""
 
     if not (2013 <= int(year_from) <= int(CURRENT_YEAR)):
         raise ValueError(

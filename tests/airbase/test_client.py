@@ -65,9 +65,11 @@ def test_request_raises_bad_year(client: airbase.AirbaseClient, year: str):
 
 def test_request_pl(client: airbase.AirbaseClient):
     r = client.request(pl="NO")
+    assert isinstance(r.shortpl, list)
     assert len(r.shortpl) == 1
 
     r = client.request(pl=["NO", "NO3"])
+    assert isinstance(r.shortpl, list)
     assert len(r.shortpl) == 2
 
     with pytest.raises(ValueError):
