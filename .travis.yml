@@ -11,15 +11,15 @@ install:
 jobs:
   include:
     - stage: lint
-      python: 3.7
+      python: 3.8
       script: tox -e format -e lint
     - stage: test
       script: tox -e py -- -m "not integration" --cov --cov-append
     - stage: integration
-      python: 3.7
+      python: 3.8
       script: tox -e py -- -m "integration" --cov --cov-append
     - stage: deploy
-      python: 3.7
+      python: 3.8
       script: skip
       deploy:
         provider: pypi
