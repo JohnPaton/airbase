@@ -71,9 +71,9 @@ extras =
 [testenv:lint]
 skipsdist=True
 commands =
-    mypy .
+    mypy --strict airbase/
+    mypy --ignore-missing-imports tests/
 extras =
-    test
     lint
 
 [testenv:docs]
