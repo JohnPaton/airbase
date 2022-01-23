@@ -7,17 +7,19 @@ python:
   - 3.9
 install:
   - pip install -U pip
-  - pip install tox tox-travis
+  - pip install -U tox tox-travis
 jobs:
   include:
-    - stage: lint
-      python: 3.8
-      script: tox -e format -e lint
     - stage: test
       script: tox -e py -- -m "not integration" --cov --cov-append
     - stage: integration
       python: 3.8
       script: tox -e py -- -m "integration" --cov --cov-append
+    - stage: lint
+      python: 3.8
+      script:
+        - tox -e format
+        - tox -e lint
     - stage: deploy
       python: 3.8
       script: skip
