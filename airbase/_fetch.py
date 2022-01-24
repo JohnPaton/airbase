@@ -130,3 +130,29 @@ async def fetch_to_path(
             # keep header line
             async with aiofiles.open(str(path), mode="w") as f:
                 await f.write(r.text)
+
+
+def fetch_to_directory(
+    urls: list[str],
+    root: Path,
+    *,
+    skip_existing: bool = True,
+    progress: bool = DEFAULT.progress,
+    raise_for_status: bool = DEFAULT.raise_for_status,
+    max_concurrent: int = DEFAULT.max_concurrent,
+) -> None:
+
+    url_paths: dict[str, Path] = {url: root / Path(url).name for url in urls}
+    if skip_existing:
+        url_paths = {
+            url: path for url, path in url_paths.items() if not path.exists()
+        }
+
+    asyncio.run(
+        fetch_to_path(
+            url_paths,
+            progress=progress,
+            raise_for_status=raise_for_status,
+            max_concurrent=max_concurrent,
+        )
+    )

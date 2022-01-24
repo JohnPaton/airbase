@@ -10,6 +10,7 @@ from airbase._fetch import (
     fetch_all_text,
     fetch_json,
     fetch_text,
+    fetch_to_directory,
     fetch_to_path,
     fetch_unique_lines,
 )
@@ -65,18 +66,6 @@ async def test_fetch_all_text(test_urls: dict[str, str]):
 
 
 @pytest.fixture
-def url_paths(tmp_path: Path, test_urls: dict[str, str]):
-    """mock several websites w/text body"""
-    return {url: tmp_path / path for url, path in test_urls.items()}
-
-
-def test_fetch_to_path(url_paths: dict[str, Path]):
-    assert not any(path.exists() for path in url_paths.values())
-    asyncio.run(fetch_to_path(url_paths))
-    assert all(path.exists() for path in url_paths.values())
-
-
-@pytest.fixture
 def csv_links_url(response):
     """mock several websites w/csv_links response"""
     urls = [
@@ -97,6 +86,18 @@ def test_fetch_unique_lines(csv_links_url: list[str]):
     assert not any(line == "" for line in lines)
     assert not any("\n" in line for line in lines)
     assert not any("\r" in line for line in lines)
+
+
+@pytest.fixture
+def url_paths(tmp_path: Path, test_urls: dict[str, str]):
+    """mock several websites w/text body"""
+    return {url: tmp_path / path for url, path in test_urls.items()}
+
+
+def test_fetch_to_path(url_paths: dict[str, Path]):
+    assert not any(path.exists() for path in url_paths.values())
+    asyncio.run(fetch_to_path(url_paths))
+    assert all(path.exists() for path in url_paths.values())
 
 
 @pytest.fixture
@@ -126,3 +127,11 @@ def test_fetch_to_path_append(tmp_path: Path, csv_urls: dict[str, str]):
         itertools.chain.from_iterable(rows(text) for text in csv_urls.values())
     )
     assert sorted(data_on_file) == sorted(data_rows)
+
+
+def test_fetch_to_directory(tmp_path: Path, csv_urls: dict[str, str]):
+    assert not list(tmp_path.glob("*"))
+    fetch_to_directory(list(csv_urls), tmp_path)
+    assert len(list(tmp_path.glob("*"))) == len(csv_urls)
+    paths = (tmp_path / Path(url).name for url in csv_urls)
+    assert all(path.exists() for path in paths)
