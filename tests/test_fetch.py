@@ -6,7 +6,14 @@ from pathlib import Path
 
 import pytest
 
-from airbase._fetch import fetch_all_text, fetch_json, fetch_text, fetch_to_path
+from airbase._fetch import (
+    fetch_all_text,
+    fetch_json,
+    fetch_text,
+    fetch_to_path,
+    fetch_unique_lines,
+)
+from tests.resources import CSV_LINKS_RESPONSE_TEXT
 
 JSON_PAYLOAD = [{"payload": "test"}]
 TEXT_PAYLOAD = "this is a test"
@@ -67,6 +74,30 @@ def test_fetch_to_path(url_paths: dict[str, Path]):
     assert not any(path.exists() for path in url_paths.values())
     asyncio.run(fetch_to_path(url_paths))
     assert all(path.exists() for path in url_paths.values())
+
+
+@pytest.fixture
+def csv_links_url(response):
+    """mock several websites w/csv_links response"""
+    urls = [
+        "https://echo.test/csv_links",
+        "https://echo.test/more_csv_links",
+    ]
+    for url in urls:
+        response.get(url=url, body=CSV_LINKS_RESPONSE_TEXT)
+    return urls
+
+
+@pytest.mark.asyncio
+async def test_fetch_unique_lines(csv_links_url: list[str]):
+    lines = await fetch_unique_lines(csv_links_url)
+    assert isinstance(lines, (set, list, tuple))
+    assert len(lines) > 0
+    assert len(lines) == len(set(lines))
+    assert all(isinstance(line, str) for line in lines)
+    assert not any(line == "" for line in lines)
+    assert not any("\n" in line for line in lines)
+    assert not any("\r" in line for line in lines)
 
 
 @pytest.fixture

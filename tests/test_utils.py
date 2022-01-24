@@ -48,14 +48,6 @@ def test_pollutants_per_country():
     assert "shortpl" in output["AD"][0]
 
 
-def test_extract_csv_links():
-    output = CSV_LINKS_RESPONSE_TEXT.splitlines()
-    assert len(output) > 0
-    assert len(output[-1]) > 0
-    assert "\n" not in output[0]
-    assert "\r" not in output[0]
-
-
 class TestLinkListURL:
     def test_all_fields_filled(self):
         output = util.link_list_url(country="BE")
