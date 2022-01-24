@@ -5,7 +5,7 @@ import json
 import sys
 from pathlib import Path
 from types import SimpleNamespace
-from typing import AsyncIterator, Iterable, NamedTuple
+from typing import AsyncIterator, Awaitable, overload
 
 import aiofiles
 import aiohttp
@@ -18,13 +18,11 @@ DEFAULT = SimpleNamespace(
 )
 
 
-class TextResponse(NamedTuple):
-    url: str
-    text: str
-
-
 def fetch_text(
-    url: str, *, timeout: float | None = None, encoding: str | None = None
+    url: str,
+    *,
+    timeout: float | None = None,
+    encoding: str | None = None,
 ) -> str:
     async def fetch() -> str:
         timeout_ = aiohttp.ClientTimeout(total=timeout)
@@ -38,7 +36,10 @@ def fetch_text(
 
 
 def fetch_json(
-    url: str, *, timeout: float | None = None, encoding: str | None = None
+    url: str,
+    *,
+    timeout: float | None = None,
+    encoding: str | None = None,
 ) -> list[dict[str, str]]:
     text = fetch_text(url, timeout=timeout, encoding=encoding)
     payload: dict[str, str] | list[dict[str, str]]
@@ -48,26 +49,66 @@ def fetch_json(
     return payload
 
 
-async def fetch_all_text(
-    urls: Iterable[str],
+@overload
+def fetcher(
+    urls: list[str],
     *,
     encoding: str | None = None,
     progress: bool = DEFAULT.progress,
     raise_for_status: bool = DEFAULT.raise_for_status,
     max_concurrent: int = DEFAULT.max_concurrent,
-) -> AsyncIterator[TextResponse]:
+) -> AsyncIterator[str]:
+    ...
+
+
+@overload
+def fetcher(
+    urls: dict[str, Path],
+    *,
+    encoding: str | None = None,
+    progress: bool = DEFAULT.progress,
+    raise_for_status: bool = DEFAULT.raise_for_status,
+    max_concurrent: int = DEFAULT.max_concurrent,
+) -> AsyncIterator[Path]:
+    ...
+
+
+async def fetcher(
+    urls: list[str] | dict[str, Path],
+    *,
+    encoding: str | None = None,
+    progress: bool = DEFAULT.progress,
+    raise_for_status: bool = DEFAULT.raise_for_status,
+    max_concurrent: int = DEFAULT.max_concurrent,
+):
 
     async with aiohttp.ClientSession() as session:
         semaphore = asyncio.Semaphore(max_concurrent)
 
-        async def fetch(url: str) -> TextResponse:
+        @overload
+        async def fetch(url: str) -> str:
+            ...
+
+        @overload
+        async def fetch(url: str, *, path: Path) -> Path:
+            ...
+
+        async def fetch(url: str, *, path: Path | None = None):
             async with semaphore:
                 async with session.get(url, ssl=False) as r:
                     r.raise_for_status()
                     text = await r.text(encoding=encoding)
-                    return TextResponse(url, text)
+                    if path is None:
+                        return text
+                    async with aiofiles.open(str(path), mode="w") as f:
+                        await f.write(text)
+                    return path
 
-        jobs = [fetch(url) for url in urls]
+        jobs: list[Awaitable[str | Path]]
+        if isinstance(urls, dict):
+            jobs = [fetch(url, path=path) for url, path in urls.items()]
+        else:
+            jobs = [fetch(url) for url in urls]
         with tqdm(total=len(jobs), leave=True, disable=not progress) as p_bar:
             for result in asyncio.as_completed(jobs):
                 p_bar.update(1)
@@ -75,7 +116,7 @@ async def fetch_all_text(
                     yield await result
                 except asyncio.CancelledError:
                     continue
-                except aiohttp.client.ClientResponseError as e:
+                except aiohttp.ClientResponseError as e:
                     if not raise_for_status:
                         print(f"Warning: {e}", file=sys.stderr)
                         continue
@@ -83,7 +124,7 @@ async def fetch_all_text(
 
 
 def fetch_unique_lines(
-    urls: Iterable[str],
+    urls: list[str],
     *,
     encoding: str | None = None,
     progress: bool = DEFAULT.progress,
@@ -92,44 +133,47 @@ def fetch_unique_lines(
 ) -> set[str]:
     async def fetch() -> set[str]:
         lines = set()
-        async for r in fetch_all_text(
+        async for text in fetcher(
             urls,
             encoding=encoding,
             progress=progress,
             raise_for_status=raise_for_status,
             max_concurrent=max_concurrent,
         ):
-            lines.update(r.text.splitlines())
+            lines.update(text.splitlines())
         return lines
 
     return asyncio.run(fetch())
 
 
-async def fetch_to_path(
-    url_paths: dict[str, Path],
+def fetch_to_file(
+    urls: list[str],
+    path: Path,
     *,
-    append: bool = False,
     progress: bool = DEFAULT.progress,
     raise_for_status: bool = DEFAULT.raise_for_status,
     max_concurrent: int = DEFAULT.max_concurrent,
 ) -> None:
+    async def fetch() -> None:
+        first = True
+        async for text in fetcher(
+            urls,
+            progress=progress,
+            raise_for_status=raise_for_status,
+            max_concurrent=max_concurrent,
+        ):
+            if first:
+                # keep header line
+                async with aiofiles.open(str(path), mode="w") as f:
+                    await f.write(text)
+                first = False
+            else:
+                # drop the 1st line
+                lines = text.splitlines(keepends=True)[1:]
+                async with aiofiles.open(str(path), mode="a") as f:
+                    await f.writelines(lines)
 
-    async for r in fetch_all_text(
-        url_paths,
-        progress=progress,
-        raise_for_status=raise_for_status,
-        max_concurrent=max_concurrent,
-    ):
-        path = url_paths[r.url]
-        if append and path.exists():
-            # drop the 1st line
-            lines = r.text.splitlines(keepends=True)[1:]
-            async with aiofiles.open(str(path), mode="a") as f:
-                await f.writelines(lines)
-        else:
-            # keep header line
-            async with aiofiles.open(str(path), mode="w") as f:
-                await f.write(r.text)
+    asyncio.run(fetch())
 
 
 def fetch_to_directory(
@@ -148,36 +192,13 @@ def fetch_to_directory(
             url: path for url, path in url_paths.items() if not path.exists()
         }
 
-    asyncio.run(
-        fetch_to_path(
+    async def fetch():
+        async for path in fetcher(
             url_paths,
             progress=progress,
             raise_for_status=raise_for_status,
             max_concurrent=max_concurrent,
-        )
-    )
+        ):
+            pass
 
-
-def fetch_to_file(
-    urls: list[str],
-    path: Path,
-    *,
-    progress: bool = DEFAULT.progress,
-    raise_for_status: bool = DEFAULT.raise_for_status,
-    max_concurrent: int = DEFAULT.max_concurrent,
-) -> None:
-
-    # do not append to existing file
-    if path.exists():
-        path.unlink()
-
-    url_paths = dict.fromkeys(urls, path)
-    asyncio.run(
-        fetch_to_path(
-            url_paths,
-            append=True,
-            progress=progress,
-            raise_for_status=raise_for_status,
-            max_concurrent=max_concurrent,
-        )
-    )
+    asyncio.run(fetch())
