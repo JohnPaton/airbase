@@ -8,33 +8,45 @@
 
 # -- Path setup --------------------------------------------------------------
 
+import os
+import sys
+from datetime import date
+
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-#
-import os
-import sys
 
-sys.path.insert(0, os.path.abspath("../.."))
+if sys.version_info >= (3, 8):
+    from importlib import metadata
+else:
+    import importlib_metadata as metadata
+
+try:
+    metadata.version("airbase")
+except metadata.PackageNotFoundError:
+    sys.path.insert(0, os.path.abspath("../.."))
 
 
 # -- Project information -----------------------------------------------------
 
+today = date.today()
+
 project = "AirBase"
-copyright = "2019, John Paton"
+copyright = f"2019-{today.year}, John Paton"
 author = "John Paton"
 
-# The short X.Y version
-version = ""
 # The full version, including alpha/beta/rc tags
-release = "0.1.0"
+release = metadata.version("airbase")
+
+# The short X.Y version
+version = ".".join(release.split(".")[:2])
 
 
 # -- General configuration ---------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
 #
-# needs_sphinx = '1.0'
+needs_sphinx = "4.2"
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
