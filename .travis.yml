@@ -19,7 +19,8 @@ jobs:
       script:
         - black --check .
         - isort --check .
-        - mypy .
+        - mypy --strict airbase/
+        - mypy tests/
     - stage: deploy
       python: 3.8
       script: skip

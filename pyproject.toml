@@ -32,9 +32,9 @@ extend_skip = ["scripts"]
 
 [tool.mypy]
 warn_unused_configs = true
-warn_unused_ignores = true
+warn_unused_ignores = false
 warn_no_return = true
-warn_return_any = false
+warn_return_any = true
 warn_unreachable = true
 show_error_codes = true
 pretty = true

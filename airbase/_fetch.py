@@ -80,7 +80,7 @@ async def fetcher(
     progress: bool = DEFAULT.progress,
     raise_for_status: bool = DEFAULT.raise_for_status,
     max_concurrent: int = DEFAULT.max_concurrent,
-):
+) -> AsyncIterator[str | Path]:
 
     async with aiohttp.ClientSession() as session:
         semaphore = asyncio.Semaphore(max_concurrent)
@@ -93,7 +93,7 @@ async def fetcher(
         async def fetch(url: str, *, path: Path) -> Path:
             ...
 
-        async def fetch(url: str, *, path: Path | None = None):
+        async def fetch(url: str, *, path: Path | None = None) -> str | Path:
             async with semaphore:
                 async with session.get(url, ssl=False) as r:
                     r.raise_for_status()
@@ -192,7 +192,7 @@ def fetch_to_directory(
             url: path for url, path in url_paths.items() if not path.exists()
         }
 
-    async def fetch():
+    async def fetch() -> None:
         async for path in fetcher(
             url_paths,
             progress=progress,
