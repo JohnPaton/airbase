@@ -79,7 +79,7 @@ extras =
 [testenv:docs]
 skipsdist=True
 commands =
-    make -C docs html
+    sphinx-build {posargs:-M html} docs/source docs/build
 extras = 
     docs
 """
