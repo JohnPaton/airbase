@@ -4,11 +4,18 @@ import asyncio
 import json
 import sys
 from pathlib import Path
+from types import SimpleNamespace
 from typing import AsyncIterator, Iterable, NamedTuple
 
 import aiofiles
 import aiohttp
 from tqdm import tqdm
+
+DEFAULT = SimpleNamespace(
+    progress=False,
+    raise_for_status=True,
+    max_concurrent=10,
+)
 
 
 class TextResponse(NamedTuple):
@@ -44,10 +51,10 @@ def fetch_json(
 async def fetch_all_text(
     urls: Iterable[str],
     *,
-    progress: bool = False,
     encoding: str | None = None,
-    raise_for_status: bool = True,
-    max_concurrent: int = 10,
+    progress: bool = DEFAULT.progress,
+    raise_for_status: bool = DEFAULT.raise_for_status,
+    max_concurrent: int = DEFAULT.max_concurrent,
 ) -> AsyncIterator[TextResponse]:
 
     async with aiohttp.ClientSession() as session:
@@ -78,17 +85,17 @@ async def fetch_all_text(
 def fetch_unique_lines(
     urls: Iterable[str],
     *,
-    progress: bool = False,
     encoding: str | None = None,
-    raise_for_status: bool = True,
-    max_concurrent: int = 10,
+    progress: bool = DEFAULT.progress,
+    raise_for_status: bool = DEFAULT.raise_for_status,
+    max_concurrent: int = DEFAULT.max_concurrent,
 ) -> set[str]:
     async def fetch() -> set[str]:
         lines = set()
         async for r in fetch_all_text(
             urls,
-            progress=progress,
             encoding=encoding,
+            progress=progress,
             raise_for_status=raise_for_status,
             max_concurrent=max_concurrent,
         ):
@@ -102,9 +109,9 @@ async def fetch_to_path(
     url_paths: dict[str, Path],
     *,
     append: bool = False,
-    progress: bool = False,
-    raise_for_status: bool = True,
-    max_concurrent: int = 10,
+    progress: bool = DEFAULT.progress,
+    raise_for_status: bool = DEFAULT.raise_for_status,
+    max_concurrent: int = DEFAULT.max_concurrent,
 ) -> None:
 
     async for r in fetch_all_text(
