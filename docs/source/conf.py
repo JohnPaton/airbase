@@ -53,6 +53,7 @@ needs_sphinx = "4.2"
 # ones.
 extensions = [
     "sphinx.ext.autodoc",
+    "sphinx.ext.autodoc.typehints",
     "sphinx.ext.coverage",
     "sphinx.ext.mathjax",
     "sphinx.ext.viewcode",
@@ -85,6 +86,8 @@ exclude_patterns = []
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = None
 
+# use type hints to annotate method/class description
+autodoc_typehints = "description"
 
 # -- Options for HTML output -------------------------------------------------
 
