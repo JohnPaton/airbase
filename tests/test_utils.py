@@ -49,7 +49,7 @@ def test_pollutants_per_country():
 
 
 def test_extract_csv_links():
-    output = util.extract_csv_links(CSV_LINKS_RESPONSE_TEXT)
+    output = CSV_LINKS_RESPONSE_TEXT.splitlines()
     assert len(output) > 0
     assert len(output[-1]) > 0
     assert "\n" not in output[0]

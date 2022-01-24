@@ -144,10 +144,3 @@ def link_list_url(
         source=source,
         update_date=update_date,
     )
-
-
-def extract_csv_links(text: str) -> list[str]:
-    """Get a list of csv links from the download link response text"""
-    links = text.replace("\r", "").split("\n")
-    links.remove("")
-    return links

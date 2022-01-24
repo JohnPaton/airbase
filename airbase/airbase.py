@@ -348,22 +348,24 @@ class AirbaseRequest:
         if self._csv_links and not force:
             return self
 
-        csv_links = []
         if self.verbose:
             print("Generating CSV download links...", file=sys.stderr)
 
-        async def fetch_links() -> None:
+        async def fetch_links() -> set[str]:
+            links = set()
             async for r in fetch_all_text(
                 self._download_links,
                 progress=self.verbose,
                 encoding="utf-8-sig",
             ):
-                csv_links.extend(util.extract_csv_links(r.text))
+                links.update(r.text.splitlines())
 
-        asyncio.run(fetch_links())
+            return links
+
+        csv_links = asyncio.run(fetch_links())
 
         # remove duplicates
-        self._csv_links = list(set(csv_links))
+        self._csv_links = list(csv_links)
 
         if self.verbose:
             print(
