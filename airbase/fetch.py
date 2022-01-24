@@ -25,6 +25,15 @@ def fetch_text(
     timeout: float | None = None,
     encoding: str | None = None,
 ) -> str:
+    """Request url and read response’s body
+
+    :param url: requested url
+    :param timeout: maximum time to complete request (seconds)
+    :param encoding: text encoding used for decodding the response's body
+
+    :return: decoded text from response's body
+    """
+
     async def fetch() -> str:
         timeout_ = aiohttp.ClientTimeout(total=timeout)
         async with aiohttp.ClientSession(timeout=timeout_) as session:
@@ -42,6 +51,14 @@ def fetch_json(
     timeout: float | None = None,
     encoding: str | None = None,
 ) -> list[dict[str, str]]:
+    """Request url and read response’s body as JSON
+
+    :param url: requested url
+    :param timeout: maximum time to complete request (seconds)
+    :param encoding: text encoding used for decodding the response's body
+
+    :return: decoded text from response's body as JSON
+    """
     text = fetch_text(url, timeout=timeout, encoding=encoding)
     payload: dict[str, str] | list[dict[str, str]]
     payload = json.loads(text)
@@ -132,6 +149,18 @@ def fetch_unique_lines(
     raise_for_status: bool = DEFAULT.raise_for_status,
     max_concurrent: int = DEFAULT.max_concurrent,
 ) -> set[str]:
+    """Request a list of url and return only the unique lines among all the responses
+
+    :param urls: requested urls
+    :param encoding: text encoding used for decodding each response's body
+    :param progress: show progress bar
+    :param raise_for_status: Raise exceptions if download links
+        return "bad" HTTP status codes. If False, a warning will be printed instead.
+    :param max_concurrent: maximum concurrent requests
+
+    :return: unique lines among from all the responses
+    """
+
     async def fetch() -> set[str]:
         lines = set()
         async for text in fetcher(
@@ -151,14 +180,27 @@ def fetch_to_file(
     urls: list[str],
     path: Path,
     *,
+    encoding: str | None = None,
     progress: bool = DEFAULT.progress,
     raise_for_status: bool = DEFAULT.raise_for_status,
     max_concurrent: int = DEFAULT.max_concurrent,
 ) -> None:
+    """Request a list of url write out all responses into a single text file
+
+    :param urls: requested urls
+    :param path: text file for all combined responses
+    :param encoding: text encoding used for decodding each response's body
+    :param progress: show progress bar
+    :param raise_for_status: Raise exceptions if download links
+        return "bad" HTTP status codes. If False, a warning will be printed instead.
+    :param max_concurrent: maximum concurrent requests
+    """
+
     async def fetch() -> None:
         first = True
         async for text in fetcher(
             urls,
+            encoding=encoding,
             progress=progress,
             raise_for_status=raise_for_status,
             max_concurrent=max_concurrent,
@@ -182,10 +224,23 @@ def fetch_to_directory(
     root: Path,
     *,
     skip_existing: bool = True,
+    encoding: str | None = None,
     progress: bool = DEFAULT.progress,
     raise_for_status: bool = DEFAULT.raise_for_status,
     max_concurrent: int = DEFAULT.max_concurrent,
 ) -> None:
+    """Request a list of url write each response to different file
+
+    :param urls: requested urls
+    :param root: directory to write all responses
+    :param bool skip_existing: Do not re-download url if the corresponding file
+        is found in `root`
+    :param encoding: text encoding used for decodding each response's body
+    :param progress: show progress bar
+    :param raise_for_status: Raise exceptions if download links
+        return "bad" HTTP status codes. If False, a warning will be printed instead.
+    :param max_concurrent: maximum concurrent requests
+    """
 
     url_paths: dict[str, Path] = {url: root / Path(url).name for url in urls}
     if skip_existing:
@@ -196,6 +251,7 @@ def fetch_to_directory(
     async def fetch() -> None:
         async for path in fetcher(
             url_paths,
+            encoding=encoding,
             progress=progress,
             raise_for_status=raise_for_status,
             max_concurrent=max_concurrent,
