@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from airbase._fetch import (
+from airbase.fetch import (
     fetch_json,
     fetch_text,
     fetch_to_directory,

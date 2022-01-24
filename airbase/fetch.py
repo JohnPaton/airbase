@@ -1,3 +1,4 @@
+"""Helper functions encapsulating async HTTP request and file IO"""
 from __future__ import annotations
 
 import asyncio

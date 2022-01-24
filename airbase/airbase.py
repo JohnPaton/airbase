@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Dict, List
 
 from . import util
-from ._fetch import (
+from .fetch import (
     fetch_json,
     fetch_text,
     fetch_to_directory,
