@@ -83,7 +83,7 @@ def pollutants_per_country(
 
 
 def link_list_url(
-    country: str,
+    country: str | None,
     shortpl: str | None = None,
     year_from: str = "2013",
     year_to: str = CURRENT_YEAR,
