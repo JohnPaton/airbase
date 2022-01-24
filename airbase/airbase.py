@@ -1,13 +1,18 @@
 from __future__ import annotations
 
-import asyncio
 import sys
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List
 
 from . import util
-from ._fetch import fetch_json, fetch_text, fetch_to_path, fetch_unique_lines
+from ._fetch import (
+    fetch_json,
+    fetch_text,
+    fetch_to_directory,
+    fetch_to_file,
+    fetch_unique_lines,
+)
 from .resources import CURRENT_YEAR, E1A_SUMMARY_URL, METADATA_URL
 
 PollutantsType = Dict[str, str]
@@ -398,20 +403,13 @@ class AirbaseRequest:
         if self.verbose:
             print(f"Downloading CSVs to {dir}...", file=sys.stderr)
 
-        url_paths: dict[str, Path] = {
-            url: root / Path(url).name for url in self._csv_links
-        }
-        if skip_existing:
-            url_paths = {
-                url: path
-                for url, path in url_paths.items()
-                if not path.exists()
-            }
-
-        fetch_all = fetch_to_path(
-            url_paths, progress=self.verbose, raise_for_status=raise_for_status
+        fetch_to_directory(
+            self._csv_links,
+            root,
+            skip_existing=skip_existing,
+            progress=self.verbose,
+            raise_for_status=raise_for_status,
         )
-        asyncio.run(fetch_all)
 
         return self
 
@@ -441,18 +439,13 @@ class AirbaseRequest:
             raise NotADirectoryError(
                 f"{path.parent.absolute()} does not exist."
             )
-        # do not append to existing file
-        if path.exists():
-            path.unlink()
 
-        url_paths = dict.fromkeys(self._csv_links, path)
-        fetch_all = fetch_to_path(
-            url_paths,
-            append=True,
+        fetch_to_file(
+            self._csv_links,
+            path,
             progress=self.verbose,
             raise_for_status=raise_for_status,
         )
-        asyncio.run(fetch_all)
 
         return self
 
