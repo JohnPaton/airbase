@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Dict, List
 
 from . import util
-from ._fetch import fetch_all_text, fetch_json, fetch_text, fetch_to_path
+from ._fetch import fetch_json, fetch_text, fetch_to_path, fetch_unique_lines
 from .resources import CURRENT_YEAR, E1A_SUMMARY_URL, METADATA_URL
 
 PollutantsType = Dict[str, str]
@@ -351,20 +351,16 @@ class AirbaseRequest:
         if self.verbose:
             print("Generating CSV download links...", file=sys.stderr)
 
-        async def fetch_links() -> set[str]:
-            links = set()
-            async for r in fetch_all_text(
+        # set of links (no duplicates)
+        csv_links = asyncio.run(
+            fetch_unique_lines(
                 self._download_links,
                 progress=self.verbose,
                 encoding="utf-8-sig",
-            ):
-                links.update(r.text.splitlines())
+            )
+        )
 
-            return links
-
-        csv_links = asyncio.run(fetch_links())
-
-        # remove duplicates
+        # list of links (no duplicates)
         self._csv_links = list(csv_links)
 
         if self.verbose:
