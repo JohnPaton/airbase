@@ -156,3 +156,28 @@ def fetch_to_directory(
             max_concurrent=max_concurrent,
         )
     )
+
+
+def fetch_to_file(
+    urls: list[str],
+    path: Path,
+    *,
+    progress: bool = DEFAULT.progress,
+    raise_for_status: bool = DEFAULT.raise_for_status,
+    max_concurrent: int = DEFAULT.max_concurrent,
+) -> None:
+
+    # do not append to existing file
+    if path.exists():
+        path.unlink()
+
+    url_paths = dict.fromkeys(urls, path)
+    asyncio.run(
+        fetch_to_path(
+            url_paths,
+            append=True,
+            progress=progress,
+            raise_for_status=raise_for_status,
+            max_concurrent=max_concurrent,
+        )
+    )

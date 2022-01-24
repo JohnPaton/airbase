@@ -11,6 +11,7 @@ from airbase._fetch import (
     fetch_json,
     fetch_text,
     fetch_to_directory,
+    fetch_to_file,
     fetch_to_path,
     fetch_unique_lines,
 )
@@ -100,6 +101,14 @@ def test_fetch_to_path(url_paths: dict[str, Path]):
     assert all(path.exists() for path in url_paths.values())
 
 
+def test_fetch_to_directory(tmp_path: Path, csv_urls: dict[str, str]):
+    assert not list(tmp_path.glob("*"))
+    fetch_to_directory(list(csv_urls), tmp_path)
+    assert len(list(tmp_path.glob("*"))) == len(csv_urls)
+    paths = (tmp_path / Path(url).name for url in csv_urls)
+    assert all(path.exists() for path in paths)
+
+
 @pytest.fixture
 def csv_urls(response):
     """mock several websites w/text body"""
@@ -129,9 +138,17 @@ def test_fetch_to_path_append(tmp_path: Path, csv_urls: dict[str, str]):
     assert sorted(data_on_file) == sorted(data_rows)
 
 
-def test_fetch_to_directory(tmp_path: Path, csv_urls: dict[str, str]):
-    assert not list(tmp_path.glob("*"))
-    fetch_to_directory(list(csv_urls), tmp_path)
-    assert len(list(tmp_path.glob("*"))) == len(csv_urls)
-    paths = (tmp_path / Path(url).name for url in csv_urls)
-    assert all(path.exists() for path in paths)
+def test_fetch_to_file(tmp_path: Path, csv_urls: dict[str, str]):
+    path = tmp_path / "single_file.test"
+    assert not path.exists()
+
+    fetch_to_file(list(csv_urls), path)
+    assert path.exists()
+
+    # drop the header and compare data rows
+    rows = lambda text: text.splitlines()[1:]
+    data_on_file = rows(path.read_text())
+    data_rows = list(
+        itertools.chain.from_iterable(rows(text) for text in csv_urls.values())
+    )
+    assert sorted(data_on_file) == sorted(data_rows)
