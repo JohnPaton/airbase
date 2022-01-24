@@ -23,7 +23,7 @@ def string_safe_list(obj: str | Iterable[str]) -> list[str]:
     ...
 
 
-def string_safe_list(obj):  # type:ignore[no-untyped-def]
+def string_safe_list(obj):
     """
     Turn an (iterable) object into a list. If it is a string or not
     iterable, put the whole object into a list of length 1.
