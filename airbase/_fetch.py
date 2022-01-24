@@ -75,7 +75,7 @@ async def fetch_all_text(
                     raise
 
 
-async def fetch_unique_lines(
+def fetch_unique_lines(
     urls: Iterable[str],
     *,
     progress: bool = False,
@@ -83,17 +83,19 @@ async def fetch_unique_lines(
     raise_for_status: bool = True,
     max_concurrent: int = 10,
 ) -> set[str]:
-    lines = set()
-    async for r in fetch_all_text(
-        urls,
-        progress=progress,
-        encoding=encoding,
-        raise_for_status=raise_for_status,
-        max_concurrent=max_concurrent,
-    ):
-        lines.update(r.text.splitlines())
+    async def fetch() -> set[str]:
+        lines = set()
+        async for r in fetch_all_text(
+            urls,
+            progress=progress,
+            encoding=encoding,
+            raise_for_status=raise_for_status,
+            max_concurrent=max_concurrent,
+        ):
+            lines.update(r.text.splitlines())
+        return lines
 
-    return lines
+    return asyncio.run(fetch())
 
 
 async def fetch_to_path(

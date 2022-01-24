@@ -88,9 +88,8 @@ def csv_links_url(response):
     return urls
 
 
-@pytest.mark.asyncio
-async def test_fetch_unique_lines(csv_links_url: list[str]):
-    lines = await fetch_unique_lines(csv_links_url)
+def test_fetch_unique_lines(csv_links_url: list[str]):
+    lines = fetch_unique_lines(csv_links_url)
     assert isinstance(lines, (set, list, tuple))
     assert len(lines) > 0
     assert len(lines) == len(set(lines))

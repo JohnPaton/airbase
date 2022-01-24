@@ -352,12 +352,10 @@ class AirbaseRequest:
             print("Generating CSV download links...", file=sys.stderr)
 
         # set of links (no duplicates)
-        csv_links = asyncio.run(
-            fetch_unique_lines(
-                self._download_links,
-                progress=self.verbose,
-                encoding="utf-8-sig",
-            )
+        csv_links = fetch_unique_lines(
+            self._download_links,
+            progress=self.verbose,
+            encoding="utf-8-sig",
         )
 
         # list of links (no duplicates)
