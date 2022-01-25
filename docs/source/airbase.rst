@@ -32,5 +32,4 @@ airbase.fetch module
     :members:
     :undoc-members:
     :show-inheritance:
-    :exclude-members: fetcher
 

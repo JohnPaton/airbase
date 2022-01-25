@@ -101,6 +101,19 @@ async def fetcher(
     raise_for_status: bool = DEFAULT.raise_for_status,
     max_concurrent: int = DEFAULT.max_concurrent,
 ) -> AsyncIterator[str | Path]:
+    """Request multiple urls and write resquest text into individual paths
+    it a `dict[url, path]` is provided, or return the decoded text from each request
+    if only a `list[url]` is provided.
+
+    :param urls: requested urls
+    :param encoding: text encoding used for decodding each response's body
+    :param progress: show progress bar
+    :param raise_for_status: Raise exceptions if download links
+        return "bad" HTTP status codes. If False, a warning will be printed instead.
+    :param max_concurrent: maximum concurrent requests
+
+    :return: url text or path to downloaded text, one by one as the requests are completed
+    """
 
     async with aiohttp.ClientSession() as session:
         semaphore = asyncio.Semaphore(max_concurrent)
