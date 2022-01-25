@@ -5,6 +5,7 @@ import asyncio
 import json
 import sys
 from pathlib import Path
+from turtle import down
 from types import SimpleNamespace
 from typing import AsyncIterator, Awaitable, overload
 
@@ -39,7 +40,8 @@ def fetch_text(
         async with aiohttp.ClientSession(timeout=timeout_) as session:
             async with session.get(url, ssl=False) as r:
                 r.raise_for_status()
-                return await r.text(encoding=encoding)
+                text: str = await r.text(encoding=encoding)
+                return text
 
     text = asyncio.run(fetch())
     return text
@@ -103,28 +105,22 @@ async def fetcher(
     async with aiohttp.ClientSession() as session:
         semaphore = asyncio.Semaphore(max_concurrent)
 
-        @overload
         async def fetch(url: str) -> str:
-            ...
-
-        @overload
-        async def fetch(url: str, *, path: Path) -> Path:
-            ...
-
-        async def fetch(url: str, *, path: Path | None = None) -> str | Path:
             async with semaphore:
                 async with session.get(url, ssl=False) as r:
                     r.raise_for_status()
-                    text = await r.text(encoding=encoding)
-                    if path is None:
-                        return text
-                    async with aiofiles.open(str(path), mode="w") as f:
-                        await f.write(text)
-                    return path
+                    text: str = await r.text(encoding=encoding)
+                    return text
+
+        async def download(url: str, path: Path) -> Path:
+            text = await fetch(url)
+            async with aiofiles.open(str(path), mode="w") as f:
+                await f.write(text)
+            return path
 
         jobs: list[Awaitable[str | Path]]
         if isinstance(urls, dict):
-            jobs = [fetch(url, path=path) for url, path in urls.items()]
+            jobs = [download(url, path) for url, path in urls.items()]
         else:
             jobs = [fetch(url) for url in urls]
         with tqdm(total=len(jobs), leave=True, disable=not progress) as p_bar:
