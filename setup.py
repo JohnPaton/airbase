@@ -21,7 +21,7 @@ REQUIRES_PYTHON = ">=3.7"
 VERSION = "0.2.7"
 
 # What packages are required for this module to be executed?
-REQUIRED = ["requests", "aiohttp", "aiofiles", "tqdm"]
+REQUIRED = ["aiohttp", "aiofiles", "tqdm"]
 
 # What packages are optional?
 EXTRAS = {
