@@ -389,7 +389,7 @@ class AirbaseRequest:
             be overwritten. Default True.
         :param bool raise_for_status: (optional) Raise exceptions if
             download links return "bad" HTTP status codes. If False,
-            a warning will be printed instead. Default True.
+            a :py:func:`warnings.warn` will be issued instead. Default True.
 
         :return: self
         """
@@ -424,7 +424,7 @@ class AirbaseRequest:
         :param str filepath: The path to the new CSV.
         :param bool raise_for_status: (optional) Raise exceptions if
             download links return "bad" HTTP status codes. If False,
-            a warning will be printed instead. Default True.
+            a :py:func:`warnings.warn` will be issued instead. Default True.
 
         :return: self
         """

@@ -4,6 +4,7 @@ from __future__ import annotations
 import asyncio
 import json
 import sys
+import warnings
 from pathlib import Path
 from turtle import down
 from types import SimpleNamespace
@@ -109,7 +110,8 @@ async def fetcher(
     :param encoding: text encoding used for decodding each response's body
     :param progress: show progress bar
     :param raise_for_status: Raise exceptions if download links
-        return "bad" HTTP status codes. If False, a warning will be printed instead.
+        return "bad" HTTP status codes. If False,
+        a :py:func:`warnings.warn` will be issued instead.
     :param max_concurrent: maximum concurrent requests
 
     :return: url text or path to downloaded text, one by one as the requests are completed
@@ -144,10 +146,9 @@ async def fetcher(
                 except asyncio.CancelledError:
                     continue
                 except aiohttp.ClientResponseError as e:
-                    if not raise_for_status:
-                        print(f"Warning: {e}", file=sys.stderr)
-                        continue
-                    raise
+                    if raise_for_status:
+                        raise
+                    warnings.warn(str(e), category=RuntimeWarning)
 
 
 def fetch_unique_lines(
@@ -164,7 +165,8 @@ def fetch_unique_lines(
     :param encoding: text encoding used for decodding each response's body
     :param progress: show progress bar
     :param raise_for_status: Raise exceptions if download links
-        return "bad" HTTP status codes. If False, a warning will be printed instead.
+        return "bad" HTTP status codes. If False,
+        a :py:func:`warnings.warn` will be issued instead.
     :param max_concurrent: maximum concurrent requests
 
     :return: unique lines among from all the responses
@@ -201,7 +203,8 @@ def fetch_to_file(
     :param encoding: text encoding used for decodding each response's body
     :param progress: show progress bar
     :param raise_for_status: Raise exceptions if download links
-        return "bad" HTTP status codes. If False, a warning will be printed instead.
+        return "bad" HTTP status codes. If False,
+        a :py:func:`warnings.warn` will be issued instead.
     :param max_concurrent: maximum concurrent requests
     """
 
@@ -247,7 +250,8 @@ def fetch_to_directory(
     :param encoding: text encoding used for decodding each response's body
     :param progress: show progress bar
     :param raise_for_status: Raise exceptions if download links
-        return "bad" HTTP status codes. If False, a warning will be printed instead.
+        return "bad" HTTP status codes. If False,
+        a :py:func:`warnings.warn` will be issued instead.
     :param max_concurrent: maximum concurrent requests
     """
 
