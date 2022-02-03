@@ -1,11 +1,16 @@
 import os
 import sys
-
-import requests
-import tqdm
+from pathlib import Path
 
 from .resources import E1A_SUMMARY_URL, METADATA_URL, CURRENT_YEAR
 from . import util
+from .fetch import (
+    fetch_json,
+    fetch_text,
+    fetch_to_directory,
+    fetch_to_file,
+    fetch_unique_lines,
+)
 
 
 class AirbaseClient:
@@ -49,13 +54,7 @@ class AirbaseClient:
 
         :return: self
         """
-        summary_request = requests.get(E1A_SUMMARY_URL, timeout=timeout)
-
-        if not summary_request.ok:
-            summary_request.raise_for_status()
-
-        summary = summary_request.json()
-
+        summary = fetch_json(E1A_SUMMARY_URL, timeout=timeout)
         self._all_countries = util.countries_from_summary(summary)
         self._all_pollutants = util.pollutants_from_summary(summary)
         self._pollutants_per_country = util.pollutants_per_country(summary)
@@ -83,7 +82,7 @@ class AirbaseClient:
         available for a country, then we simply do not try to download
         those CSVs.
 
-        Requests proceed in two steps: First, links to inividual CSVs
+        Requests proceed in two steps: First, links to individual CSVs
         are requested from the Airbase server. Then these links are
         used to download the individual CSVs.
 
@@ -272,7 +271,7 @@ class AirbaseRequest:
         """
         Handler for Airbase data requests.
 
-        Requests proceed in two steps: First, links to inividual CSVs
+        Requests proceed in two steps: First, links to individual CSVs
         are requested from the Airbase server. Then these links are
         used to download the individual CSVs.
 
@@ -343,21 +342,18 @@ class AirbaseRequest:
         if self._csv_links and not force:
             return self._csv_links
 
-        csv_links = []
         if self.verbose:
             print("Generating CSV download links...", file=sys.stderr)
 
-        for url in tqdm.tqdm(
-            self._download_links, leave=True, disable=not self.verbose
-        ):
-            r = requests.get(url)
-            r.encoding = "utf-8-sig"
-            r.raise_for_status()
+        # set of links (no duplicates)
+        csv_links = fetch_unique_lines(
+            self._download_links,
+            progress=self.verbose,
+            encoding="utf-8-sig",
+        )
 
-            csv_links += util.extract_csv_links(r.text)
-
-        # remove duplicates
-        self._csv_links = list(set(csv_links))
+        # list of links (no duplicates)
+        self._csv_links = list(csv_links)
 
         if self.verbose:
             print(
@@ -381,7 +377,7 @@ class AirbaseRequest:
             be overwritten. Default True.
         :param bool raise_for_status: (optional) Raise exceptions if
             download links return "bad" HTTP status codes. If False,
-            a warning will be printed instead. Default True.
+            a :py:func:`warnings.warn` will be issued instead. Default True.
 
         :return: self
         """
@@ -396,29 +392,13 @@ class AirbaseRequest:
         if self.verbose:
             print("Downloading CSVs to {}...".format(dir), file=sys.stderr)
 
-        for url in tqdm.tqdm(
-            self._csv_links, disable=not self.verbose, leave=True
-        ):
-            # filepath matches filenmae in url
-            fpath = os.path.join(dir, os.path.basename(url))
-
-            # skip before downloading if we already have the file
-            if os.path.exists(fpath) and skip_existing:
-                continue
-
-            r = requests.get(url)
-
-            try:
-                r.raise_for_status()
-            except Exception as e:
-                if raise_for_status:
-                    raise
-                else:
-                    print("Warning: " + str(e), file=sys.stderr)
-                    continue
-
-            with open(fpath, "w") as h:
-                h.write(r.text)
+        fetch_to_directory(
+            self._csv_links,
+            Path(dir),
+            skip_existing=skip_existing,
+            progress=self.verbose,
+            raise_for_status=raise_for_status,
+        )
 
         return self
 
@@ -431,7 +411,7 @@ class AirbaseRequest:
         :param str filepath: The path to the new CSV.
         :param bool raise_for_status: (optional) Raise exceptions if
             download links return "bad" HTTP status codes. If False,
-            a warning will be printed instead. Default True.
+            a :py:func:`warnings.warn` will be issued instead. Default True.
 
         :return: self
         """
@@ -446,32 +426,12 @@ class AirbaseRequest:
                 os.path.dirname(os.path.realpath(filepath)) + " does not exist."
             )
 
-        first = True  # flag to keep header
-
-        for url in tqdm.tqdm(
-            self._csv_links, disable=not self.verbose, leave=True
-        ):
-            r = requests.get(url)
-
-            try:
-                r.raise_for_status()
-            except Exception as e:
-                if raise_for_status:
-                    raise
-                else:
-                    print("Warning: " + str(e), file=sys.stderr)
-                    continue
-
-            lines = r.text.split("\n")
-
-            if first:
-                # keep header line
-                first = False
-            else:
-                lines = lines[1:]
-
-            with open(filepath, "a") as h:
-                h.write("\n".join(lines))
+        fetch_to_file(
+            self._csv_links,
+            Path(filepath),
+            progress=self.verbose,
+            raise_for_status=raise_for_status,
+        )
 
         return self
 
@@ -492,8 +452,5 @@ class AirbaseRequest:
         if self.verbose:
             print("Writing metadata to {}...".format(filepath), file=sys.stderr)
 
-        r = requests.get(METADATA_URL)
-        r.raise_for_status()
-
-        with open(filepath, "w") as h:
-            h.write(r.text)
+        text = fetch_text(METADATA_URL)
+        Path(filepath).write_text(text)
