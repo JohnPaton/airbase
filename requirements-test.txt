@@ -1,7 +1,8 @@
 # requirements for running the test suite
 -r requirements.txt
-pytest
-responses
+pytest>=6.0
+aioresponses
+responses      
 pytest-responses
 pytest-mock
 pytest-cov
