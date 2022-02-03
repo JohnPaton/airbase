@@ -1,69 +1,57 @@
 import re
 
 import pytest
-import responses as rsps  # avoid name collision with fixture
+from aioresponses import aioresponses
 
 import airbase
+from tests import resources
+
+
+@pytest.fixture
+def response():
+    """aioresponses as a fixture"""
+    with aioresponses() as mocker:
+        yield mocker
 
 
 @pytest.fixture()
-def summary_response(responses):
-    from .resources import SUMMARY
-
-    r = rsps.Response(
-        method="GET", url=airbase.resources.E1A_SUMMARY_URL, json=SUMMARY
+def summary_response(response: aioresponses):
+    """mock response from summary url"""
+    response.get(
+        airbase.resources.E1A_SUMMARY_URL,
+        payload=resources.SUMMARY,
     )
-    responses.add(r)
-    yield r
-    responses.remove(r)
 
 
 @pytest.fixture()
-def csv_links_response(responses):
-    from .resources import CSV_LINKS_RESPONSE_TEXT
-
-    r = rsps.Response(
-        method="GET",
-        url="http://fme.discomap.eea.europa.eu/fmedatastreaming/"
-        "AirQualityDownload/AQData_Extract.fmw",
-        body=CSV_LINKS_RESPONSE_TEXT,
-        match_querystring=False,
+def csv_links_response(response: aioresponses):
+    """mock response from station data links url"""
+    response.get(
+        re.compile(
+            r"http://fme\.discomap\.eea\.europa\.eu/fmedatastreaming/"
+            r"AirQualityDownload/AQData_Extract\.fmw.*"
+        ),
+        body=resources.CSV_LINKS_RESPONSE_TEXT,
+        repeat=True,
     )
-    responses.add(r)
-    yield r
-    responses.remove(r)
 
 
 @pytest.fixture()
-def csv_response(responses):
-    from .resources import CSV_RESPONSE
-
-    r = rsps.Response(
-        method="GET",
-        url=re.compile(
+def csv_response(response: aioresponses):
+    """mock response from station data url|"""
+    response.get(
+        re.compile(
             r"https://ereporting\.blob\.core\.windows\.net/downloadservice/.*"
         ),
-        body=CSV_RESPONSE,
+        body=resources.CSV_RESPONSE,
+        repeat=True,
     )
-    responses.add(r)
-    yield r
-    responses.remove(r)
 
 
 @pytest.fixture()
-def metadata_response(responses):
-    from .resources import METADATA_RESPONSE
-
-    r = rsps.Response(
-        method="GET", url=airbase.resources.METADATA_URL, body=METADATA_RESPONSE
+def metadata_response(response: aioresponses):
+    """mock response from metadata url"""
+    response.get(
+        airbase.resources.METADATA_URL,
+        body=resources.METADATA_RESPONSE,
     )
-    responses.add(r)
-    yield r
-    responses.remove(r)
-
-
-@pytest.fixture()
-def all_responses(
-    summary_response, csv_links_response, csv_response, metadata_response
-):
-    return

@@ -4,7 +4,6 @@ import itertools
 from pathlib import Path
 
 import pytest
-from aioresponses import aioresponses
 
 from airbase.fetch import (
     fetch_json,
@@ -17,13 +16,6 @@ from tests.resources import CSV_LINKS_RESPONSE_TEXT
 
 JSON_PAYLOAD = [{"payload": "test"}]
 TEXT_PAYLOAD = "this is a test"
-
-
-@pytest.fixture
-def response():
-    """aioresponses as a fixture"""
-    with aioresponses() as mocker:
-        yield mocker
 
 
 @pytest.fixture
