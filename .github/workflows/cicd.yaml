@@ -15,8 +15,7 @@ jobs:
       - run: |
           pip install . -r requirements-test.txt
       - run: |
-          pytest -lk "not integration" --cov-append --cov=airbase \
-            --cov-report=xml --cov-report=term
+          pytest -lk "not integration" --cov=airbase --cov-report=term
 
   integration-test:
     needs: unit-test
@@ -29,8 +28,7 @@ jobs:
       - run: |
           pip install . -r requirements-test.txt
       - run: |
-          pytest -lvk "integration" --cov-append --cov=airbase \
-            --cov-report=xml --cov-report=term
+          pytest -lvk "integration"
 
   lint:
     runs-on: ubuntu-latest
