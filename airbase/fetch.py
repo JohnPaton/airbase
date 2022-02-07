@@ -31,7 +31,7 @@ def fetch_text(
 
     :param url: requested url
     :param timeout: maximum time to complete request (seconds)
-    :param encoding: text encoding used for decodding the response's body
+    :param encoding: text encoding used for decoding the response's body
 
     :return: decoded text from response's body
     """
