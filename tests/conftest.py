@@ -38,7 +38,7 @@ def csv_links_response(response: aioresponses):
 
 @pytest.fixture()
 def csv_response(response: aioresponses):
-    """mock response from station data url|"""
+    """mock response from station data url"""
     response.get(
         re.compile(
             r"https://ereporting\.blob\.core\.windows\.net/downloadservice/.*"
