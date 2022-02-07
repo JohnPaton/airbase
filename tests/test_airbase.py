@@ -1,10 +1,9 @@
-import os
-import glob
+from pathlib import Path
 
 import pytest
 
 import airbase
-from . import resources
+from tests import resources
 
 
 @pytest.fixture
@@ -46,13 +45,12 @@ class TestAirbaseClient:
         assert client.pollutants_per_country is not None
 
     def test_download_metadata(
-        self, tmpdir, capsys, client: airbase.AirbaseClient
+        self, tmp_path: Path, capsys, client: airbase.AirbaseClient
     ):
-        fpath = str(tmpdir / "meta.csv")
-        client.download_metadata(fpath)
-        assert os.path.exists(fpath)
-        with open(fpath) as h:
-            assert h.read() == resources.METADATA_RESPONSE
+        path = tmp_path / "meta.csv"
+        client.download_metadata(path)
+        assert path.exists()
+        assert path.read_text() == resources.METADATA_RESPONSE
 
     def test_request_raises_bad_country(self, client: airbase.AirbaseClient):
         with pytest.raises(ValueError):
@@ -120,16 +118,16 @@ class TestAirbaseRequest:
         r = airbase.AirbaseRequest(preload_csv_links=True)
         assert len(r._csv_links) > 0
 
-    def test_verbose_produces_output(self, capsys, tmpdir):
+    def test_verbose_produces_output(self, capsys, tmp_path: Path):
         r = airbase.AirbaseRequest(verbose=False, preload_csv_links=True)
-        r.download_to_directory(str(tmpdir))
+        r.download_to_directory(tmp_path)
 
         output = capsys.readouterr()
         assert len(output.out) == 0
         assert len(output.err) == 0
 
         r = airbase.AirbaseRequest(verbose=True, preload_csv_links=True)
-        r.download_to_directory(str(tmpdir))
+        r.download_to_directory(tmp_path)
 
         output = capsys.readouterr()
         assert len(output.out) == 0
@@ -140,51 +138,56 @@ class TestAirbaseRequest:
         with pytest.raises(NotADirectoryError):
             r.download_to_directory("does/not/exist")
 
-    def test_download_to_directory_files_written(self, tmpdir):
+    def test_download_to_directory_files_written(self, tmp_path: Path):
         r = airbase.AirbaseRequest()
-        r.download_to_directory(str(tmpdir))
-        assert len(glob.glob(str(tmpdir / "*.csv"))) > 0
+        r.download_to_directory(tmp_path)
+        assert list(tmp_path.glob("*.csv"))
 
     def test_download_file_directory_must_exist(self):
         r = airbase.AirbaseRequest()
         with pytest.raises(NotADirectoryError):
             r.download_to_file("does/not/exist.csv")
 
-    def test_download_file_curdir(self, tmpdir, monkeypatch):
-        monkeypatch.chdir(str(tmpdir))
-        r = airbase.AirbaseRequest()
-        r.download_to_file("test.csv")
-        assert os.path.exists("test.csv")
+    def test_download_file_curdir(self, tmp_path: Path, monkeypatch):
+        path = tmp_path / Path("test.csv")
+        monkeypatch.chdir(path.parent)
 
-    def test_download_file(self, tmpdir):
         r = airbase.AirbaseRequest()
-        fpath = str(tmpdir / "test.csv")
-        r.download_to_file(fpath)
-        assert os.path.exists(fpath)
+        r.download_to_file(path.name)
+        assert path.exists()
+
+    def test_download_file(self, tmp_path: Path):
+        path = tmp_path / "test.csv"
+
+        r = airbase.AirbaseRequest()
+        r.download_to_file(path)
+        assert path.exists()
 
         # make sure header written
-        with open(fpath) as h:
-            lines = h.readlines()
+        lines = path.read_text().splitlines()
 
-        header = lines[0].strip()
-        header_expected = resources.CSV_RESPONSE.split("\n")[0]
+        header = lines[0]
+        header_expected = resources.CSV_RESPONSE.splitlines()[0]
         assert header == header_expected
 
         # make sure header only there once
-        is_header = [l.strip() == header_expected for l in lines]
+        is_header = (l.strip() == header_expected for l in lines)
         assert sum(is_header) == 1
 
-    def test_download_metadata(self, tmpdir):
+    def test_download_metadata(self, tmp_path: Path):
         r = airbase.AirbaseRequest()
 
         with pytest.raises(NotADirectoryError):
             r.download_metadata("does/not/exist.tsv")
 
-        r.download_metadata(str(tmpdir / "meta.tsv"))
-        assert os.path.exists(str(tmpdir / "meta.tsv"))
+        path = tmp_path / "meta.tsv"
+        r.download_metadata(path)
+        assert path.exists()
 
-    def test_download_metadata_curdir(self, tmpdir, monkeypatch):
+    def test_download_metadata_curdir(self, tmp_path: Path, monkeypatch):
+        path = tmp_path / "meta.tsv"
+        monkeypatch.chdir(path.parent)
+
         r = airbase.AirbaseRequest()
-        monkeypatch.chdir(str(tmpdir))
-        r.download_metadata("meta.tsv")
-        assert os.path.exists("meta.tsv")
+        r.download_metadata(path.name)
+        assert path.exists
