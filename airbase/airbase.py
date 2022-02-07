@@ -40,8 +40,6 @@ class AirbaseClient:
         self._all_countries = None
         self._all_pollutants = None
         self._pollutants_per_country = None
-        self._cities_per_country = None
-        self._current_request = None
 
         if connect:
             self.connect()
@@ -154,7 +152,7 @@ class AirbaseClient:
                         "'{}' is not a valid pollutant name".format(p)
                     )
 
-        r = AirbaseRequest(
+        return AirbaseRequest(
             country,
             shortpl,
             year_from,
@@ -164,9 +162,6 @@ class AirbaseClient:
             verbose,
             preload_csv_links,
         )
-
-        self._current_request = r
-        return r
 
     def search_pollutant(self, query, limit=None):
         """
