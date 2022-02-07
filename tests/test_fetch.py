@@ -89,6 +89,11 @@ def test_fetch_unique_lines_error(bad_request_url: str):
         fetch_unique_lines([bad_request_url])
 
 
+def test_fetch_unique_lines_warning(bad_request_url: str):
+    with pytest.warns(RuntimeWarning):
+        fetch_unique_lines([bad_request_url], raise_for_status=False)
+
+
 def test_fetch_to_directory(tmp_path: Path, csv_urls: dict[str, str]):
     assert not list(tmp_path.glob("*"))
     fetch_to_directory(list(csv_urls), tmp_path)
@@ -100,6 +105,12 @@ def test_fetch_to_directory(tmp_path: Path, csv_urls: dict[str, str]):
 def test_fetch_to_directory_error(tmp_path: Path, bad_request_url: str):
     with pytest.raises(aiohttp.ClientResponseError):
         fetch_to_directory([bad_request_url], tmp_path)
+    assert not list(tmp_path.glob("*"))
+
+
+def test_fetch_to_directory_warning(tmp_path: Path, bad_request_url: str):
+    with pytest.warns(RuntimeWarning):
+        fetch_to_directory([bad_request_url], tmp_path, raise_for_status=False)
     assert not list(tmp_path.glob("*"))
 
 
@@ -135,4 +146,11 @@ def test_fetchtest_fetch_to_file_error(tmp_path: Path, bad_request_url: str):
     path = tmp_path / "single_file.test"
     with pytest.raises(aiohttp.ClientResponseError):
         fetch_to_file([bad_request_url], path)
+    assert not path.exists()
+
+
+def test_fetchtest_fetch_to_file_warning(tmp_path: Path, bad_request_url: str):
+    path = tmp_path / "single_file.test"
+    with pytest.warns(RuntimeWarning):
+        fetch_to_file([bad_request_url], path, raise_for_status=False)
     assert not path.exists()
