@@ -3,6 +3,7 @@ from __future__ import annotations
 import itertools
 from pathlib import Path
 
+import aiohttp
 import pytest
 
 from airbase.fetch import (
@@ -34,12 +35,30 @@ def text_url(response):
     yield url
 
 
+@pytest.fixture
+def bad_request_url(response):
+    """mock website w/json payload"""
+    url = "https:/echo.test/bad_request"
+    response.get(url=url, status=400)
+    yield url
+
+
 def test_fetch_json(json_url: str):
     assert fetch_json(json_url) == JSON_PAYLOAD
 
 
+def test_fetch_json_error(bad_request_url: str):
+    with pytest.raises(aiohttp.ClientResponseError):
+        fetch_json(bad_request_url)
+
+
 def test_fetch_text(text_url: str):
     assert fetch_text(text_url) == TEXT_PAYLOAD
+
+
+def test_fetch_text_error(bad_request_url: str):
+    with pytest.raises(aiohttp.ClientResponseError):
+        fetch_text(bad_request_url)
 
 
 @pytest.fixture
@@ -65,12 +84,23 @@ def test_fetch_unique_lines(csv_links_url: list[str]):
     assert not any("\r" in line for line in lines)
 
 
+def test_fetch_unique_lines_error(bad_request_url: str):
+    with pytest.raises(aiohttp.ClientResponseError):
+        fetch_unique_lines([bad_request_url])
+
+
 def test_fetch_to_directory(tmp_path: Path, csv_urls: dict[str, str]):
     assert not list(tmp_path.glob("*"))
     fetch_to_directory(list(csv_urls), tmp_path)
     assert len(list(tmp_path.glob("*"))) == len(csv_urls)
     paths = (tmp_path / Path(url).name for url in csv_urls)
     assert all(path.exists() for path in paths)
+
+
+def test_fetch_to_directory_error(tmp_path: Path, bad_request_url: str):
+    with pytest.raises(aiohttp.ClientResponseError):
+        fetch_to_directory([bad_request_url], tmp_path)
+    assert not list(tmp_path.glob("*"))
 
 
 @pytest.fixture
@@ -99,3 +129,10 @@ def test_fetch_to_file(tmp_path: Path, csv_urls: dict[str, str]):
         itertools.chain.from_iterable(rows(text) for text in csv_urls.values())
     )
     assert sorted(data_on_file) == sorted(data_rows)
+
+
+def test_fetchtest_fetch_to_file_error(tmp_path: Path, bad_request_url: str):
+    path = tmp_path / "single_file.test"
+    with pytest.raises(aiohttp.ClientResponseError):
+        fetch_to_file([bad_request_url], path)
+    assert not path.exists()

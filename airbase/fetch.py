@@ -76,7 +76,7 @@ def fetcher(
     progress: bool = DEFAULT.progress,
     raise_for_status: bool = DEFAULT.raise_for_status,
     max_concurrent: int = DEFAULT.max_concurrent,
-) -> AsyncIterator[str]:
+) -> AsyncIterator[str]:  # pragma: no cover
     ...
 
 
@@ -88,7 +88,7 @@ def fetcher(
     progress: bool = DEFAULT.progress,
     raise_for_status: bool = DEFAULT.raise_for_status,
     max_concurrent: int = DEFAULT.max_concurrent,
-) -> AsyncIterator[Path]:
+) -> AsyncIterator[Path]:  # pragma: no cover
     ...
 
 
