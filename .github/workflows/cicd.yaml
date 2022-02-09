@@ -49,7 +49,7 @@ jobs:
         with:
           python-version: 3.x
       - run: |
-          pip install –-user –-upgrade setuptools wheel
+          pip install –-upgrade setuptools wheel
       - run: |
           python setup.py sdist bdist_wheel
       - uses: pypa/gh-action-pypi-publish@release/v1
