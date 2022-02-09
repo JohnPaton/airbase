@@ -1,5 +1,8 @@
 name: CI/CD
-on: [push, release]
+on:
+  push:
+  schedule:
+    - cron:  '0 12 1 * *'  # On the first day of the month
 
 jobs:
   unit-test:
