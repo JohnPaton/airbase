@@ -3,12 +3,6 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-.. image:: https://travis-ci.com/JohnPaton/airbase.svg?branch=master
-   :target: https://travis-ci.com/JohnPaton/airbase
-.. image:: https://readthedocs.org/projects/airbase/badge/?version=latest
-   :target: https://airbase.readthedocs.io/en/latest/?badge=latest
-   :alt: Documentation Status
-
 Welcome to AirBase's documentation!
 ===================================
 
