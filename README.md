@@ -1,5 +1,8 @@
-[![PyPI version](https://badge.fury.io/py/airbase.svg)](https://badge.fury.io/py/airbase) [![Downloads](https://pepy.tech/badge/airbase)](https://pepy.tech/project/airbase) [![Build Status](https://travis-ci.com/JohnPaton/airbase.svg?branch=master)](https://travis-ci.com/JohnPaton/airbase) [![Documentation Status](https://readthedocs.org/projects/airbase/badge/?version=latest)](https://airbase.readthedocs.io/en/latest/?badge=latest)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
+[![PyPI version](https://badge.fury.io/py/airbase.svg)](https://badge.fury.io/py/airbase)
+[![Downloads](https://pepy.tech/badge/airbase)](https://pepy.tech/project/airbase)
+[![CI/CD](https://github.com/JohnPaton/airbase/actions/workflows/cicd.yaml/badge.svg)](https://github.com/JohnPaton/airbase/actions/workflows/cicd.yaml)
+[![Documentation Status](https://readthedocs.org/projects/airbase/badge/?version=latest)](https://airbase.readthedocs.io/en/latest/?badge=latest)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 # 🌬 AirBase
 
