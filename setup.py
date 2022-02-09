@@ -18,7 +18,7 @@ URL = "https://github.com/johnpaton/airbase"
 EMAIL = "john@johnpaton.net"
 AUTHOR = "John Paton"
 REQUIRES_PYTHON = ">=3.7"
-VERSION = "0.2.7"
+VERSION = "0.3.0"
 
 # What packages are required for this module to be executed?
 REQUIRED = ["aiohttp", "aiofiles", "tqdm"]
