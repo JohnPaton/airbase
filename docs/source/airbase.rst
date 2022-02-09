@@ -25,4 +25,11 @@ airbase.util module
     :undoc-members:
     :show-inheritance:
 
+airbase.fetch module
+--------------------
+
+.. automodule:: airbase.fetch
+    :members:
+    :undoc-members:
+    :show-inheritance:
 

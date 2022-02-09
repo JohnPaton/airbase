@@ -113,3 +113,4 @@ activate
 # custom
 data
 !**/.gitkeep
+.vscode

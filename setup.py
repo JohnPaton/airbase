@@ -17,11 +17,11 @@ DESCRIPTION = "An easy downloader for the AirBase air quality data."
 URL = "https://github.com/johnpaton/airbase"
 EMAIL = "john@johnpaton.net"
 AUTHOR = "John Paton"
-REQUIRES_PYTHON = ">=3.4.0"
+REQUIRES_PYTHON = ">=3.7"
 VERSION = "0.2.7"
 
 # What packages are required for this module to be executed?
-REQUIRED = ["requests", "tqdm"]
+REQUIRED = ["aiohttp", "aiofiles", "tqdm"]
 
 # What packages are optional?
 EXTRAS = {
@@ -120,11 +120,10 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.4",
-        "Programming Language :: Python :: 3.5",
-        "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
         "Intended Audience :: Science/Research",
         "Topic :: Scientific/Engineering",
         "Topic :: Scientific/Engineering :: Atmospheric Science",

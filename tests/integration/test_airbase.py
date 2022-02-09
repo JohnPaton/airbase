@@ -1,36 +1,25 @@
 import os
 
 import pytest
-import responses as rsps
 
 import airbase
-
-
-from ..resources import CSV_RESPONSE, METADATA_RESPONSE
-
-
-@pytest.fixture(scope="module")
-def withoutresponses():
-    with rsps.RequestsMock(passthru_prefixes="http"):
-        yield
+from tests.resources import CSV_RESPONSE, METADATA_RESPONSE
 
 
 @pytest.fixture(scope="module")
-def client(withoutresponses):
-    """Return an initialized AirbaseClient"""
+def client():
+    """Return initialized AirbaseClient instance"""
     return airbase.AirbaseClient(connect=True)
 
 
-@pytest.mark.withoutresponses
-def test_client_connects(client):
+def test_client_connects(client: airbase.AirbaseClient):
     assert client.all_countries is not None
     assert client.all_pollutants is not None
     assert client.pollutants_per_country is not None
     assert client.search_pollutant("O3") is not None
 
 
-@pytest.mark.withoutresponses
-def test_download_to_directory(client, tmpdir):
+def test_download_to_directory(client: airbase.AirbaseClient, tmpdir):
     r = client.request(
         country=["AD", "BE"], pl="CO", year_from="2017", year_to="2017"
     )
@@ -38,8 +27,7 @@ def test_download_to_directory(client, tmpdir):
     assert os.listdir(str(tmpdir)) != []
 
 
-@pytest.mark.withoutresponses
-def test_download_to_file(client, tmpdir):
+def test_download_to_file(client: airbase.AirbaseClient, tmpdir):
     r = client.request(
         country="CY", pl=["As", "NO2"], year_from="2014", year_to="2014"
     )
@@ -54,8 +42,7 @@ def test_download_to_file(client, tmpdir):
     assert headers_downloaded == headers_expected
 
 
-@pytest.mark.withoutresponses
-def test_download_metadata(client, tmpdir):
+def test_download_metadata(client: airbase.AirbaseClient, tmpdir):
     client.download_metadata(str(tmpdir / "metadata.tsv"))
     assert os.path.exists(str(tmpdir / "metadata.tsv"))
 
