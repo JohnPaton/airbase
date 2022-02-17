@@ -381,8 +381,7 @@ class AirbaseRequest:
         :return: self
         """
         # ensure the directory exists
-        if isinstance(dir, str):
-            dir = Path(dir)
+        dir = Path(dir)
         if not dir.is_dir():
             raise NotADirectoryError(f"{dir.resolve()} is not a directory.")
 
@@ -419,8 +418,7 @@ class AirbaseRequest:
         self._get_csv_links()
 
         # ensure the path is valid
-        if isinstance(filepath, str):
-            filepath = Path(filepath)
+        filepath = Path(filepath)
         if not filepath.parent.is_dir():
             raise NotADirectoryError(
                 f"{filepath.parent.resolve()} does not exist."
@@ -446,8 +444,7 @@ class AirbaseRequest:
         :param filepath: Where to save the TSV
         """
         # ensure the path is valid
-        if isinstance(filepath, str):
-            filepath = Path(filepath)
+        filepath = Path(filepath)
         if not filepath.parent.is_dir():
             raise NotADirectoryError(
                 f"{filepath.parent.resolve()} does not exist."
