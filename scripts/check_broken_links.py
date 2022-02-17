@@ -22,6 +22,7 @@ def main(output_file, retries, ignore_errors=False):
 
     client = ab.AirbaseClient()
     req = client.request(preload_csv_links=True)  # get links to all files
+    req = client.request(preload_csv_links=True)  # get links to all files
     session = requests.Session()  # reuse HTTP connections
 
     # Define inside main to re-use Session
@@ -72,7 +73,7 @@ if __name__ == "__main__":
         "--output",
         default="bad-links-{}.txt".format(now),
         help="File to record the broken links in",
-        type=os.path.realpath,
+        type=argparse.FileType(),
     )
     parser.add_argument(
         "-r",
