@@ -22,7 +22,6 @@ def main(output_file, retries, ignore_errors=False):
 
     client = ab.AirbaseClient()
     req = client.request(preload_csv_links=True)  # get links to all files
-    req = client.request(preload_csv_links=True)  # get links to all files
     session = requests.Session()  # reuse HTTP connections
 
     # Define inside main to re-use Session
