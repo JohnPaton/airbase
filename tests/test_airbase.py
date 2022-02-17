@@ -70,9 +70,11 @@ class TestAirbaseClient:
 
     def test_request_pl(self, client: airbase.AirbaseClient):
         r = client.request(pl="NO")
+        assert r.shortpl is not None
         assert len(r.shortpl) == 1
 
         r = client.request(pl=["NO", "NO3"])
+        assert r.shortpl is not None
         assert len(r.shortpl) == 2
 
         with pytest.raises(ValueError):
