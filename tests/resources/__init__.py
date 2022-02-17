@@ -1,16 +1,12 @@
-import os
 import json
+from importlib import resources
 
-_HERE = os.path.realpath(os.path.dirname(__file__))
+SUMMARY = json.loads(resources.read_text(__package__, "summary.json"))
 
-with open(os.path.join(_HERE, "summary.json")) as h:
-    SUMMARY = json.load(h)
+CSV_LINKS_RESPONSE_TEXT = resources.read_text(
+    __package__, "csv_links_response.txt"
+)
 
-with open(os.path.join(_HERE, "csv_links_response.txt")) as h:
-    CSV_LINKS_RESPONSE_TEXT = h.read()
+CSV_RESPONSE = resources.read_text(__package__, "csv_response.csv")
 
-with open(os.path.join(_HERE, "csv_response.csv")) as h:
-    CSV_RESPONSE = h.read()
-
-with open(os.path.join(_HERE, "metadata.tsv")) as h:
-    METADATA_RESPONSE = h.read()
+METADATA_RESPONSE = resources.read_text(__package__, "metadata.tsv")

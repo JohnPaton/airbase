@@ -1,4 +1,5 @@
-import os
+from __future__ import annotations
+
 import sys
 from pathlib import Path
 
@@ -39,8 +40,6 @@ class AirbaseClient:
         self._all_countries = None
         self._all_pollutants = None
         self._pollutants_per_country = None
-        self._cities_per_country = None
-        self._current_request = None
 
         if connect:
             self.connect()
@@ -153,7 +152,7 @@ class AirbaseClient:
                         "'{}' is not a valid pollutant name".format(p)
                     )
 
-        r = AirbaseRequest(
+        return AirbaseRequest(
             country,
             shortpl,
             year_from,
@@ -163,9 +162,6 @@ class AirbaseClient:
             verbose,
             preload_csv_links,
         )
-
-        self._current_request = r
-        return r
 
     def search_pollutant(self, query, limit=None):
         """
@@ -198,14 +194,14 @@ class AirbaseClient:
         ]
 
     @staticmethod
-    def download_metadata(filepath, verbose=True):
+    def download_metadata(filepath: str | Path, verbose: bool = True):
         """
         Download the metadata file.
 
         See http://discomap.eea.europa.eu/map/fme/AirQualityExport.htm.
 
-        :param str filepath:
-        :param bool verbose:
+        :param filepath:
+        :param verbose:
         """
         AirbaseRequest(verbose=verbose).download_metadata(filepath)
 
@@ -366,35 +362,37 @@ class AirbaseRequest:
         return self
 
     def download_to_directory(
-        self, dir, skip_existing=True, raise_for_status=True
+        self,
+        dir: str | Path,
+        skip_existing: bool = True,
+        raise_for_status: bool = True,
     ):
         """
         Download into a directory, preserving original file structure.
 
-        :param str dir: The directory to save files in (must exist)
-        :param bool skip_existing: (optional) Don't re-download files if
+        :param dir: The directory to save files in (must exist)
+        :param skip_existing: (optional) Don't re-download files if
             they exist in `dir`. If False, existing files in `dir` may
             be overwritten. Default True.
-        :param bool raise_for_status: (optional) Raise exceptions if
+        :param raise_for_status: (optional) Raise exceptions if
             download links return "bad" HTTP status codes. If False,
             a :py:func:`warnings.warn` will be issued instead. Default True.
 
         :return: self
         """
         # ensure the directory exists
-        if not os.path.isdir(dir):
-            raise NotADirectoryError(
-                os.path.realpath(dir) + " is not a directory."
-            )
+        dir = Path(dir)
+        if not dir.is_dir():
+            raise NotADirectoryError(f"{dir.resolve()} is not a directory.")
 
         self._get_csv_links()
 
         if self.verbose:
-            print("Downloading CSVs to {}...".format(dir), file=sys.stderr)
+            print(f"Downloading CSVs to {dir}...", file=sys.stderr)
 
         fetch_to_directory(
             self._csv_links,
-            Path(dir),
+            dir,
             skip_existing=skip_existing,
             progress=self.verbose,
             raise_for_status=raise_for_status,
@@ -402,14 +400,16 @@ class AirbaseRequest:
 
         return self
 
-    def download_to_file(self, filepath, raise_for_status=True):
+    def download_to_file(
+        self, filepath: str | Path, raise_for_status: bool = True
+    ):
         """
         Download data into one large CSV.
 
         Directory where the new CSV will be created must exist.
 
-        :param str filepath: The path to the new CSV.
-        :param bool raise_for_status: (optional) Raise exceptions if
+        :param filepath: The path to the new CSV.
+        :param raise_for_status: (optional) Raise exceptions if
             download links return "bad" HTTP status codes. If False,
             a :py:func:`warnings.warn` will be issued instead. Default True.
 
@@ -417,40 +417,40 @@ class AirbaseRequest:
         """
         self._get_csv_links()
 
-        if self.verbose:
-            print("Writing data to {}...".format(filepath), file=sys.stderr)
-
         # ensure the path is valid
-        if not os.path.exists(os.path.dirname(os.path.realpath(filepath))):
+        filepath = Path(filepath)
+        if not filepath.parent.is_dir():
             raise NotADirectoryError(
-                os.path.dirname(os.path.realpath(filepath)) + " does not exist."
+                f"{filepath.parent.resolve()} does not exist."
             )
 
+        if self.verbose:
+            print(f"Writing data to {filepath}...", file=sys.stderr)
         fetch_to_file(
             self._csv_links,
-            Path(filepath),
+            filepath,
             progress=self.verbose,
             raise_for_status=raise_for_status,
         )
 
         return self
 
-    def download_metadata(self, filepath):
+    def download_metadata(self, filepath: str | Path):
         """
         Download the metadata TSV file.
 
         See http://discomap.eea.europa.eu/map/fme/AirQualityExport.htm.
 
-        :param str filepath: Where to save the TSV
+        :param filepath: Where to save the TSV
         """
         # ensure the path is valid
-        if not os.path.exists(os.path.dirname(os.path.realpath(filepath))):
+        filepath = Path(filepath)
+        if not filepath.parent.is_dir():
             raise NotADirectoryError(
-                os.path.dirname(filepath) + " does not exist."
+                f"{filepath.parent.resolve()} does not exist."
             )
 
         if self.verbose:
-            print("Writing metadata to {}...".format(filepath), file=sys.stderr)
-
+            print(f"Writing metadata to {filepath}...", file=sys.stderr)
         text = fetch_text(METADATA_URL)
-        Path(filepath).write_text(text)
+        filepath.write_text(text)

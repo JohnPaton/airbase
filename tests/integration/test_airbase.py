@@ -1,4 +1,4 @@
-import os
+from pathlib import Path
 
 import pytest
 
@@ -19,36 +19,38 @@ def test_client_connects(client: airbase.AirbaseClient):
     assert client.search_pollutant("O3") is not None
 
 
-def test_download_to_directory(client: airbase.AirbaseClient, tmpdir):
+def test_download_to_directory(client: airbase.AirbaseClient, tmp_path: Path):
     r = client.request(
         country=["AD", "BE"], pl="CO", year_from="2017", year_to="2017"
     )
-    r.download_to_directory(dir=str(tmpdir), skip_existing=True)
-    assert os.listdir(str(tmpdir)) != []
+
+    r.download_to_directory(dir=str(tmp_path), skip_existing=True)
+    assert list(tmp_path.iterdir())
 
 
-def test_download_to_file(client: airbase.AirbaseClient, tmpdir):
+def test_download_to_file(client: airbase.AirbaseClient, tmp_path: Path):
     r = client.request(
         country="CY", pl=["As", "NO2"], year_from="2014", year_to="2014"
     )
-    r.download_to_file(str(tmpdir / "raw.csv"))
-    assert os.path.exists(str(tmpdir / "raw.csv"))
+
+    path = tmp_path / "raw.csv"
+    r.download_to_file(path)
+    assert path.exists()
 
     # make sure data format hasn't changed
-    with open(str(tmpdir / "raw.csv")) as h:
-        headers_downloaded = h.readline().strip()
-    headers_expected = CSV_RESPONSE.split("\n")[0]
+    headers_downloaded = path.read_text().splitlines()[0]
+    headers_expected = CSV_RESPONSE.splitlines()[0]
 
     assert headers_downloaded == headers_expected
 
 
-def test_download_metadata(client: airbase.AirbaseClient, tmpdir):
-    client.download_metadata(str(tmpdir / "metadata.tsv"))
-    assert os.path.exists(str(tmpdir / "metadata.tsv"))
+def test_download_metadata(client: airbase.AirbaseClient, tmp_path: Path):
+    path = tmp_path / "metadata.tsv"
+    client.download_metadata(path)
+    assert path.exists()
 
     # make sure metadata format hasn't changed
-    with open(str(tmpdir / "metadata.tsv")) as h:
-        headers_downloaded = h.readline().strip()
-    headers_expected = METADATA_RESPONSE.split("\n")[0]
+    headers_downloaded = path.read_text().splitlines()[0]
+    headers_expected = METADATA_RESPONSE.splitlines()[0]
 
     assert headers_downloaded == headers_expected

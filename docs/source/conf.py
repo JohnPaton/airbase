@@ -8,13 +8,10 @@
 
 # -- Path setup --------------------------------------------------------------
 
-import os
 import sys
 from datetime import date
+from pathlib import Path
 
-# If extensions (or modules to document with autodoc) are in another directory,
-# add these directories to sys.path here. If the directory is relative to the
-# documentation root, use os.path.abspath to make it absolute, like shown here.
 
 if sys.version_info >= (3, 8):
     from importlib import metadata
@@ -24,7 +21,9 @@ else:
 try:
     metadata.version("airbase")
 except metadata.PackageNotFoundError:
-    sys.path.insert(0, os.path.abspath("../.."))
+    # airbase package is not installed, so we add
+    # the project's root directory to `sys.path`
+    sys.path.insert(0, str(Path(__file__).parents[2]))
 
 
 # -- Project information -----------------------------------------------------
