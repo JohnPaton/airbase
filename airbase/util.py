@@ -3,10 +3,10 @@
 import datetime
 
 from .resources import (
-    LINK_LIST_URL_TEMPLATE,
+    ALL_SOURCES,
     CURRENT_YEAR,
     DATE_FMT,
-    ALL_SOURCES,
+    LINK_LIST_URL_TEMPLATE,
 )
 
 

@@ -3,7 +3,6 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-from .resources import E1A_SUMMARY_URL, METADATA_URL, CURRENT_YEAR
 from . import util
 from .fetch import (
     fetch_json,
@@ -12,6 +11,7 @@ from .fetch import (
     fetch_to_file,
     fetch_unique_lines,
 )
+from .resources import CURRENT_YEAR, E1A_SUMMARY_URL, METADATA_URL
 
 
 class AirbaseClient:
