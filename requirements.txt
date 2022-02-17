@@ -1,2 +1,0 @@
-# requirements to use the project
-# libraries should use setup.py for this instead
