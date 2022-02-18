@@ -33,3 +33,12 @@ airbase.fetch module
     :undoc-members:
     :show-inheritance:
 
+
+airbase.summary module
+----------------------
+
+.. automodule:: airbase.summary
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
