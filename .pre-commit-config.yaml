@@ -1,7 +1,12 @@
 repos:
--   repo: https://github.com/psf/black
-    rev: 21.9b0
-    hooks:
-    - id: black
-      args:
-        - -l 80
+- repo: https://github.com/psf/black
+  rev: 21.9b0
+  hooks:
+  - id: black
+    args: [-l, "80"]
+- repo: https://github.com/pre-commit/mirrors-mypy
+  rev: v0.931
+  hooks:
+  - id: mypy
+    exclude: '(docs/.*)|(setup\.py)'
+    additional_dependencies: [types-aiofiles, types-requests]

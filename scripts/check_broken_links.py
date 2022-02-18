@@ -72,7 +72,7 @@ if __name__ == "__main__":
         "--output",
         default="bad-links-{}.txt".format(now),
         help="File to record the broken links in",
-        type=os.path.realpath,
+        type=argparse.FileType(),
     )
     parser.add_argument(
         "-r",

@@ -10,7 +10,7 @@ from typing import AsyncIterator, Awaitable, overload
 
 import aiofiles
 import aiohttp
-from tqdm import tqdm
+from tqdm import tqdm  # type: ignore  # https://github.com/tqdm/tqdm/issues/260
 
 DEFAULT = SimpleNamespace(
     progress=False,
