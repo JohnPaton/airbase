@@ -43,8 +43,7 @@ jobs:
         with:
           extra_args: --all-files
 
-  deploy:
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
+  build-and-deploy:
     needs: [unit-test, integration-test, lint]
     runs-on: ubuntu-latest
     steps:
@@ -57,7 +56,9 @@ jobs:
       - run: |
           python -m build
       - uses: pypa/gh-action-pypi-publish@release/v1
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
         with:
           user: __token__
           password: ${{ secrets.PYPI_TOKEN }}
           skip_existing: true
+
