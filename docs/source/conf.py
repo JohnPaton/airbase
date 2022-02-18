@@ -12,7 +12,6 @@ import sys
 from datetime import date
 from pathlib import Path
 
-
 if sys.version_info >= (3, 8):
     from importlib import metadata
 else:

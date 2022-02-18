@@ -17,9 +17,9 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
       - run: |
-          pip install . -r requirements-test.txt
+          pip install .[test]
       - run: |
-          pytest -lk "not integration" --cov=airbase --cov-report=term
+          pytest -lk "not integration" --cov
 
   integration-test:
     needs: unit-test
@@ -30,7 +30,7 @@ jobs:
         with:
           python-version: 3.x
       - run: |
-          pip install . -r requirements-test.txt
+          pip install .[test]
       - run: |
           pytest -lvk "integration"
 
@@ -53,9 +53,9 @@ jobs:
         with:
           python-version: 3.x
       - run: |
-          pip install setuptools wheel
+          pip install build
       - run: |
-          python setup.py sdist bdist_wheel
+          python -m build
       - uses: pypa/gh-action-pypi-publish@release/v1
         with:
           user: __token__

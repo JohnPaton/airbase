@@ -1,23 +1,96 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "--showlocals"
+testpaths = ["tests"]
+
+[tool.coverage.run]
+source = ["airbase"]
+
+[tool.coverage.report]
+skip_covered = true
+skip_empty = true
+show_missing = true
+
 [tool.black]
 line-length = 80
-target-version = ['py36','py37','py38','py39']
-include = '\.pyi?$'
-exclude = '''
+target-version = ["py37"]
 
-(
-  /(
-      \.eggs         # exclude a few common directories in the
-    | \.git          # root of the project
-    | \.hg
-    | \.mypy_cache
-    | \.tox
-    | \.venv
-    | _build
-    | buck-out
-    | build
-    | dist
-  )/
-  | foo.py           # also separately exclude a file named foo.py in
-                     # the root of the project
-)
-'''
+[tool.isort]
+line_length = 80
+py_version = "37"
+profile = "black"
+src_paths = ["airbase", "tests"]
+extend_skip = ["scripts"]
+
+[tool.mypy]
+warn_unused_configs = true
+warn_unused_ignores = false
+warn_no_return = true
+warn_return_any = true
+warn_unreachable = true
+show_error_codes = true
+pretty = true
+sqlite_cache = true
+exclude = "docs|scripts"
+
+[[tool.mypy.overrides]]
+module = ["tqdm"]
+ignore_missing_imports = true
+
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+envlist = py37, py38, py39, py310, format, lint, docs, integration, pre-commit
+skip_missing_interpreters = True
+isolated_build = True
+
+[testenv]
+commands_pre =
+    python --version
+commands =
+    pytest -ra -q {posargs:--cov -k "not integration"}
+extras = 
+    test
+
+[testenv:integration]
+commands_pre =
+    python --version
+commands =
+    pytest -ra -q {posargs:--cov -k integration}
+extras = 
+    test
+
+[testenv:pre-commit]
+skipsdist=True
+commands =
+    pre-commit run --all-files
+deps =
+    pre-commit
+
+[testenv:format]
+skipsdist=True
+commands =
+    black --check .
+    isort --check .
+extras = 
+    format
+
+[testenv:lint]
+skipsdist=True
+commands =
+    mypy --strict airbase/
+    mypy tests/
+extras =
+    lint
+
+[testenv:docs]
+skipsdist=True
+commands =
+    sphinx-build {posargs:-M html} docs/source docs/build
+extras = 
+    docs
+"""

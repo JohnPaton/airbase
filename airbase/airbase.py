@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 import sys
+from datetime import datetime
 from pathlib import Path
 
-from .resources import E1A_SUMMARY_URL, METADATA_URL, CURRENT_YEAR
 from . import util
 from .fetch import (
     fetch_json,
@@ -12,14 +12,15 @@ from .fetch import (
     fetch_to_file,
     fetch_unique_lines,
 )
+from .resources import CURRENT_YEAR, E1A_SUMMARY_URL, METADATA_URL
 
 
 class AirbaseClient:
-    def __init__(self, connect=True):
+    def __init__(self, connect: bool = True) -> None:
         """
         The central point for requesting Airbase data.
 
-        :param bool connect: (optional) Immediately test network
+        :param connect: (optional) Immediately test network
             connection and download available countries and pollutants.
             If False, `.connect()` must be called before making data
             requests. Default True.
@@ -37,18 +38,20 @@ class AirbaseClient:
             Writing metadata to data/metadata.tsv...
 
         """
-        self._all_countries = None
-        self._all_pollutants = None
-        self._pollutants_per_country = None
+        self._all_countries: list[str] | None = None
+        self._all_pollutants: dict[str, str] | None = None
+        self._pollutants_per_country: dict[
+            str, list[dict[str, str]]
+        ] | None = None
 
         if connect:
             self.connect()
 
-    def connect(self, timeout=None):
+    def connect(self, timeout: float | None = None) -> AirbaseClient:
         """
         Download the available countries and pollutants for validation.
 
-        :param float timeout: Raise ConnectionError if the server takes
+        :param timeout: Raise ConnectionError if the server takes
             longer than `timeout` seconds to respond.
 
         :return: self
@@ -62,16 +65,16 @@ class AirbaseClient:
 
     def request(
         self,
-        country=None,
-        pl=None,
-        shortpl=None,
-        year_from="2013",
-        year_to=CURRENT_YEAR,
-        source="All",
-        update_date=None,
-        verbose=True,
-        preload_csv_links=False,
-    ):
+        country: str | list[str] | None = None,
+        pl: str | list[str] | None = None,
+        shortpl: str | list[str] | None = None,
+        year_from: str = "2013",
+        year_to: str = CURRENT_YEAR,
+        source: str = "All",
+        update_date: str | datetime | None = None,
+        verbose: bool = True,
+        preload_csv_links: bool = False,
+    ) -> AirbaseRequest:
         """
         Initialize an AirbaseRequest for a query.
 
@@ -87,31 +90,31 @@ class AirbaseClient:
 
         See http://discomap.eea.europa.eu/map/fme/AirQualityExport.htm.
 
-        :param str|list country: (optional), 2-letter country code or a
+        :param country: (optional), 2-letter country code or a
             list of them. If a list, data will be requested for each
             country. Will raise ValueError if a country is not available
             on the server. If None, data for all countries will be
             requested. See `self.all_countries`.
-        :param str|list pl: (optional) The pollutant(s) to request data
+        :param pl: (optional) The pollutant(s) to request data
             for. Must be one of the pollutants in `self.all_pollutants`.
             Cannot be used in conjunction with `shortpl`.
-        :param str|list shortpl: (optional). The pollutant code(s) to
+        :param shortpl: (optional). The pollutant code(s) to
             request data for. Will be applied to each country requested.
             Cannot be used in conjunction with `pl`.
-        :param str year_from: (optional) The first year of data. Can
+        :param year_from: (optional) The first year of data. Can
             not be earlier than 2013. Default 2013.
-        :param str year_to: (optional) The last year of data. Can not be
+        :param year_to: (optional) The last year of data. Can not be
             later than the current year. Default <current year>.
-        :param str source: (optional) One of "E1a", "E2a" or "All". E2a
+        :param source: (optional) One of "E1a", "E2a" or "All". E2a
             (UTD) data are only available for years where E1a data have
             not yet been delivered (this will normally be the most
             recent year). Default "All".
-        :param str|datetime update_date: (optional). Format
+        :param update_date: (optional). Format
             "yyyy-mm-dd hh:mm:ss". To be used when only files created or
             updated after a certain date is of interest.
-        :param bool verbose: (optional) print status messages to stderr.
+        :param verbose: (optional) print status messages to stderr.
             Default True.
-        :param bool preload_csv_links: (optional) Request all the csv
+        :param preload_csv_links: (optional) Request all the csv
             download links from the Airbase server at object
             initialization. Default False.
 
@@ -131,11 +134,11 @@ class AirbaseClient:
             Writing metadata to data/metadata.tsv...
         """
         # validation
-        if country:
+        if country is None:
+            country = self.all_countries
+        else:
             country = util.string_safe_list(country)
             self._validate_country(country)
-        else:
-            country = self.all_countries
 
         if pl is not None and shortpl is not None:
             raise ValueError("You cannot specify both 'pl' and 'shortpl'")
@@ -163,14 +166,16 @@ class AirbaseClient:
             preload_csv_links,
         )
 
-    def search_pollutant(self, query, limit=None):
+    def search_pollutant(
+        self, query: str, limit: int | None = None
+    ) -> list[dict[str, str]]:
         """
         Search for a pollutant's `shortpl` number based on its name.
 
-        :param str query: The pollutant to search for.
-        :param int limit: (optional) Max number of results.
+        :param query: The pollutant to search for.
+        :param limit: (optional) Max number of results.
 
-        :return list[dict]: The best pollutant matches. Pollutants
+        :return: The best pollutant matches. Pollutants
             are dicts with keys "pl" and "shortpl".
 
         :example:
@@ -194,7 +199,7 @@ class AirbaseClient:
         ]
 
     @staticmethod
-    def download_metadata(filepath: str | Path, verbose: bool = True):
+    def download_metadata(filepath: str | Path, verbose: bool = True) -> None:
         """
         Download the metadata file.
 
@@ -205,14 +210,14 @@ class AirbaseClient:
         """
         AirbaseRequest(verbose=verbose).download_metadata(filepath)
 
-    def _validate_country(self, country):
+    def _validate_country(self, country: str | list[str]) -> None:
         """
         Ensure that a country or list of countries exists on the server.
 
         Must first download the country list using `.connect()`. Raises
         value error if a country does not exist.
 
-        :param str|list country: The 2-letter country code to validate.
+        :param country: The 2-letter country code to validate.
         """
         country_list = util.string_safe_list(country)
         for c in country_list:
@@ -222,7 +227,7 @@ class AirbaseClient:
                 )
 
     @property
-    def all_countries(self):
+    def all_countries(self) -> list[str]:
         """All countries available from AirBase."""
         if self._all_countries is None:
             raise AttributeError(
@@ -232,7 +237,7 @@ class AirbaseClient:
         return self._all_countries
 
     @property
-    def all_pollutants(self):
+    def all_pollutants(self) -> dict[str, str]:
         """All pollutants available from AirBase."""
         if self._all_pollutants is None:
             raise AttributeError(
@@ -242,7 +247,7 @@ class AirbaseClient:
         return self._all_pollutants
 
     @property
-    def pollutants_per_country(self):
+    def pollutants_per_country(self) -> dict[str, list[dict[str, str]]]:
         """The pollutants available in each country from AirBase."""
         if self._pollutants_per_country is None:
             raise AttributeError(
@@ -255,15 +260,15 @@ class AirbaseClient:
 class AirbaseRequest:
     def __init__(
         self,
-        country=None,
-        shortpl=None,
-        year_from="2013",
-        year_to=CURRENT_YEAR,
-        source="All",
-        update_date=None,
-        verbose=True,
-        preload_csv_links=False,
-    ):
+        country: str | list[str] | None = None,
+        shortpl: str | list[str] | None = None,
+        year_from: str = "2013",
+        year_to: str = CURRENT_YEAR,
+        source: str = "All",
+        update_date: str | datetime | None = None,
+        verbose: bool = True,
+        preload_csv_links: bool = False,
+    ) -> None:
         """
         Handler for Airbase data requests.
 
@@ -273,22 +278,22 @@ class AirbaseRequest:
 
         See http://discomap.eea.europa.eu/map/fme/AirQualityExport.htm.
 
-        :param str|list country: 2-letter country code or a list of
+        :param country: 2-letter country code or a list of
             them. If a list, data will be requested for each country.
-        :param str|list shortpl: (optional). The pollutant code to
+        :param shortpl: (optional). The pollutant code to
             request data for. Will be applied to each country requested.
             If None, all available pollutants will be requested. If a
             pollutant is not available for a country, then we simply
             do not try to download those CSVs.
-        :param str year_from: (optional) The first year of data. Can
+        :param year_from: (optional) The first year of data. Can
             not be earlier than 2013. Default 2013.
-        :param str year_to: (optional) The last year of data. Can not be
+        :param year_to: (optional) The last year of data. Can not be
             later than the current year. Default <current year>.
-        :param str source: (optional) One of "E1a", "E2a" or "All". E2a
+        :param source: (optional) One of "E1a", "E2a" or "All". E2a
             (UTD) data are only available for years where E1a data have
             not yet been delivered (this will normally be the most
             recent year). Default "All".
-        :param str|datetime update_date: (optional). Format
+        :param update_date: (optional). Format
             "yyyy-mm-dd hh:mm:ss". To be used when only files created or
             updated after a certain date is of interest.
         :param bool verbose: (optional) print status messages to stderr.
@@ -317,12 +322,12 @@ class AirbaseRequest:
                     )
                 )
 
-        self._csv_links = []
+        self._csv_links: list[str] = []
 
         if preload_csv_links:
             self._get_csv_links()
 
-    def _get_csv_links(self, force=False):
+    def _get_csv_links(self, force: bool = False) -> None:
         """
         Request all relevant CSV links from the server.
 
@@ -330,13 +335,11 @@ class AirbaseRequest:
         This action will only be performed once, unless `force` is set
         to True.
 
-        :param bool force: Re-download all of the links, even if they
+        :param force: Re-download all of the links, even if they
             are already known
-
-        :return: self
         """
         if self._csv_links and not force:
-            return self._csv_links
+            return
 
         if self.verbose:
             print("Generating CSV download links...", file=sys.stderr)
@@ -359,14 +362,12 @@ class AirbaseRequest:
                 file=sys.stderr,
             )
 
-        return self
-
     def download_to_directory(
         self,
         dir: str | Path,
         skip_existing: bool = True,
         raise_for_status: bool = True,
-    ):
+    ) -> AirbaseRequest:
         """
         Download into a directory, preserving original file structure.
 
@@ -402,7 +403,7 @@ class AirbaseRequest:
 
     def download_to_file(
         self, filepath: str | Path, raise_for_status: bool = True
-    ):
+    ) -> AirbaseRequest:
         """
         Download data into one large CSV.
 
@@ -435,7 +436,7 @@ class AirbaseRequest:
 
         return self
 
-    def download_metadata(self, filepath: str | Path):
+    def download_metadata(self, filepath: str | Path) -> None:
         """
         Download the metadata TSV file.
 

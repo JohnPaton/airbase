@@ -1,3 +1,0 @@
-# requirements for developing the package
--r requirements-test.txt
-black==21.9b0
