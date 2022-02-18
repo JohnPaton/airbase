@@ -43,8 +43,6 @@ class AirbaseClient:
         self._pollutants_per_country: dict[
             str, list[dict[str, str]]
         ] | None = None
-        self._cities_per_country = None
-        self._current_request: AirbaseRequest | None = None
 
         if connect:
             self.connect()
