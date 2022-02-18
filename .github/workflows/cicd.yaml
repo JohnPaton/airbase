@@ -3,6 +3,7 @@ on:
   push:
   schedule:
     - cron:  '0 12 1 * *'  # On the first day of the month
+  pull_request:
 
 jobs:
   unit-test:
