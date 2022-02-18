@@ -10,3 +10,8 @@ repos:
   - id: mypy
     exclude: '(docs/.*)|(setup\.py)'
     additional_dependencies: [types-aiofiles, types-requests]
+- repo: https://github.com/pycqa/isort
+  rev: 5.10.1
+  hooks:
+  - id: isort
+    name: isort (python)
