@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import sys
 from datetime import datetime
+from functools import lru_cache
 from pathlib import Path
 
-from . import util
 from .fetch import (
     fetch_json,
     fetch_text,
@@ -13,6 +13,8 @@ from .fetch import (
     fetch_unique_lines,
 )
 from .resources import CURRENT_YEAR, E1A_SUMMARY_URL, METADATA_URL
+from .summary import Summary
+from .util import link_list_url, string_safe_list
 
 
 class AirbaseClient:
@@ -38,12 +40,7 @@ class AirbaseClient:
             Writing metadata to data/metadata.tsv...
 
         """
-        self._all_countries: list[str] | None = None
-        self._all_pollutants: dict[str, str] | None = None
-        self._pollutants_per_country: dict[
-            str, list[dict[str, str]]
-        ] | None = None
-
+        self._db: Summary | None = None
         if connect:
             self.connect()
 
@@ -57,9 +54,7 @@ class AirbaseClient:
         :return: self
         """
         summary = fetch_json(E1A_SUMMARY_URL, timeout=timeout)
-        self._all_countries = util.countries_from_summary(summary)
-        self._all_pollutants = util.pollutants_from_summary(summary)
-        self._pollutants_per_country = util.pollutants_per_country(summary)
+        self._db = Summary(summary)
 
         return self
 
@@ -137,7 +132,7 @@ class AirbaseClient:
         if country is None:
             country = self.all_countries
         else:
-            country = util.string_safe_list(country)
+            country = string_safe_list(country)
             self._validate_country(country)
 
         if pl is not None and shortpl is not None:
@@ -145,15 +140,13 @@ class AirbaseClient:
 
         # construct shortpl form pl if applicable
         if pl is not None:
-            pl_list = util.string_safe_list(pl)
-            shortpl = []
-            for p in pl_list:
-                try:
-                    shortpl.append(self.all_pollutants[p])
-                except KeyError:
-                    raise ValueError(
-                        "'{}' is not a valid pollutant name".format(p)
-                    )
+            pl_list = string_safe_list(pl)
+            try:
+                shortpl = [self.all_pollutants[p] for p in pl_list]
+            except KeyError as e:
+                raise ValueError(
+                    f"'{e.args[0]}' is not a valid pollutant name"
+                ) from e
 
         return AirbaseRequest(
             country,
@@ -183,20 +176,14 @@ class AirbaseClient:
             >>> [{"pl": "O3", "shortpl": "7"}, {"pl": "NO3", "shortpl": "46"}]
 
         """
-        names = list(self.all_pollutants.keys())
-        # substring search
-        results = [n for n in names if query.lower() in n.lower()]
+        if self._db is None:
+            raise AttributeError(
+                "Pollutant list has not yet been downloaded. "
+                "Please .connect() first."
+            )
 
-        # shortest results first
-        results.sort(key=lambda x: len(x))
-
-        if limit:
-            results = results[:limit]
-
-        return [
-            {"pl": name, "shortpl": self.all_pollutants[name]}
-            for name in results
-        ]
+        results = self._db.search_pollutant(query, limit=limit)
+        return [dict(pl=pl, shortpl=str(id)) for pl, id in results.items()]
 
     @staticmethod
     def download_metadata(filepath: str | Path, verbose: bool = True) -> None:
@@ -219,42 +206,51 @@ class AirbaseClient:
 
         :param country: The 2-letter country code to validate.
         """
-        country_list = util.string_safe_list(country)
+        country_list = string_safe_list(country)
         for c in country_list:
             if c not in self.all_countries:
                 raise ValueError(
-                    "'{}' is not an available 2-letter country code.".format(c)
+                    f"'{c}' is not an available 2-letter country code."
                 )
 
-    @property
+    @property  # type:ignore[misc]
+    @lru_cache(maxsize=1)
     def all_countries(self) -> list[str]:
         """All countries available from AirBase."""
-        if self._all_countries is None:
+        if self._db is None:
             raise AttributeError(
                 "Country list has not yet been downloaded. "
                 "Please .connect() first."
             )
-        return self._all_countries
+        return self._db.countries()
 
-    @property
+    @property  # type:ignore[misc]
+    @lru_cache(maxsize=1)
     def all_pollutants(self) -> dict[str, str]:
         """All pollutants available from AirBase."""
-        if self._all_pollutants is None:
+        if self._db is None:
             raise AttributeError(
                 "Pollutant list has not yet been downloaded. "
                 "Please .connect() first."
             )
-        return self._all_pollutants
+        return self._db.pollutants()
 
-    @property
+    @property  # type:ignore[misc]
+    @lru_cache(maxsize=1)
     def pollutants_per_country(self) -> dict[str, list[dict[str, str]]]:
         """The pollutants available in each country from AirBase."""
-        if self._pollutants_per_country is None:
+        if self._db is None:
             raise AttributeError(
                 "Country-Pollutant map has not yet been downloaded. "
                 "Please .connect() first."
             )
-        return self._pollutants_per_country
+
+        output: dict[str, list[dict[str, str]]] = dict()
+        for country, pollutants in self._db.pollutants_per_country().items():
+            output[country] = [
+                dict(pl=pl, shortpl=str(id)) for pl, id in pollutants.items()
+            ]
+        return output
 
 
 class AirbaseRequest:
@@ -310,16 +306,14 @@ class AirbaseRequest:
         self.update_date = update_date
         self.verbose = verbose
 
-        self._country_list = util.string_safe_list(country)
-        self._shortpl_list = util.string_safe_list(shortpl)
+        self._country_list = string_safe_list(country)
+        self._shortpl_list = string_safe_list(shortpl)
         self._download_links = []
 
         for c in self._country_list:
             for p in self._shortpl_list:
                 self._download_links.append(
-                    util.link_list_url(
-                        c, p, year_from, year_to, source, update_date
-                    )
+                    link_list_url(c, p, year_from, year_to, source, update_date)
                 )
 
         self._csv_links: list[str] = []
