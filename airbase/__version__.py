@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import sys
 
 if sys.version_info >= (3, 8):
@@ -5,6 +7,7 @@ if sys.version_info >= (3, 8):
 else:
     import importlib_metadata as metadata
 
+__version__: str | None
 try:
     __version__ = metadata.version("airbase")
 except metadata.PackageNotFoundError:
