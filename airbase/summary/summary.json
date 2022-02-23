@@ -1,0 +1,1521 @@
+[
+{"ct" : "AD", "pl" : "CO", "shortpl" : "10"}
+,{"ct" : "AD", "pl" : "NO", "shortpl" : "38"}
+,{"ct" : "AD", "pl" : "NO2", "shortpl" : "8"}
+,{"ct" : "AD", "pl" : "NOX as NO2", "shortpl" : "9"}
+,{"ct" : "AD", "pl" : "O3", "shortpl" : "7"}
+,{"ct" : "AD", "pl" : "PM10", "shortpl" : "5"}
+,{"ct" : "AD", "pl" : "SO2", "shortpl" : "1"}
+,{"ct" : "AL", "pl" : "C6H6", "shortpl" : "20"}
+,{"ct" : "AL", "pl" : "CO", "shortpl" : "10"}
+,{"ct" : "AL", "pl" : "NO2", "shortpl" : "8"}
+,{"ct" : "AL", "pl" : "NOX as NO2", "shortpl" : "9"}
+,{"ct" : "AL", "pl" : "O3", "shortpl" : "7"}
+,{"ct" : "AL", "pl" : "PM10", "shortpl" : "5"}
+,{"ct" : "AL", "pl" : "SO2", "shortpl" : "1"}
+,{"ct" : "AT", "pl" : "(CH3)2-CH-CH2-CH2-CH3", "shortpl" : "316"}
+,{"ct" : "AT", "pl" : "(CH3)3-C-CH2-CH-(CH3)2", "shortpl" : "449"}
+,{"ct" : "AT", "pl" : "1,2,3-C6H3(CH3)3", "shortpl" : "6012"}
+,{"ct" : "AT", "pl" : "1,2,4-C6H3(CH3)3", "shortpl" : "6011"}
+,{"ct" : "AT", "pl" : "1,3,5-C6H3(CH3)3", "shortpl" : "6013"}
+,{"ct" : "AT", "pl" : "As", "shortpl" : "7018"}
+,{"ct" : "AT", "pl" : "As in PM10", "shortpl" : "5018"}
+,{"ct" : "AT", "pl" : "BaP", "shortpl" : "7029"}
+,{"ct" : "AT", "pl" : "BaP in PM10", "shortpl" : "5029"}
+,{"ct" : "AT", "pl" : "Benzo(a)anthracene", "shortpl" : "611"}
+,{"ct" : "AT", "pl" : "Benzo(a)anthracene in PM10", "shortpl" : "5610"}
+,{"ct" : "AT", "pl" : "Benzo(b)fluoranthene", "shortpl" : "618"}
+,{"ct" : "AT", "pl" : "Benzo(b)fluoranthene in PM10", "shortpl" : "5617"}
+,{"ct" : "AT", "pl" : "Benzo(j)fluoranthene", "shortpl" : "760"}
+,{"ct" : "AT", "pl" : "Benzo(j)fluoranthene in PM10", "shortpl" : "5759"}
+,{"ct" : "AT", "pl" : "Benzo(k)fluoranthene", "shortpl" : "627"}
+,{"ct" : "AT", "pl" : "Benzo(k)fluoranthene in PM10", "shortpl" : "5626"}
+,{"ct" : "AT", "pl" : "C6H14", "shortpl" : "443"}
+,{"ct" : "AT", "pl" : "C6H5-C2H5", "shortpl" : "431"}
+,{"ct" : "AT", "pl" : "C6H5-CH3", "shortpl" : "21"}
+,{"ct" : "AT", "pl" : "C6H6", "shortpl" : "20"}
+,{"ct" : "AT", "pl" : "C7H16", "shortpl" : "441"}
+,{"ct" : "AT", "pl" : "C8H18", "shortpl" : "475"}
+,{"ct" : "AT", "pl" : "Ca2+ in PM2.5", "shortpl" : "1629"}
+,{"ct" : "AT", "pl" : "Cd", "shortpl" : "7014"}
+,{"ct" : "AT", "pl" : "Cd in PM10", "shortpl" : "5014"}
+,{"ct" : "AT", "pl" : "Cl- in PM2.5", "shortpl" : "1631"}
+,{"ct" : "AT", "pl" : "CO", "shortpl" : "10"}
+,{"ct" : "AT", "pl" : "Dibenzo(ah)anthracene", "shortpl" : "7419"}
+,{"ct" : "AT", "pl" : "Dibenzo(ah)anthracene in PM10", "shortpl" : "5419"}
+,{"ct" : "AT", "pl" : "EC in PM2.5", "shortpl" : "1771"}
+,{"ct" : "AT", "pl" : "H2C=CH-CH2-CH2-CH3", "shortpl" : "6008"}
+,{"ct" : "AT", "pl" : "H3C-(CH2)3-CH3", "shortpl" : "486"}
+,{"ct" : "AT", "pl" : "H3C-CH2-CH(CH3)2", "shortpl" : "450"}
+,{"ct" : "AT", "pl" : "H3C-HC=CH-CH2-CH3", "shortpl" : "6009"}
+,{"ct" : "AT", "pl" : "Hg", "shortpl" : "7013"}
+,{"ct" : "AT", "pl" : "Indeno-(1,2,3-cd)pyrene", "shortpl" : "656"}
+,{"ct" : "AT", "pl" : "Indeno-(1,2,3-cd)pyrene in PM", "shortpl" : "5655"}
+,{"ct" : "AT", "pl" : "K+ in PM2.5", "shortpl" : "1657"}
+,{"ct" : "AT", "pl" : "m,p-C6H4(CH3)2", "shortpl" : "464"}
+,{"ct" : "AT", "pl" : "Mg2+ in PM2.5", "shortpl" : "1659"}
+,{"ct" : "AT", "pl" : "Na+  in PM2.5", "shortpl" : "1668"}
+,{"ct" : "AT", "pl" : "NH4+ in PM2.5", "shortpl" : "1045"}
+,{"ct" : "AT", "pl" : "Ni", "shortpl" : "7015"}
+,{"ct" : "AT", "pl" : "Ni in PM10", "shortpl" : "5015"}
+,{"ct" : "AT", "pl" : "NO", "shortpl" : "38"}
+,{"ct" : "AT", "pl" : "NO2", "shortpl" : "8"}
+,{"ct" : "AT", "pl" : "NO3- in PM2.5", "shortpl" : "1046"}
+,{"ct" : "AT", "pl" : "NOX as NO2", "shortpl" : "9"}
+,{"ct" : "AT", "pl" : "O3", "shortpl" : "7"}
+,{"ct" : "AT", "pl" : "OC in PM2.5", "shortpl" : "1772"}
+,{"ct" : "AT", "pl" : "o-C6H4-(CH3)2", "shortpl" : "482"}
+,{"ct" : "AT", "pl" : "Pb", "shortpl" : "7012"}
+,{"ct" : "AT", "pl" : "Pb in PM10", "shortpl" : "5012"}
+,{"ct" : "AT", "pl" : "PM10", "shortpl" : "5"}
+,{"ct" : "AT", "pl" : "PM2.5", "shortpl" : "6001"}
+,{"ct" : "AT", "pl" : "SO2", "shortpl" : "1"}
+,{"ct" : "AT", "pl" : "SO42- in PM2.5", "shortpl" : "1047"}
+,{"ct" : "BA", "pl" : "CO", "shortpl" : "10"}
+,{"ct" : "BA", "pl" : "H2S", "shortpl" : "11"}
+,{"ct" : "BA", "pl" : "NO2", "shortpl" : "8"}
+,{"ct" : "BA", "pl" : "O3", "shortpl" : "7"}
+,{"ct" : "BA", "pl" : "PM10", "shortpl" : "5"}
+,{"ct" : "BA", "pl" : "PM2.5", "shortpl" : "6001"}
+,{"ct" : "BA", "pl" : "SO2", "shortpl" : "1"}
+,{"ct" : "BE", "pl" : "(CH3)2-CH-CH2-CH2-CH3", "shortpl" : "316"}
+,{"ct" : "BE", "pl" : "(CH3)3-C-CH2-CH-(CH3)2", "shortpl" : "449"}
+,{"ct" : "BE", "pl" : "1,2,4-C6H3(CH3)3", "shortpl" : "6011"}
+,{"ct" : "BE", "pl" : "1,2-dichloroethane (air)", "shortpl" : "461"}
+,{"ct" : "BE", "pl" : "1,3,5-C6H3(CH3)3", "shortpl" : "6013"}
+,{"ct" : "BE", "pl" : "Acenaphthene", "shortpl" : "351"}
+,{"ct" : "BE", "pl" : "Acenaphtylene", "shortpl" : "352"}
+,{"ct" : "BE", "pl" : "Anthracene", "shortpl" : "606"}
+,{"ct" : "BE", "pl" : "As", "shortpl" : "7018"}
+,{"ct" : "BE", "pl" : "As in PM10", "shortpl" : "5018"}
+,{"ct" : "BE", "pl" : "As in TSP", "shortpl" : "3018"}
+,{"ct" : "BE", "pl" : "BaP", "shortpl" : "6015"}
+,{"ct" : "BE", "pl" : "BaP in PM10", "shortpl" : "5029"}
+,{"ct" : "BE", "pl" : "Benzo(a)anthracene", "shortpl" : "609"}
+,{"ct" : "BE", "pl" : "Benzo(b)fluoranthene", "shortpl" : "616"}
+,{"ct" : "BE", "pl" : "Benzo(b+j+k)fluoranthenes", "shortpl" : "380"}
+,{"ct" : "BE", "pl" : "Benzo(e)pyrene", "shortpl" : "381"}
+,{"ct" : "BE", "pl" : "Benzo(ghi)perylene", "shortpl" : "622"}
+,{"ct" : "BE", "pl" : "Benzo(j)fluoranthene", "shortpl" : "762"}
+,{"ct" : "BE", "pl" : "Benzo(k)fluoranthene", "shortpl" : "625"}
+,{"ct" : "BE", "pl" : "C6H12", "shortpl" : "6016"}
+,{"ct" : "BE", "pl" : "C6H14", "shortpl" : "443"}
+,{"ct" : "BE", "pl" : "C6H5-C2H5", "shortpl" : "431"}
+,{"ct" : "BE", "pl" : "C6H5-CH3", "shortpl" : "21"}
+,{"ct" : "BE", "pl" : "C6H6", "shortpl" : "20"}
+,{"ct" : "BE", "pl" : "C7H16", "shortpl" : "441"}
+,{"ct" : "BE", "pl" : "C8H18", "shortpl" : "475"}
+,{"ct" : "BE", "pl" : "C9H12", "shortpl" : "434"}
+,{"ct" : "BE", "pl" : "C9H20", "shortpl" : "454"}
+,{"ct" : "BE", "pl" : "Cd", "shortpl" : "7014"}
+,{"ct" : "BE", "pl" : "Cd in PM10", "shortpl" : "5014"}
+,{"ct" : "BE", "pl" : "Cd in TSP", "shortpl" : "3014"}
+,{"ct" : "BE", "pl" : "CH2=CH-C(CH3)=CH2", "shortpl" : "451"}
+,{"ct" : "BE", "pl" : "CH2=CH-CH=CH2", "shortpl" : "24"}
+,{"ct" : "BE", "pl" : "Chlorobenzene (air)", "shortpl" : "457"}
+,{"ct" : "BE", "pl" : "Chrysene", "shortpl" : "4406"}
+,{"ct" : "BE", "pl" : "cis-H3C-CH=CH-CH3", "shortpl" : "6007"}
+,{"ct" : "BE", "pl" : "CO", "shortpl" : "10"}
+,{"ct" : "BE", "pl" : "Dibenzo(ah)anthracene", "shortpl" : "763"}
+,{"ct" : "BE", "pl" : "Fluoranthene", "shortpl" : "643"}
+,{"ct" : "BE", "pl" : "Fluorene", "shortpl" : "435"}
+,{"ct" : "BE", "pl" : "H2C=CH-CH2-CH2-CH3", "shortpl" : "6008"}
+,{"ct" : "BE", "pl" : "H2C=CH-CH2-CH3", "shortpl" : "6005"}
+,{"ct" : "BE", "pl" : "H3C-(CH2)3-CH3", "shortpl" : "486"}
+,{"ct" : "BE", "pl" : "H3C-CH(CH3)2", "shortpl" : "447"}
+,{"ct" : "BE", "pl" : "H3C-CH2-CH(CH3)2", "shortpl" : "450"}
+,{"ct" : "BE", "pl" : "H3C-CH2-CH2-CH3", "shortpl" : "394"}
+,{"ct" : "BE", "pl" : "Hg", "shortpl" : "7013"}
+,{"ct" : "BE", "pl" : "Hg0", "shortpl" : "4013"}
+,{"ct" : "BE", "pl" : "Indeno-(1,2,3-cd)pyrene", "shortpl" : "654"}
+,{"ct" : "BE", "pl" : "m,p-C6H4(CH3)2", "shortpl" : "464"}
+,{"ct" : "BE", "pl" : "Naphtalene", "shortpl" : "465"}
+,{"ct" : "BE", "pl" : "Ni", "shortpl" : "7015"}
+,{"ct" : "BE", "pl" : "Ni in PM10", "shortpl" : "5015"}
+,{"ct" : "BE", "pl" : "Ni in TSP", "shortpl" : "3015"}
+,{"ct" : "BE", "pl" : "NO2", "shortpl" : "8"}
+,{"ct" : "BE", "pl" : "NOX as NO2", "shortpl" : "9"}
+,{"ct" : "BE", "pl" : "O3", "shortpl" : "7"}
+,{"ct" : "BE", "pl" : "o-C6H4-(CH3)2", "shortpl" : "482"}
+,{"ct" : "BE", "pl" : "Pb in PM10", "shortpl" : "5012"}
+,{"ct" : "BE", "pl" : "Pb in TSP", "shortpl" : "3012"}
+,{"ct" : "BE", "pl" : "Phenanthrene", "shortpl" : "712"}
+,{"ct" : "BE", "pl" : "PM10", "shortpl" : "5"}
+,{"ct" : "BE", "pl" : "PM2.5", "shortpl" : "6001"}
+,{"ct" : "BE", "pl" : "Pyrene", "shortpl" : "715"}
+,{"ct" : "BE", "pl" : "SO2", "shortpl" : "1"}
+,{"ct" : "BE", "pl" : "trans-H3C-CH=CH-CH3", "shortpl" : "6006"}
+,{"ct" : "BE", "pl" : "trans-H3C-HC=CH-CH2-CH3", "shortpl" : "82"}
+,{"ct" : "BG", "pl" : "1,2,3-C6H3(CH3)3", "shortpl" : "6012"}
+,{"ct" : "BG", "pl" : "1,2,4-C6H3(CH3)3", "shortpl" : "6011"}
+,{"ct" : "BG", "pl" : "1,3,5-C6H3(CH3)3", "shortpl" : "6013"}
+,{"ct" : "BG", "pl" : "As in PM10", "shortpl" : "5018"}
+,{"ct" : "BG", "pl" : "BaP in PM10", "shortpl" : "5029"}
+,{"ct" : "BG", "pl" : "C6H5-CH3", "shortpl" : "21"}
+,{"ct" : "BG", "pl" : "C6H6", "shortpl" : "20"}
+,{"ct" : "BG", "pl" : "Cd in PM10", "shortpl" : "5014"}
+,{"ct" : "BG", "pl" : "CO", "shortpl" : "10"}
+,{"ct" : "BG", "pl" : "H2S", "shortpl" : "11"}
+,{"ct" : "BG", "pl" : "m,p-C6H4(CH3)2", "shortpl" : "464"}
+,{"ct" : "BG", "pl" : "NH3", "shortpl" : "35"}
+,{"ct" : "BG", "pl" : "Ni in PM10", "shortpl" : "5015"}
+,{"ct" : "BG", "pl" : "NO", "shortpl" : "38"}
+,{"ct" : "BG", "pl" : "NO2", "shortpl" : "8"}
+,{"ct" : "BG", "pl" : "NOX as NO2", "shortpl" : "9"}
+,{"ct" : "BG", "pl" : "O3", "shortpl" : "7"}
+,{"ct" : "BG", "pl" : "Pb in PM10", "shortpl" : "5012"}
+,{"ct" : "BG", "pl" : "PM10", "shortpl" : "5"}
+,{"ct" : "BG", "pl" : "PM2.5", "shortpl" : "6001"}
+,{"ct" : "BG", "pl" : "SO2", "shortpl" : "1"}
+,{"ct" : "BG", "pl" : "THC (NM)", "shortpl" : "32"}
+,{"ct" : "BG", "pl" : "T-VOC", "shortpl" : "33"}
+,{"ct" : "CH", "pl" : "As in PM10", "shortpl" : "5018"}
+,{"ct" : "CH", "pl" : "BaP in PM10", "shortpl" : "5029"}
+,{"ct" : "CH", "pl" : "C6H5-CH3", "shortpl" : "21"}
+,{"ct" : "CH", "pl" : "C6H6", "shortpl" : "20"}
+,{"ct" : "CH", "pl" : "Cd in PM10", "shortpl" : "5014"}
+,{"ct" : "CH", "pl" : "CO", "shortpl" : "10"}
+,{"ct" : "CH", "pl" : "Ni in PM10", "shortpl" : "5015"}
+,{"ct" : "CH", "pl" : "NO", "shortpl" : "38"}
+,{"ct" : "CH", "pl" : "NO2", "shortpl" : "8"}
+,{"ct" : "CH", "pl" : "NOX as NO2", "shortpl" : "9"}
+,{"ct" : "CH", "pl" : "O3", "shortpl" : "7"}
+,{"ct" : "CH", "pl" : "Pb in PM10", "shortpl" : "5012"}
+,{"ct" : "CH", "pl" : "PM10", "shortpl" : "5"}
+,{"ct" : "CH", "pl" : "PM2.5", "shortpl" : "6001"}
+,{"ct" : "CH", "pl" : "SO2", "shortpl" : "1"}
+,{"ct" : "CH", "pl" : "THC (NM)", "shortpl" : "32"}
+,{"ct" : "CY", "pl" : "Al", "shortpl" : "604"}
+,{"ct" : "CY", "pl" : "As", "shortpl" : "18"}
+,{"ct" : "CY", "pl" : "As in PM10", "shortpl" : "5018"}
+,{"ct" : "CY", "pl" : "BaP in PM10", "shortpl" : "5029"}
+,{"ct" : "CY", "pl" : "Benzo(a)anthracene in PM10", "shortpl" : "5610"}
+,{"ct" : "CY", "pl" : "Benzo(b)fluoranthene in PM10", "shortpl" : "5617"}
+,{"ct" : "CY", "pl" : "Benzo(ghi)perylene in PM10", "shortpl" : "5623"}
+,{"ct" : "CY", "pl" : "Benzo(k)fluoranthene in PM10", "shortpl" : "5626"}
+,{"ct" : "CY", "pl" : "C6H6", "shortpl" : "20"}
+,{"ct" : "CY", "pl" : "Ca2+ in PM2.5", "shortpl" : "1629"}
+,{"ct" : "CY", "pl" : "Cd", "shortpl" : "14"}
+,{"ct" : "CY", "pl" : "Cd in PM10", "shortpl" : "5014"}
+,{"ct" : "CY", "pl" : "Cl- in PM2.5", "shortpl" : "1631"}
+,{"ct" : "CY", "pl" : "CO", "shortpl" : "10"}
+,{"ct" : "CY", "pl" : "Cr in PM10", "shortpl" : "5016"}
+,{"ct" : "CY", "pl" : "Cu in PM10", "shortpl" : "5073"}
+,{"ct" : "CY", "pl" : "Dibenzo(ah)anthracene in PM10", "shortpl" : "5763"}
+,{"ct" : "CY", "pl" : "EC in PM2.5", "shortpl" : "1771"}
+,{"ct" : "CY", "pl" : "Fe in PM10", "shortpl" : "5065"}
+,{"ct" : "CY", "pl" : "Hg in PM10", "shortpl" : "5013"}
+,{"ct" : "CY", "pl" : "Indeno-(1,2,3-cd)pyrene in PM", "shortpl" : "5654"}
+,{"ct" : "CY", "pl" : "K+ in PM2.5", "shortpl" : "1657"}
+,{"ct" : "CY", "pl" : "Mg2+ in PM2.5", "shortpl" : "1659"}
+,{"ct" : "CY", "pl" : "Mn in PM10", "shortpl" : "5017"}
+,{"ct" : "CY", "pl" : "Na+  in PM2.5", "shortpl" : "1668"}
+,{"ct" : "CY", "pl" : "NH4+ in PM2.5", "shortpl" : "1045"}
+,{"ct" : "CY", "pl" : "Ni", "shortpl" : "15"}
+,{"ct" : "CY", "pl" : "Ni in PM10", "shortpl" : "5015"}
+,{"ct" : "CY", "pl" : "NO2", "shortpl" : "8"}
+,{"ct" : "CY", "pl" : "NO3- in PM2.5", "shortpl" : "1046"}
+,{"ct" : "CY", "pl" : "NOX as NO2", "shortpl" : "9"}
+,{"ct" : "CY", "pl" : "O3", "shortpl" : "7"}
+,{"ct" : "CY", "pl" : "OC in PM2.5", "shortpl" : "1772"}
+,{"ct" : "CY", "pl" : "Pb", "shortpl" : "12"}
+,{"ct" : "CY", "pl" : "Pb in PM10", "shortpl" : "5012"}
+,{"ct" : "CY", "pl" : "PM10", "shortpl" : "5"}
+,{"ct" : "CY", "pl" : "PM2.5", "shortpl" : "6001"}
+,{"ct" : "CY", "pl" : "SO2", "shortpl" : "1"}
+,{"ct" : "CY", "pl" : "SO42- in PM2.5", "shortpl" : "1047"}
+,{"ct" : "CY", "pl" : "V in PM10", "shortpl" : "5049"}
+,{"ct" : "CY", "pl" : "Zn in PM10", "shortpl" : "5063"}
+,{"ct" : "CZ", "pl" : "As", "shortpl" : "18"}
+,{"ct" : "CZ", "pl" : "As in PM10", "shortpl" : "5018"}
+,{"ct" : "CZ", "pl" : "BaP", "shortpl" : "6015"}
+,{"ct" : "CZ", "pl" : "BaP in PM10", "shortpl" : "5029"}
+,{"ct" : "CZ", "pl" : "C6H6", "shortpl" : "20"}
+,{"ct" : "CZ", "pl" : "Cd", "shortpl" : "14"}
+,{"ct" : "CZ", "pl" : "Cd in PM10", "shortpl" : "5014"}
+,{"ct" : "CZ", "pl" : "CO", "shortpl" : "10"}
+,{"ct" : "CZ", "pl" : "Ni", "shortpl" : "15"}
+,{"ct" : "CZ", "pl" : "Ni in PM10", "shortpl" : "5015"}
+,{"ct" : "CZ", "pl" : "NO", "shortpl" : "38"}
+,{"ct" : "CZ", "pl" : "NO2", "shortpl" : "8"}
+,{"ct" : "CZ", "pl" : "NOX as NO2", "shortpl" : "9"}
+,{"ct" : "CZ", "pl" : "O3", "shortpl" : "7"}
+,{"ct" : "CZ", "pl" : "Pb", "shortpl" : "12"}
+,{"ct" : "CZ", "pl" : "Pb in PM10", "shortpl" : "5012"}
+,{"ct" : "CZ", "pl" : "PM10", "shortpl" : "5"}
+,{"ct" : "CZ", "pl" : "PM2.5", "shortpl" : "6001"}
+,{"ct" : "CZ", "pl" : "SO2", "shortpl" : "1"}
+,{"ct" : "DE", "pl" : "(CH3)2-CH-CH2-CH2-CH3", "shortpl" : "316"}
+,{"ct" : "DE", "pl" : "As", "shortpl" : "7018"}
+,{"ct" : "DE", "pl" : "As in PM10", "shortpl" : "5018"}
+,{"ct" : "DE", "pl" : "As in PM2.5", "shortpl" : "1018"}
+,{"ct" : "DE", "pl" : "BaP", "shortpl" : "7029"}
+,{"ct" : "DE", "pl" : "BaP in PM10", "shortpl" : "5029"}
+,{"ct" : "DE", "pl" : "BaP in PM2.5", "shortpl" : "1029"}
+,{"ct" : "DE", "pl" : "Benzo(a)anthracene", "shortpl" : "611"}
+,{"ct" : "DE", "pl" : "Benzo(a)anthracene in PM10", "shortpl" : "5610"}
+,{"ct" : "DE", "pl" : "Benzo(a)anthracene in PM2.5", "shortpl" : "1610"}
+,{"ct" : "DE", "pl" : "Benzo(b)fluoranthene", "shortpl" : "618"}
+,{"ct" : "DE", "pl" : "Benzo(b)fluoranthene in PM10", "shortpl" : "5617"}
+,{"ct" : "DE", "pl" : "Benzo(b)fluoranthene in PM2.5", "shortpl" : "1617"}
+,{"ct" : "DE", "pl" : "Benzo(b,j)fluorantheneinPM10", "shortpl" : "5480"}
+,{"ct" : "DE", "pl" : "Benzo(b,j,k)fluoranthene", "shortpl" : "7380"}
+,{"ct" : "DE", "pl" : "Benzo(b,j,k)fluorantheneInPM1", "shortpl" : "5380"}
+,{"ct" : "DE", "pl" : "Benzo(j)fluoranthene", "shortpl" : "760"}
+,{"ct" : "DE", "pl" : "Benzo(j)fluoranthene in PM10", "shortpl" : "5759"}
+,{"ct" : "DE", "pl" : "Benzo(j)fluoranthene in PM2.5", "shortpl" : "1759"}
+,{"ct" : "DE", "pl" : "Benzo(k)fluoranthene", "shortpl" : "627"}
+,{"ct" : "DE", "pl" : "Benzo(k)fluoranthene in PM10", "shortpl" : "5626"}
+,{"ct" : "DE", "pl" : "Benzo(k)fluoranthene in PM2.5", "shortpl" : "1626"}
+,{"ct" : "DE", "pl" : "BS", "shortpl" : "6"}
+,{"ct" : "DE", "pl" : "C2H6", "shortpl" : "428"}
+,{"ct" : "DE", "pl" : "C6H14", "shortpl" : "443"}
+,{"ct" : "DE", "pl" : "C6H5-C2H5", "shortpl" : "431"}
+,{"ct" : "DE", "pl" : "C6H5-CH3", "shortpl" : "21"}
+,{"ct" : "DE", "pl" : "C6H6", "shortpl" : "20"}
+,{"ct" : "DE", "pl" : "C7H16", "shortpl" : "441"}
+,{"ct" : "DE", "pl" : "Ca2+ in PM10", "shortpl" : "5629"}
+,{"ct" : "DE", "pl" : "Ca2+ in PM2.5", "shortpl" : "1629"}
+,{"ct" : "DE", "pl" : "Cd", "shortpl" : "7014"}
+,{"ct" : "DE", "pl" : "Cd in PM10", "shortpl" : "5014"}
+,{"ct" : "DE", "pl" : "Cd in PM2.5", "shortpl" : "1014"}
+,{"ct" : "DE", "pl" : "CH2=CH-C(CH3)=CH2", "shortpl" : "451"}
+,{"ct" : "DE", "pl" : "CH2=CH-CH=CH2", "shortpl" : "24"}
+,{"ct" : "DE", "pl" : "CH2=CH-CH3", "shortpl" : "505"}
+,{"ct" : "DE", "pl" : "CH4", "shortpl" : "41"}
+,{"ct" : "DE", "pl" : "cis-H3C-CH=CH-CH3", "shortpl" : "6007"}
+,{"ct" : "DE", "pl" : "Cl- in PM10", "shortpl" : "5631"}
+,{"ct" : "DE", "pl" : "Cl- in PM2.5", "shortpl" : "1631"}
+,{"ct" : "DE", "pl" : "CO", "shortpl" : "10"}
+,{"ct" : "DE", "pl" : "Co in PM10", "shortpl" : "5064"}
+,{"ct" : "DE", "pl" : "CO2", "shortpl" : "71"}
+,{"ct" : "DE", "pl" : "Cu in PM10", "shortpl" : "5073"}
+,{"ct" : "DE", "pl" : "Dibenzo(ah)anthracene", "shortpl" : "7419"}
+,{"ct" : "DE", "pl" : "Dibenzo(ah)anthracene in PM10", "shortpl" : "5419"}
+,{"ct" : "DE", "pl" : "Dibenzo(ah)anthracene in PM2.5", "shortpl" : "1419"}
+,{"ct" : "DE", "pl" : "EC in PM10", "shortpl" : "5771"}
+,{"ct" : "DE", "pl" : "EC in PM2.5", "shortpl" : "1771"}
+,{"ct" : "DE", "pl" : "H2C=CH2", "shortpl" : "430"}
+,{"ct" : "DE", "pl" : "H2C=CH-CH2-CH3", "shortpl" : "6005"}
+,{"ct" : "DE", "pl" : "H2S", "shortpl" : "11"}
+,{"ct" : "DE", "pl" : "H3C-(CH2)3-CH3", "shortpl" : "486"}
+,{"ct" : "DE", "pl" : "H3C-CH(CH3)2", "shortpl" : "447"}
+,{"ct" : "DE", "pl" : "H3C-CH2-CH(CH3)2", "shortpl" : "450"}
+,{"ct" : "DE", "pl" : "H3C-CH2-CH2-CH3", "shortpl" : "394"}
+,{"ct" : "DE", "pl" : "H3C-CH2-CH3", "shortpl" : "503"}
+,{"ct" : "DE", "pl" : "HC=CH", "shortpl" : "432"}
+,{"ct" : "DE", "pl" : "Hg", "shortpl" : "7013"}
+,{"ct" : "DE", "pl" : "Hg in PM2.5", "shortpl" : "1013"}
+,{"ct" : "DE", "pl" : "Hg0 + Hg-reactive", "shortpl" : "4813"}
+,{"ct" : "DE", "pl" : "Indeno-(1,2,3-cd)pyrene", "shortpl" : "656"}
+,{"ct" : "DE", "pl" : "Indeno-(1,2,3-cd)pyrene in PM", "shortpl" : "5655"}
+,{"ct" : "DE", "pl" : "Indeno-(1,2,3-cd)pyrene in PM2", "shortpl" : "1655"}
+,{"ct" : "DE", "pl" : "K+ in PM10", "shortpl" : "5657"}
+,{"ct" : "DE", "pl" : "K+ in PM2.5", "shortpl" : "1657"}
+,{"ct" : "DE", "pl" : "m,p-C6H4(CH3)2", "shortpl" : "464"}
+,{"ct" : "DE", "pl" : "Mg2+ in PM10", "shortpl" : "5659"}
+,{"ct" : "DE", "pl" : "Mg2+ in PM2.5", "shortpl" : "1659"}
+,{"ct" : "DE", "pl" : "Mn in PM10", "shortpl" : "5017"}
+,{"ct" : "DE", "pl" : "N2O", "shortpl" : "425"}
+,{"ct" : "DE", "pl" : "Na+  in PM10", "shortpl" : "5668"}
+,{"ct" : "DE", "pl" : "Na+  in PM2.5", "shortpl" : "1668"}
+,{"ct" : "DE", "pl" : "NH3", "shortpl" : "35"}
+,{"ct" : "DE", "pl" : "NH4+ in PM10", "shortpl" : "5045"}
+,{"ct" : "DE", "pl" : "NH4+ in PM2.5", "shortpl" : "1045"}
+,{"ct" : "DE", "pl" : "Ni", "shortpl" : "7015"}
+,{"ct" : "DE", "pl" : "Ni in PM10", "shortpl" : "5015"}
+,{"ct" : "DE", "pl" : "Ni in PM2.5", "shortpl" : "1015"}
+,{"ct" : "DE", "pl" : "NO", "shortpl" : "38"}
+,{"ct" : "DE", "pl" : "NO2", "shortpl" : "8"}
+,{"ct" : "DE", "pl" : "NO3- in PM10", "shortpl" : "5046"}
+,{"ct" : "DE", "pl" : "NO3- in PM2.5", "shortpl" : "1046"}
+,{"ct" : "DE", "pl" : "NOX as NO2", "shortpl" : "9"}
+,{"ct" : "DE", "pl" : "O3", "shortpl" : "7"}
+,{"ct" : "DE", "pl" : "OC in PM10", "shortpl" : "5772"}
+,{"ct" : "DE", "pl" : "OC in PM2.5", "shortpl" : "1772"}
+,{"ct" : "DE", "pl" : "o-C6H4-(CH3)2", "shortpl" : "482"}
+,{"ct" : "DE", "pl" : "Pb", "shortpl" : "7012"}
+,{"ct" : "DE", "pl" : "Pb in PM10", "shortpl" : "5012"}
+,{"ct" : "DE", "pl" : "Pb in PM2.5", "shortpl" : "1012"}
+,{"ct" : "DE", "pl" : "PM1", "shortpl" : "6002"}
+,{"ct" : "DE", "pl" : "PM10", "shortpl" : "5"}
+,{"ct" : "DE", "pl" : "PM2.5", "shortpl" : "6001"}
+,{"ct" : "DE", "pl" : "SO2", "shortpl" : "1"}
+,{"ct" : "DE", "pl" : "SO42-  in PM10", "shortpl" : "5047"}
+,{"ct" : "DE", "pl" : "SO42- in PM2.5", "shortpl" : "1047"}
+,{"ct" : "DE", "pl" : "THC (NM)", "shortpl" : "32"}
+,{"ct" : "DE", "pl" : "trans-H3C-CH=CH-CH3", "shortpl" : "6006"}
+,{"ct" : "DE", "pl" : "V in PM10", "shortpl" : "5049"}
+,{"ct" : "DK", "pl" : "(CH3)2-CH-CH2-CH2-CH3", "shortpl" : "316"}
+,{"ct" : "DK", "pl" : "(CH3)3-C-CH2-CH-(CH3)2", "shortpl" : "449"}
+,{"ct" : "DK", "pl" : "1,2,3-C6H3(CH3)3", "shortpl" : "6012"}
+,{"ct" : "DK", "pl" : "1,2,4-C6H3(CH3)3", "shortpl" : "6011"}
+,{"ct" : "DK", "pl" : "1,3,5-C6H3(CH3)3", "shortpl" : "6013"}
+,{"ct" : "DK", "pl" : "As", "shortpl" : "18"}
+,{"ct" : "DK", "pl" : "As", "shortpl" : "7018"}
+,{"ct" : "DK", "pl" : "As in PM10", "shortpl" : "5018"}
+,{"ct" : "DK", "pl" : "BaP", "shortpl" : "7029"}
+,{"ct" : "DK", "pl" : "BaP in PM10", "shortpl" : "5029"}
+,{"ct" : "DK", "pl" : "Benzo(a)anthracene", "shortpl" : "611"}
+,{"ct" : "DK", "pl" : "Benzo(a)anthracene in PM10", "shortpl" : "5610"}
+,{"ct" : "DK", "pl" : "Benzo(k)fluoranthene in PM10", "shortpl" : "5626"}
+,{"ct" : "DK", "pl" : "C6H14", "shortpl" : "443"}
+,{"ct" : "DK", "pl" : "C6H5-C2H5", "shortpl" : "431"}
+,{"ct" : "DK", "pl" : "C6H5-CH3", "shortpl" : "21"}
+,{"ct" : "DK", "pl" : "C6H6", "shortpl" : "20"}
+,{"ct" : "DK", "pl" : "C7H16", "shortpl" : "441"}
+,{"ct" : "DK", "pl" : "C8H18", "shortpl" : "475"}
+,{"ct" : "DK", "pl" : "Ca2+ in PM2.5", "shortpl" : "1629"}
+,{"ct" : "DK", "pl" : "Cd", "shortpl" : "14"}
+,{"ct" : "DK", "pl" : "Cd", "shortpl" : "7014"}
+,{"ct" : "DK", "pl" : "Cd in PM10", "shortpl" : "5014"}
+,{"ct" : "DK", "pl" : "CH2=CH-C(CH3)=CH2", "shortpl" : "451"}
+,{"ct" : "DK", "pl" : "Cl- in PM2.5", "shortpl" : "1631"}
+,{"ct" : "DK", "pl" : "CO", "shortpl" : "10"}
+,{"ct" : "DK", "pl" : "Dibenzo(ah)anthracene", "shortpl" : "7419"}
+,{"ct" : "DK", "pl" : "Dibenzo(ah)anthracene in PM10", "shortpl" : "5419"}
+,{"ct" : "DK", "pl" : "EC in PM2.5", "shortpl" : "1771"}
+,{"ct" : "DK", "pl" : "H2C=CH-CH2-CH2-CH3", "shortpl" : "6008"}
+,{"ct" : "DK", "pl" : "H3C-(CH2)3-CH3", "shortpl" : "486"}
+,{"ct" : "DK", "pl" : "H3C-HC=CH-CH2-CH3", "shortpl" : "6009"}
+,{"ct" : "DK", "pl" : "Indeno-(1,2,3-cd)pyrene", "shortpl" : "656"}
+,{"ct" : "DK", "pl" : "Indeno-(1,2,3-cd)pyrene in PM", "shortpl" : "5655"}
+,{"ct" : "DK", "pl" : "K+ in PM2.5", "shortpl" : "1657"}
+,{"ct" : "DK", "pl" : "m,p-C6H4(CH3)2", "shortpl" : "464"}
+,{"ct" : "DK", "pl" : "Mg2+ in PM2.5", "shortpl" : "1659"}
+,{"ct" : "DK", "pl" : "Na+  in PM2.5", "shortpl" : "1668"}
+,{"ct" : "DK", "pl" : "NH4+ in PM2.5", "shortpl" : "1045"}
+,{"ct" : "DK", "pl" : "Ni", "shortpl" : "15"}
+,{"ct" : "DK", "pl" : "Ni", "shortpl" : "7015"}
+,{"ct" : "DK", "pl" : "Ni in PM10", "shortpl" : "5015"}
+,{"ct" : "DK", "pl" : "NO", "shortpl" : "38"}
+,{"ct" : "DK", "pl" : "NO2", "shortpl" : "8"}
+,{"ct" : "DK", "pl" : "NO3- in PM2.5", "shortpl" : "1046"}
+,{"ct" : "DK", "pl" : "NOX as NO2", "shortpl" : "9"}
+,{"ct" : "DK", "pl" : "O3", "shortpl" : "7"}
+,{"ct" : "DK", "pl" : "OC in PM2.5", "shortpl" : "1772"}
+,{"ct" : "DK", "pl" : "o-C6H4-(CH3)2", "shortpl" : "482"}
+,{"ct" : "DK", "pl" : "Pb", "shortpl" : "12"}
+,{"ct" : "DK", "pl" : "Pb", "shortpl" : "7012"}
+,{"ct" : "DK", "pl" : "Pb in PM10", "shortpl" : "5012"}
+,{"ct" : "DK", "pl" : "PM10", "shortpl" : "5"}
+,{"ct" : "DK", "pl" : "PM2.5", "shortpl" : "6001"}
+,{"ct" : "DK", "pl" : "Se", "shortpl" : "48"}
+,{"ct" : "DK", "pl" : "SO2", "shortpl" : "1"}
+,{"ct" : "DK", "pl" : "SO42- in PM2.5", "shortpl" : "1047"}
+,{"ct" : "EE", "pl" : "As in PM10", "shortpl" : "5018"}
+,{"ct" : "EE", "pl" : "BaP in PM10", "shortpl" : "5029"}
+,{"ct" : "EE", "pl" : "C6H6", "shortpl" : "20"}
+,{"ct" : "EE", "pl" : "Cd in PM10", "shortpl" : "5014"}
+,{"ct" : "EE", "pl" : "CO", "shortpl" : "10"}
+,{"ct" : "EE", "pl" : "Ni in PM10", "shortpl" : "5015"}
+,{"ct" : "EE", "pl" : "NO2", "shortpl" : "8"}
+,{"ct" : "EE", "pl" : "NOX as NO2", "shortpl" : "9"}
+,{"ct" : "EE", "pl" : "O3", "shortpl" : "7"}
+,{"ct" : "EE", "pl" : "Pb in PM10", "shortpl" : "5012"}
+,{"ct" : "EE", "pl" : "PM10", "shortpl" : "5"}
+,{"ct" : "EE", "pl" : "PM2.5", "shortpl" : "6001"}
+,{"ct" : "EE", "pl" : "SO2", "shortpl" : "1"}
+,{"ct" : "ES", "pl" : "(CH3)2-CH-CH2-CH2-CH3", "shortpl" : "316"}
+,{"ct" : "ES", "pl" : "(CH3)3-C-CH2-CH-(CH3)2", "shortpl" : "449"}
+,{"ct" : "ES", "pl" : "1,2,3-C6H3(CH3)3", "shortpl" : "6012"}
+,{"ct" : "ES", "pl" : "1,2,4-C6H3(CH3)3", "shortpl" : "6011"}
+,{"ct" : "ES", "pl" : "1,3,5-C6H3(CH3)3", "shortpl" : "6013"}
+,{"ct" : "ES", "pl" : "Acenaphthene", "shortpl" : "351"}
+,{"ct" : "ES", "pl" : "Acenaphtylene", "shortpl" : "352"}
+,{"ct" : "ES", "pl" : "Anthracene", "shortpl" : "606"}
+,{"ct" : "ES", "pl" : "Anthracene", "shortpl" : "608"}
+,{"ct" : "ES", "pl" : "As", "shortpl" : "7018"}
+,{"ct" : "ES", "pl" : "As in PM10", "shortpl" : "5018"}
+,{"ct" : "ES", "pl" : "BaP", "shortpl" : "7029"}
+,{"ct" : "ES", "pl" : "BaP in PM10", "shortpl" : "5029"}
+,{"ct" : "ES", "pl" : "Benzo(a)anthracene", "shortpl" : "611"}
+,{"ct" : "ES", "pl" : "Benzo(a)anthracene in PM10", "shortpl" : "5610"}
+,{"ct" : "ES", "pl" : "Benzo(b)fluoranthene in PM10", "shortpl" : "5617"}
+,{"ct" : "ES", "pl" : "Benzo(b,j)fluorantheneinPM10", "shortpl" : "5480"}
+,{"ct" : "ES", "pl" : "Benzo(b+j)fluoranthene", "shortpl" : "7480"}
+,{"ct" : "ES", "pl" : "Benzo(ghi)perylene", "shortpl" : "624"}
+,{"ct" : "ES", "pl" : "Benzo(ghi)perylene in PM10", "shortpl" : "5623"}
+,{"ct" : "ES", "pl" : "Benzo(j)fluoranthene in PM10", "shortpl" : "5759"}
+,{"ct" : "ES", "pl" : "Benzo(k)fluoranthene", "shortpl" : "627"}
+,{"ct" : "ES", "pl" : "Benzo(k)fluoranthene in PM10", "shortpl" : "5626"}
+,{"ct" : "ES", "pl" : "C2H6", "shortpl" : "428"}
+,{"ct" : "ES", "pl" : "C6H14", "shortpl" : "443"}
+,{"ct" : "ES", "pl" : "C6H4-(CH3)2", "shortpl" : "78"}
+,{"ct" : "ES", "pl" : "C6H5-C2H5", "shortpl" : "431"}
+,{"ct" : "ES", "pl" : "C6H5-CH3", "shortpl" : "21"}
+,{"ct" : "ES", "pl" : "C6H6", "shortpl" : "20"}
+,{"ct" : "ES", "pl" : "C7H16", "shortpl" : "441"}
+,{"ct" : "ES", "pl" : "C8H18", "shortpl" : "475"}
+,{"ct" : "ES", "pl" : "Ca2+ in PM2.5", "shortpl" : "1629"}
+,{"ct" : "ES", "pl" : "Cd", "shortpl" : "7014"}
+,{"ct" : "ES", "pl" : "Cd in PM10", "shortpl" : "5014"}
+,{"ct" : "ES", "pl" : "CH2=CH-C(CH3)=CH2", "shortpl" : "451"}
+,{"ct" : "ES", "pl" : "CH2=CH-CH=CH2", "shortpl" : "24"}
+,{"ct" : "ES", "pl" : "CH2=CH-CH3", "shortpl" : "505"}
+,{"ct" : "ES", "pl" : "Chrysene", "shortpl" : "4406"}
+,{"ct" : "ES", "pl" : "cis-H3C-CH=CH-CH3", "shortpl" : "6007"}
+,{"ct" : "ES", "pl" : "Cl- in PM2.5", "shortpl" : "1631"}
+,{"ct" : "ES", "pl" : "CO", "shortpl" : "10"}
+,{"ct" : "ES", "pl" : "Cr", "shortpl" : "7016"}
+,{"ct" : "ES", "pl" : "Cu", "shortpl" : "7073"}
+,{"ct" : "ES", "pl" : "Dibenzo(ah)anthracene", "shortpl" : "7419"}
+,{"ct" : "ES", "pl" : "Dibenzo(ah)anthracene in PM10", "shortpl" : "5419"}
+,{"ct" : "ES", "pl" : "EC in PM2.5", "shortpl" : "1771"}
+,{"ct" : "ES", "pl" : "Fluoranthene", "shortpl" : "643"}
+,{"ct" : "ES", "pl" : "Fluoranthene", "shortpl" : "645"}
+,{"ct" : "ES", "pl" : "Fluorene", "shortpl" : "435"}
+,{"ct" : "ES", "pl" : "H2C=CH2", "shortpl" : "430"}
+,{"ct" : "ES", "pl" : "H2C=CH-CH2-CH2-CH3", "shortpl" : "6008"}
+,{"ct" : "ES", "pl" : "H2C=CH-CH2-CH3", "shortpl" : "6005"}
+,{"ct" : "ES", "pl" : "H3C-(CH2)3-CH3", "shortpl" : "486"}
+,{"ct" : "ES", "pl" : "H3C-CH(CH3)2", "shortpl" : "447"}
+,{"ct" : "ES", "pl" : "H3C-CH2-CH(CH3)2", "shortpl" : "450"}
+,{"ct" : "ES", "pl" : "H3C-CH2-CH2-CH3", "shortpl" : "394"}
+,{"ct" : "ES", "pl" : "H3C-CH2-CH3", "shortpl" : "503"}
+,{"ct" : "ES", "pl" : "H3C-HC=CH-CH2-CH3", "shortpl" : "6009"}
+,{"ct" : "ES", "pl" : "HC=CH", "shortpl" : "432"}
+,{"ct" : "ES", "pl" : "HCHO", "shortpl" : "25"}
+,{"ct" : "ES", "pl" : "Hg", "shortpl" : "7013"}
+,{"ct" : "ES", "pl" : "Hg0 + Hg-reactive", "shortpl" : "4813"}
+,{"ct" : "ES", "pl" : "Indeno-(1,2,3-cd)pyrene", "shortpl" : "656"}
+,{"ct" : "ES", "pl" : "Indeno-(1,2,3-cd)pyrene in PM", "shortpl" : "5655"}
+,{"ct" : "ES", "pl" : "K+ in PM2.5", "shortpl" : "1657"}
+,{"ct" : "ES", "pl" : "m,p-C6H4(CH3)2", "shortpl" : "464"}
+,{"ct" : "ES", "pl" : "m-C6H4-(CH3)2", "shortpl" : "81"}
+,{"ct" : "ES", "pl" : "Mg2+ in PM2.5", "shortpl" : "1659"}
+,{"ct" : "ES", "pl" : "Na+  in PM2.5", "shortpl" : "1668"}
+,{"ct" : "ES", "pl" : "Naphtalene", "shortpl" : "465"}
+,{"ct" : "ES", "pl" : "NH4+ in PM2.5", "shortpl" : "1045"}
+,{"ct" : "ES", "pl" : "Ni", "shortpl" : "7015"}
+,{"ct" : "ES", "pl" : "Ni in PM10", "shortpl" : "5015"}
+,{"ct" : "ES", "pl" : "NO", "shortpl" : "38"}
+,{"ct" : "ES", "pl" : "NO2", "shortpl" : "8"}
+,{"ct" : "ES", "pl" : "NO3- in PM2.5", "shortpl" : "1046"}
+,{"ct" : "ES", "pl" : "NOX as NO2", "shortpl" : "9"}
+,{"ct" : "ES", "pl" : "O3", "shortpl" : "7"}
+,{"ct" : "ES", "pl" : "OC in PM2.5", "shortpl" : "1772"}
+,{"ct" : "ES", "pl" : "o-C6H4-(CH3)2", "shortpl" : "482"}
+,{"ct" : "ES", "pl" : "Pb", "shortpl" : "7012"}
+,{"ct" : "ES", "pl" : "Pb in PM10", "shortpl" : "5012"}
+,{"ct" : "ES", "pl" : "Phenanthrene", "shortpl" : "712"}
+,{"ct" : "ES", "pl" : "Phenanthrene", "shortpl" : "714"}
+,{"ct" : "ES", "pl" : "PM10", "shortpl" : "5"}
+,{"ct" : "ES", "pl" : "PM2.5", "shortpl" : "6001"}
+,{"ct" : "ES", "pl" : "Pyrene", "shortpl" : "715"}
+,{"ct" : "ES", "pl" : "Pyrene", "shortpl" : "717"}
+,{"ct" : "ES", "pl" : "SO2", "shortpl" : "1"}
+,{"ct" : "ES", "pl" : "SO42- in PM2.5", "shortpl" : "1047"}
+,{"ct" : "ES", "pl" : "THC (NM)", "shortpl" : "32"}
+,{"ct" : "ES", "pl" : "trans-H3C-CH=CH-CH3", "shortpl" : "6006"}
+,{"ct" : "ES", "pl" : "trans-H3C-HC=CH-CH2-CH3", "shortpl" : "82"}
+,{"ct" : "ES", "pl" : "T-VOC", "shortpl" : "33"}
+,{"ct" : "ES", "pl" : "Zn", "shortpl" : "7063"}
+,{"ct" : "FI", "pl" : "(CH3)2-CH-CH2-CH2-CH3", "shortpl" : "316"}
+,{"ct" : "FI", "pl" : "1,3,5-C6H3(CH3)3", "shortpl" : "6013"}
+,{"ct" : "FI", "pl" : "Anthracene", "shortpl" : "608"}
+,{"ct" : "FI", "pl" : "As", "shortpl" : "7018"}
+,{"ct" : "FI", "pl" : "As in PM10", "shortpl" : "5018"}
+,{"ct" : "FI", "pl" : "BaP", "shortpl" : "7029"}
+,{"ct" : "FI", "pl" : "BaP in PM10", "shortpl" : "5029"}
+,{"ct" : "FI", "pl" : "Benzo(a)anthracene", "shortpl" : "611"}
+,{"ct" : "FI", "pl" : "Benzo(a)anthracene in PM10", "shortpl" : "5610"}
+,{"ct" : "FI", "pl" : "Benzo(b)fluoranthene in PM10", "shortpl" : "5617"}
+,{"ct" : "FI", "pl" : "Benzo(b,j,k)fluoranthene", "shortpl" : "7380"}
+,{"ct" : "FI", "pl" : "Benzo(b,j,k)fluorantheneInPM1", "shortpl" : "5380"}
+,{"ct" : "FI", "pl" : "Benzo(ghi)perylene", "shortpl" : "624"}
+,{"ct" : "FI", "pl" : "Benzo(k)fluoranthene in PM10", "shortpl" : "5626"}
+,{"ct" : "FI", "pl" : "Black Carbon", "shortpl" : "391"}
+,{"ct" : "FI", "pl" : "C2H6", "shortpl" : "428"}
+,{"ct" : "FI", "pl" : "C6H14", "shortpl" : "443"}
+,{"ct" : "FI", "pl" : "C6H4-(CH3)2", "shortpl" : "78"}
+,{"ct" : "FI", "pl" : "C6H5-C2H5", "shortpl" : "431"}
+,{"ct" : "FI", "pl" : "C6H5-CH3", "shortpl" : "21"}
+,{"ct" : "FI", "pl" : "C6H6", "shortpl" : "20"}
+,{"ct" : "FI", "pl" : "Ca2+ in PM2.5", "shortpl" : "1629"}
+,{"ct" : "FI", "pl" : "Cd", "shortpl" : "7014"}
+,{"ct" : "FI", "pl" : "Cd in PM10", "shortpl" : "5014"}
+,{"ct" : "FI", "pl" : "Chrysene + Triphenylene", "shortpl" : "7407"}
+,{"ct" : "FI", "pl" : "Cl- in PM2.5", "shortpl" : "1631"}
+,{"ct" : "FI", "pl" : "CO", "shortpl" : "10"}
+,{"ct" : "FI", "pl" : "Dibenzo(ah)anthracene in PM10", "shortpl" : "5419"}
+,{"ct" : "FI", "pl" : "Fluoranthene", "shortpl" : "645"}
+,{"ct" : "FI", "pl" : "H2C=CH2", "shortpl" : "430"}
+,{"ct" : "FI", "pl" : "H3C-(CH2)3-CH3", "shortpl" : "486"}
+,{"ct" : "FI", "pl" : "H3C-CH(CH3)2", "shortpl" : "447"}
+,{"ct" : "FI", "pl" : "H3C-CH2-CH(CH3)2", "shortpl" : "450"}
+,{"ct" : "FI", "pl" : "H3C-CH2-CH2-CH3", "shortpl" : "394"}
+,{"ct" : "FI", "pl" : "H3C-CH2-CH3", "shortpl" : "503"}
+,{"ct" : "FI", "pl" : "HC=CH", "shortpl" : "432"}
+,{"ct" : "FI", "pl" : "Hg", "shortpl" : "7013"}
+,{"ct" : "FI", "pl" : "Hg0 + Hg-reactive", "shortpl" : "4813"}
+,{"ct" : "FI", "pl" : "Indeno-(1,2,3-cd)pyrene", "shortpl" : "656"}
+,{"ct" : "FI", "pl" : "Indeno-(1,2,3-cd)pyrene in PM", "shortpl" : "5655"}
+,{"ct" : "FI", "pl" : "K+ in PM2.5", "shortpl" : "1657"}
+,{"ct" : "FI", "pl" : "m,p-C6H4(CH3)2", "shortpl" : "464"}
+,{"ct" : "FI", "pl" : "Mg2+ in PM2.5", "shortpl" : "1659"}
+,{"ct" : "FI", "pl" : "Na+  in PM2.5", "shortpl" : "1668"}
+,{"ct" : "FI", "pl" : "NH4+ in PM2.5", "shortpl" : "1045"}
+,{"ct" : "FI", "pl" : "Ni", "shortpl" : "7015"}
+,{"ct" : "FI", "pl" : "Ni in PM10", "shortpl" : "5015"}
+,{"ct" : "FI", "pl" : "NO", "shortpl" : "38"}
+,{"ct" : "FI", "pl" : "NO2", "shortpl" : "8"}
+,{"ct" : "FI", "pl" : "NO3- in PM2.5", "shortpl" : "1046"}
+,{"ct" : "FI", "pl" : "NOX as NO2", "shortpl" : "9"}
+,{"ct" : "FI", "pl" : "O3", "shortpl" : "7"}
+,{"ct" : "FI", "pl" : "OC in PM2.5", "shortpl" : "1772"}
+,{"ct" : "FI", "pl" : "o-C6H4-(CH3)2", "shortpl" : "482"}
+,{"ct" : "FI", "pl" : "Pb in PM10", "shortpl" : "5012"}
+,{"ct" : "FI", "pl" : "Phenanthrene", "shortpl" : "714"}
+,{"ct" : "FI", "pl" : "PM10", "shortpl" : "5"}
+,{"ct" : "FI", "pl" : "PM2.5", "shortpl" : "6001"}
+,{"ct" : "FI", "pl" : "Pyrene", "shortpl" : "717"}
+,{"ct" : "FI", "pl" : "SO2", "shortpl" : "1"}
+,{"ct" : "FI", "pl" : "SO42- in PM2.5", "shortpl" : "1047"}
+,{"ct" : "FR", "pl" : "As in PM10", "shortpl" : "5018"}
+,{"ct" : "FR", "pl" : "BaP in PM10", "shortpl" : "5029"}
+,{"ct" : "FR", "pl" : "C6H6", "shortpl" : "20"}
+,{"ct" : "FR", "pl" : "Cd in PM10", "shortpl" : "5014"}
+,{"ct" : "FR", "pl" : "CO", "shortpl" : "10"}
+,{"ct" : "FR", "pl" : "Ni in PM10", "shortpl" : "5015"}
+,{"ct" : "FR", "pl" : "NO", "shortpl" : "38"}
+,{"ct" : "FR", "pl" : "NO2", "shortpl" : "8"}
+,{"ct" : "FR", "pl" : "NOX as NO2", "shortpl" : "9"}
+,{"ct" : "FR", "pl" : "O3", "shortpl" : "7"}
+,{"ct" : "FR", "pl" : "Pb in PM10", "shortpl" : "5012"}
+,{"ct" : "FR", "pl" : "PM10", "shortpl" : "5"}
+,{"ct" : "FR", "pl" : "PM2.5", "shortpl" : "6001"}
+,{"ct" : "FR", "pl" : "SO2", "shortpl" : "1"}
+,{"ct" : "GB", "pl" : "(CH3)2-CH-CH2-CH2-CH3", "shortpl" : "316"}
+,{"ct" : "GB", "pl" : "(CH3)3-C-CH2-CH-(CH3)2", "shortpl" : "449"}
+,{"ct" : "GB", "pl" : "1,2,3-C6H3(CH3)3", "shortpl" : "6012"}
+,{"ct" : "GB", "pl" : "1,2,4-C6H3(CH3)3", "shortpl" : "6011"}
+,{"ct" : "GB", "pl" : "1,3,5-C6H3(CH3)3", "shortpl" : "6013"}
+,{"ct" : "GB", "pl" : "1-Methyl anthracene", "shortpl" : "7301"}
+,{"ct" : "GB", "pl" : "1-Methyl anthracene in PM10", "shortpl" : "5301"}
+,{"ct" : "GB", "pl" : "1-Methyl Naphthalene", "shortpl" : "7309"}
+,{"ct" : "GB", "pl" : "1-Methyl phenanthrene", "shortpl" : "7310"}
+,{"ct" : "GB", "pl" : "1-methylnaphtalene", "shortpl" : "309"}
+,{"ct" : "GB", "pl" : "1-methylphenanthrene", "shortpl" : "310"}
+,{"ct" : "GB", "pl" : "2-Methyl anthracene", "shortpl" : "7313"}
+,{"ct" : "GB", "pl" : "2-Methyl Naphthalene", "shortpl" : "7315"}
+,{"ct" : "GB", "pl" : "2-Methyl phenanthrene", "shortpl" : "7317"}
+,{"ct" : "GB", "pl" : "2-methylanthracene", "shortpl" : "313"}
+,{"ct" : "GB", "pl" : "2-methylnaphtalene", "shortpl" : "315"}
+,{"ct" : "GB", "pl" : "2-methylphenanthrene", "shortpl" : "317"}
+,{"ct" : "GB", "pl" : "4.5-Methylene phenanthrene", "shortpl" : "7521"}
+,{"ct" : "GB", "pl" : "4.5-Methylene phenanthrene in PM10", "shortpl" : "5521"}
+,{"ct" : "GB", "pl" : "5-Methyl Chrysene", "shortpl" : "7522"}
+,{"ct" : "GB", "pl" : "5-Methyl Chrysene in PM10", "shortpl" : "5522"}
+,{"ct" : "GB", "pl" : "5-Methyl Chrysene in PM10", "shortpl" : "5622"}
+,{"ct" : "GB", "pl" : "9-Methyl anthracene", "shortpl" : "7523"}
+,{"ct" : "GB", "pl" : "9-Methyl anthracene in PM10", "shortpl" : "5523"}
+,{"ct" : "GB", "pl" : "Acenaphthene", "shortpl" : "351"}
+,{"ct" : "GB", "pl" : "Acenaphthene", "shortpl" : "7351"}
+,{"ct" : "GB", "pl" : "Acenaphthylene", "shortpl" : "7352"}
+,{"ct" : "GB", "pl" : "Acenaphtylene", "shortpl" : "352"}
+,{"ct" : "GB", "pl" : "Anthanthrene", "shortpl" : "364"}
+,{"ct" : "GB", "pl" : "Anthanthrene", "shortpl" : "7364"}
+,{"ct" : "GB", "pl" : "Anthanthrene in PM10", "shortpl" : "5364"}
+,{"ct" : "GB", "pl" : "Anthracene", "shortpl" : "606"}
+,{"ct" : "GB", "pl" : "Anthracene", "shortpl" : "608"}
+,{"ct" : "GB", "pl" : "As", "shortpl" : "7018"}
+,{"ct" : "GB", "pl" : "As in PM10", "shortpl" : "5018"}
+,{"ct" : "GB", "pl" : "BaP", "shortpl" : "7029"}
+,{"ct" : "GB", "pl" : "BaP in PM10", "shortpl" : "5029"}
+,{"ct" : "GB", "pl" : "BaP in PM10", "shortpl" : "5129"}
+,{"ct" : "GB", "pl" : "Benzo(a)anthracene", "shortpl" : "611"}
+,{"ct" : "GB", "pl" : "Benzo(a)anthracene in PM10", "shortpl" : "5609"}
+,{"ct" : "GB", "pl" : "Benzo(a)anthracene in PM10", "shortpl" : "5610"}
+,{"ct" : "GB", "pl" : "Benzo(b)fluoranthene", "shortpl" : "618"}
+,{"ct" : "GB", "pl" : "Benzo(b)fluoranthene in PM10", "shortpl" : "5616"}
+,{"ct" : "GB", "pl" : "Benzo(b)fluoranthene in PM10", "shortpl" : "5617"}
+,{"ct" : "GB", "pl" : "Benzo(b)naphtho(2,1-d)thiophene", "shortpl" : "7524"}
+,{"ct" : "GB", "pl" : "Benzo(b)naphtho(2,1-d)thiophene in PM10", "shortpl" : "5524"}
+,{"ct" : "GB", "pl" : "Benzo(b)naphtho(2,1-d)thiophene in PM10", "shortpl" : "5624"}
+,{"ct" : "GB", "pl" : "Benzo(b+j)fluoranthene", "shortpl" : "7480"}
+,{"ct" : "GB", "pl" : "Benzo(c)phenanthrene", "shortpl" : "7525"}
+,{"ct" : "GB", "pl" : "Benzo(c)phenanthrene in PM10", "shortpl" : "5525"}
+,{"ct" : "GB", "pl" : "Benzo(c)phenanthrene in PM10", "shortpl" : "5725"}
+,{"ct" : "GB", "pl" : "Benzo(e)pyrene", "shortpl" : "381"}
+,{"ct" : "GB", "pl" : "Benzo(e)pyrene", "shortpl" : "7381"}
+,{"ct" : "GB", "pl" : "Benzo(e)pyrene in PM10", "shortpl" : "5381"}
+,{"ct" : "GB", "pl" : "Benzo(ghi)perylene", "shortpl" : "622"}
+,{"ct" : "GB", "pl" : "Benzo(ghi)perylene", "shortpl" : "624"}
+,{"ct" : "GB", "pl" : "Benzo(ghi)perylene in PM10", "shortpl" : "5623"}
+,{"ct" : "GB", "pl" : "Benzo(j)fluoranthene", "shortpl" : "760"}
+,{"ct" : "GB", "pl" : "Benzo(j)fluoranthene in PM10", "shortpl" : "5759"}
+,{"ct" : "GB", "pl" : "Benzo(j)fluoranthene in PM10", "shortpl" : "5762"}
+,{"ct" : "GB", "pl" : "Benzo(k)fluoranthene", "shortpl" : "627"}
+,{"ct" : "GB", "pl" : "Benzo(k)fluoranthene in PM10", "shortpl" : "5625"}
+,{"ct" : "GB", "pl" : "Benzo(k)fluoranthene in PM10", "shortpl" : "5626"}
+,{"ct" : "GB", "pl" : "Biphenyl", "shortpl" : "390"}
+,{"ct" : "GB", "pl" : "Biphenyl", "shortpl" : "7390"}
+,{"ct" : "GB", "pl" : "Black Carbon", "shortpl" : "391"}
+,{"ct" : "GB", "pl" : "C2H6", "shortpl" : "428"}
+,{"ct" : "GB", "pl" : "C6H14", "shortpl" : "443"}
+,{"ct" : "GB", "pl" : "C6H5-C2H5", "shortpl" : "431"}
+,{"ct" : "GB", "pl" : "C6H5-CH3", "shortpl" : "21"}
+,{"ct" : "GB", "pl" : "C6H6", "shortpl" : "20"}
+,{"ct" : "GB", "pl" : "C7H16", "shortpl" : "441"}
+,{"ct" : "GB", "pl" : "C8H18", "shortpl" : "475"}
+,{"ct" : "GB", "pl" : "Ca2+ in PM2.5", "shortpl" : "1629"}
+,{"ct" : "GB", "pl" : "Cd", "shortpl" : "7014"}
+,{"ct" : "GB", "pl" : "Cd in PM10", "shortpl" : "5014"}
+,{"ct" : "GB", "pl" : "CH2=CH-C(CH3)=CH2", "shortpl" : "451"}
+,{"ct" : "GB", "pl" : "CH2=CH-CH=CH2", "shortpl" : "24"}
+,{"ct" : "GB", "pl" : "CH2=CH-CH3", "shortpl" : "505"}
+,{"ct" : "GB", "pl" : "Cholanthrene", "shortpl" : "7526"}
+,{"ct" : "GB", "pl" : "Cholanthrene in PM10", "shortpl" : "5526"}
+,{"ct" : "GB", "pl" : "Chrysene", "shortpl" : "4406"}
+,{"ct" : "GB", "pl" : "Chrysene", "shortpl" : "7406"}
+,{"ct" : "GB", "pl" : "Chrysene in PM10", "shortpl" : "5406"}
+,{"ct" : "GB", "pl" : "cis-H3C-CH=CH-CH3", "shortpl" : "6007"}
+,{"ct" : "GB", "pl" : "Cl- in PM2.5", "shortpl" : "1631"}
+,{"ct" : "GB", "pl" : "CO", "shortpl" : "10"}
+,{"ct" : "GB", "pl" : "Coronene", "shortpl" : "415"}
+,{"ct" : "GB", "pl" : "Coronene", "shortpl" : "7415"}
+,{"ct" : "GB", "pl" : "Coronene in PM10", "shortpl" : "5415"}
+,{"ct" : "GB", "pl" : "Cyclopenta(c,d)pyrene", "shortpl" : "7417"}
+,{"ct" : "GB", "pl" : "Cyclopenta(c,d)pyrene in PM10", "shortpl" : "5417"}
+,{"ct" : "GB", "pl" : "Cyklopenta(cd)pyrene", "shortpl" : "417"}
+,{"ct" : "GB", "pl" : "Dibenzo(ac)anthracene", "shortpl" : "7527"}
+,{"ct" : "GB", "pl" : "Dibenzo(ac)anthracene in PM10", "shortpl" : "5527"}
+,{"ct" : "GB", "pl" : "Dibenzo(ac)anthracene in PM10", "shortpl" : "5627"}
+,{"ct" : "GB", "pl" : "Dibenzo(ae)pyrene", "shortpl" : "636"}
+,{"ct" : "GB", "pl" : "Dibenzo(ae)pyrene", "shortpl" : "7636"}
+,{"ct" : "GB", "pl" : "Dibenzo(ae)pyrene in PM10", "shortpl" : "5636"}
+,{"ct" : "GB", "pl" : "Dibenzo(ah)anthracene", "shortpl" : "7419"}
+,{"ct" : "GB", "pl" : "Dibenzo(ah)anthracene in PM10", "shortpl" : "5419"}
+,{"ct" : "GB", "pl" : "Dibenzo(ah)anthracene in PM10", "shortpl" : "5763"}
+,{"ct" : "GB", "pl" : "Dibenzo(ah)pyrene", "shortpl" : "637"}
+,{"ct" : "GB", "pl" : "Dibenzo(ah)pyrene", "shortpl" : "7637"}
+,{"ct" : "GB", "pl" : "Dibenzo(ah)pyrene in PM10", "shortpl" : "5637"}
+,{"ct" : "GB", "pl" : "Dibenzo(ah+ac)anthracene", "shortpl" : "7418"}
+,{"ct" : "GB", "pl" : "Dibenzo(ai)pyrene", "shortpl" : "638"}
+,{"ct" : "GB", "pl" : "Dibenzo(ai)pyrene", "shortpl" : "7639"}
+,{"ct" : "GB", "pl" : "Dibenzo(ai)pyrene in PM10", "shortpl" : "5639"}
+,{"ct" : "GB", "pl" : "Dibenzo(al)pyrene", "shortpl" : "7528"}
+,{"ct" : "GB", "pl" : "Dibenzo(al)pyrene in PM10", "shortpl" : "5528"}
+,{"ct" : "GB", "pl" : "Dibenzo(al)pyrene in PM10", "shortpl" : "5628"}
+,{"ct" : "GB", "pl" : "EC in PM2.5", "shortpl" : "1771"}
+,{"ct" : "GB", "pl" : "Fluoranthene", "shortpl" : "643"}
+,{"ct" : "GB", "pl" : "Fluoranthene", "shortpl" : "645"}
+,{"ct" : "GB", "pl" : "Fluorene", "shortpl" : "435"}
+,{"ct" : "GB", "pl" : "Fluorene", "shortpl" : "7435"}
+,{"ct" : "GB", "pl" : "H2C=CH2", "shortpl" : "430"}
+,{"ct" : "GB", "pl" : "H2C=CH-CH2-CH2-CH3", "shortpl" : "6008"}
+,{"ct" : "GB", "pl" : "H2C=CH-CH2-CH3", "shortpl" : "6005"}
+,{"ct" : "GB", "pl" : "H3C-(CH2)3-CH3", "shortpl" : "486"}
+,{"ct" : "GB", "pl" : "H3C-CH(CH3)2", "shortpl" : "447"}
+,{"ct" : "GB", "pl" : "H3C-CH2-CH(CH3)2", "shortpl" : "450"}
+,{"ct" : "GB", "pl" : "H3C-CH2-CH2-CH3", "shortpl" : "394"}
+,{"ct" : "GB", "pl" : "H3C-CH2-CH3", "shortpl" : "503"}
+,{"ct" : "GB", "pl" : "HC=CH", "shortpl" : "432"}
+,{"ct" : "GB", "pl" : "Hg", "shortpl" : "7013"}
+,{"ct" : "GB", "pl" : "Hg in PM10", "shortpl" : "5013"}
+,{"ct" : "GB", "pl" : "Hg0", "shortpl" : "4013"}
+,{"ct" : "GB", "pl" : "Hg0 + Hg-reactive", "shortpl" : "4813"}
+,{"ct" : "GB", "pl" : "Indeno-(1,2,3-cd)pyrene", "shortpl" : "656"}
+,{"ct" : "GB", "pl" : "Indeno-(1,2,3-cd)pyrene in PM", "shortpl" : "5654"}
+,{"ct" : "GB", "pl" : "Indeno-(1,2,3-cd)pyrene in PM", "shortpl" : "5655"}
+,{"ct" : "GB", "pl" : "K+ in PM2.5", "shortpl" : "1657"}
+,{"ct" : "GB", "pl" : "m,p-C6H4(CH3)2", "shortpl" : "464"}
+,{"ct" : "GB", "pl" : "Mg2+ in PM2.5", "shortpl" : "1659"}
+,{"ct" : "GB", "pl" : "Na+  in PM2.5", "shortpl" : "1668"}
+,{"ct" : "GB", "pl" : "Naphthalene", "shortpl" : "7465"}
+,{"ct" : "GB", "pl" : "NH4+ in PM2.5", "shortpl" : "1045"}
+,{"ct" : "GB", "pl" : "Ni", "shortpl" : "7015"}
+,{"ct" : "GB", "pl" : "Ni in PM10", "shortpl" : "5015"}
+,{"ct" : "GB", "pl" : "NO", "shortpl" : "38"}
+,{"ct" : "GB", "pl" : "NO2", "shortpl" : "8"}
+,{"ct" : "GB", "pl" : "NO3- in PM2.5", "shortpl" : "1046"}
+,{"ct" : "GB", "pl" : "NOX as NO2", "shortpl" : "9"}
+,{"ct" : "GB", "pl" : "O3", "shortpl" : "7"}
+,{"ct" : "GB", "pl" : "OC in PM2.5", "shortpl" : "1772"}
+,{"ct" : "GB", "pl" : "o-C6H4-(CH3)2", "shortpl" : "482"}
+,{"ct" : "GB", "pl" : "Pb", "shortpl" : "7012"}
+,{"ct" : "GB", "pl" : "Pb in PM10", "shortpl" : "5012"}
+,{"ct" : "GB", "pl" : "Perylene", "shortpl" : "488"}
+,{"ct" : "GB", "pl" : "Perylene", "shortpl" : "7488"}
+,{"ct" : "GB", "pl" : "Perylene in PM10", "shortpl" : "5488"}
+,{"ct" : "GB", "pl" : "Phenanthrene", "shortpl" : "712"}
+,{"ct" : "GB", "pl" : "Phenanthrene", "shortpl" : "714"}
+,{"ct" : "GB", "pl" : "PM10", "shortpl" : "5"}
+,{"ct" : "GB", "pl" : "PM2.5", "shortpl" : "6001"}
+,{"ct" : "GB", "pl" : "Pyrene", "shortpl" : "715"}
+,{"ct" : "GB", "pl" : "Pyrene", "shortpl" : "717"}
+,{"ct" : "GB", "pl" : "Retene", "shortpl" : "508"}
+,{"ct" : "GB", "pl" : "SO2", "shortpl" : "1"}
+,{"ct" : "GB", "pl" : "SO42- in PM2.5", "shortpl" : "1047"}
+,{"ct" : "GB", "pl" : "trans-H3C-CH=CH-CH3", "shortpl" : "6006"}
+,{"ct" : "GB", "pl" : "trans-H3C-HC=CH-CH2-CH3", "shortpl" : "82"}
+,{"ct" : "GI", "pl" : "As in PM10", "shortpl" : "5018"}
+,{"ct" : "GI", "pl" : "BaP in PM10", "shortpl" : "5029"}
+,{"ct" : "GI", "pl" : "Benzo(a)anthracene in PM10", "shortpl" : "5610"}
+,{"ct" : "GI", "pl" : "Benzo(b,j)fluorantheneinPM10", "shortpl" : "5480"}
+,{"ct" : "GI", "pl" : "Benzo(k)fluoranthene in PM10", "shortpl" : "5626"}
+,{"ct" : "GI", "pl" : "C6H5-C2H5", "shortpl" : "431"}
+,{"ct" : "GI", "pl" : "C6H5-CH3", "shortpl" : "21"}
+,{"ct" : "GI", "pl" : "C6H6", "shortpl" : "20"}
+,{"ct" : "GI", "pl" : "Cd in PM10", "shortpl" : "5014"}
+,{"ct" : "GI", "pl" : "CH2=CH-CH=CH2", "shortpl" : "24"}
+,{"ct" : "GI", "pl" : "CO", "shortpl" : "10"}
+,{"ct" : "GI", "pl" : "Dibenzo(ah+ac)anthracene in PM10", "shortpl" : "5633"}
+,{"ct" : "GI", "pl" : "Indeno-(1,2,3-cd)pyrene in PM", "shortpl" : "5655"}
+,{"ct" : "GI", "pl" : "m,p-C6H4(CH3)2", "shortpl" : "464"}
+,{"ct" : "GI", "pl" : "Ni in PM10", "shortpl" : "5015"}
+,{"ct" : "GI", "pl" : "NO2", "shortpl" : "8"}
+,{"ct" : "GI", "pl" : "NOX as NO2", "shortpl" : "9"}
+,{"ct" : "GI", "pl" : "O3", "shortpl" : "7"}
+,{"ct" : "GI", "pl" : "o-C6H4-(CH3)2", "shortpl" : "482"}
+,{"ct" : "GI", "pl" : "Pb in PM10", "shortpl" : "5012"}
+,{"ct" : "GI", "pl" : "PM10", "shortpl" : "5"}
+,{"ct" : "GI", "pl" : "PM2.5", "shortpl" : "6001"}
+,{"ct" : "GI", "pl" : "SO2", "shortpl" : "1"}
+,{"ct" : "GR", "pl" : "As", "shortpl" : "18"}
+,{"ct" : "GR", "pl" : "C6H6", "shortpl" : "20"}
+,{"ct" : "GR", "pl" : "Cd", "shortpl" : "14"}
+,{"ct" : "GR", "pl" : "CO", "shortpl" : "10"}
+,{"ct" : "GR", "pl" : "Ni", "shortpl" : "15"}
+,{"ct" : "GR", "pl" : "NO", "shortpl" : "38"}
+,{"ct" : "GR", "pl" : "NO2", "shortpl" : "8"}
+,{"ct" : "GR", "pl" : "O3", "shortpl" : "7"}
+,{"ct" : "GR", "pl" : "Pb", "shortpl" : "12"}
+,{"ct" : "GR", "pl" : "PM10", "shortpl" : "5"}
+,{"ct" : "GR", "pl" : "PM2.5", "shortpl" : "6001"}
+,{"ct" : "GR", "pl" : "SO2", "shortpl" : "1"}
+,{"ct" : "HR", "pl" : "As in PM10", "shortpl" : "5018"}
+,{"ct" : "HR", "pl" : "BaP in PM10", "shortpl" : "5029"}
+,{"ct" : "HR", "pl" : "Benzo(a)anthracene in PM10", "shortpl" : "5610"}
+,{"ct" : "HR", "pl" : "Benzo(b)fluoranthene in PM10", "shortpl" : "5617"}
+,{"ct" : "HR", "pl" : "Benzo(k)fluoranthene in PM10", "shortpl" : "5626"}
+,{"ct" : "HR", "pl" : "C6H6", "shortpl" : "20"}
+,{"ct" : "HR", "pl" : "Ca2+ in PM2.5", "shortpl" : "1629"}
+,{"ct" : "HR", "pl" : "Cd in PM10", "shortpl" : "5014"}
+,{"ct" : "HR", "pl" : "Cl- in PM2.5", "shortpl" : "1631"}
+,{"ct" : "HR", "pl" : "CO", "shortpl" : "10"}
+,{"ct" : "HR", "pl" : "Dibenzo(ah)anthracene in PM10", "shortpl" : "5419"}
+,{"ct" : "HR", "pl" : "EC in PM2.5", "shortpl" : "1771"}
+,{"ct" : "HR", "pl" : "Hg0 + Hg-reactive", "shortpl" : "4813"}
+,{"ct" : "HR", "pl" : "Indeno-(1,2,3-cd)pyrene in PM", "shortpl" : "5655"}
+,{"ct" : "HR", "pl" : "K+ in PM2.5", "shortpl" : "1657"}
+,{"ct" : "HR", "pl" : "Mg2+ in PM2.5", "shortpl" : "1659"}
+,{"ct" : "HR", "pl" : "Na+  in PM2.5", "shortpl" : "1668"}
+,{"ct" : "HR", "pl" : "NH4+ in PM2.5", "shortpl" : "1045"}
+,{"ct" : "HR", "pl" : "Ni in PM10", "shortpl" : "5015"}
+,{"ct" : "HR", "pl" : "NO2", "shortpl" : "8"}
+,{"ct" : "HR", "pl" : "NO3- in PM2.5", "shortpl" : "1046"}
+,{"ct" : "HR", "pl" : "NOX as NO2", "shortpl" : "9"}
+,{"ct" : "HR", "pl" : "O3", "shortpl" : "7"}
+,{"ct" : "HR", "pl" : "OC in PM2.5", "shortpl" : "1772"}
+,{"ct" : "HR", "pl" : "Pb in PM10", "shortpl" : "5012"}
+,{"ct" : "HR", "pl" : "PM10", "shortpl" : "5"}
+,{"ct" : "HR", "pl" : "PM2.5", "shortpl" : "6001"}
+,{"ct" : "HR", "pl" : "SO2", "shortpl" : "1"}
+,{"ct" : "HR", "pl" : "SO42- in PM2.5", "shortpl" : "1047"}
+,{"ct" : "HU", "pl" : "As", "shortpl" : "7018"}
+,{"ct" : "HU", "pl" : "As in PM10", "shortpl" : "5018"}
+,{"ct" : "HU", "pl" : "BaP", "shortpl" : "7029"}
+,{"ct" : "HU", "pl" : "BaP in PM10", "shortpl" : "5029"}
+,{"ct" : "HU", "pl" : "Benzo(a)anthracene", "shortpl" : "611"}
+,{"ct" : "HU", "pl" : "Benzo(a)anthracene in PM10", "shortpl" : "5610"}
+,{"ct" : "HU", "pl" : "Benzo(b,j,k)fluoranthene", "shortpl" : "7380"}
+,{"ct" : "HU", "pl" : "Benzo(b,j,k)fluorantheneInPM1", "shortpl" : "5380"}
+,{"ct" : "HU", "pl" : "C6H5-C2H5", "shortpl" : "431"}
+,{"ct" : "HU", "pl" : "C6H5-CH3", "shortpl" : "21"}
+,{"ct" : "HU", "pl" : "C6H6", "shortpl" : "20"}
+,{"ct" : "HU", "pl" : "Cd", "shortpl" : "7014"}
+,{"ct" : "HU", "pl" : "Cd in PM10", "shortpl" : "5014"}
+,{"ct" : "HU", "pl" : "CO", "shortpl" : "10"}
+,{"ct" : "HU", "pl" : "Dibenzo(ah)anthracene", "shortpl" : "7419"}
+,{"ct" : "HU", "pl" : "Dibenzo(ah)anthracene in PM10", "shortpl" : "5419"}
+,{"ct" : "HU", "pl" : "Hg", "shortpl" : "7013"}
+,{"ct" : "HU", "pl" : "Indeno-(1,2,3-cd)pyrene", "shortpl" : "656"}
+,{"ct" : "HU", "pl" : "Indeno-(1,2,3-cd)pyrene in PM", "shortpl" : "5655"}
+,{"ct" : "HU", "pl" : "m,p-C6H4(CH3)2", "shortpl" : "464"}
+,{"ct" : "HU", "pl" : "Ni", "shortpl" : "7015"}
+,{"ct" : "HU", "pl" : "Ni in PM10", "shortpl" : "5015"}
+,{"ct" : "HU", "pl" : "NO2", "shortpl" : "8"}
+,{"ct" : "HU", "pl" : "NOX as NO2", "shortpl" : "9"}
+,{"ct" : "HU", "pl" : "O3", "shortpl" : "7"}
+,{"ct" : "HU", "pl" : "o-C6H4-(CH3)2", "shortpl" : "482"}
+,{"ct" : "HU", "pl" : "PM10", "shortpl" : "5"}
+,{"ct" : "HU", "pl" : "PM2.5", "shortpl" : "6001"}
+,{"ct" : "HU", "pl" : "SO2", "shortpl" : "1"}
+,{"ct" : "IE", "pl" : "Acenaphthene", "shortpl" : "351"}
+,{"ct" : "IE", "pl" : "Acenaphtylene", "shortpl" : "352"}
+,{"ct" : "IE", "pl" : "Anthracene", "shortpl" : "606"}
+,{"ct" : "IE", "pl" : "As", "shortpl" : "7018"}
+,{"ct" : "IE", "pl" : "As in PM10", "shortpl" : "5018"}
+,{"ct" : "IE", "pl" : "BaP", "shortpl" : "7029"}
+,{"ct" : "IE", "pl" : "BaP in PM10", "shortpl" : "5029"}
+,{"ct" : "IE", "pl" : "Benzo(a)anthracene", "shortpl" : "611"}
+,{"ct" : "IE", "pl" : "Benzo(a)anthracene in PM10", "shortpl" : "5610"}
+,{"ct" : "IE", "pl" : "Benzo(b)fluoranthene", "shortpl" : "618"}
+,{"ct" : "IE", "pl" : "Benzo(b)fluoranthene in PM10", "shortpl" : "5617"}
+,{"ct" : "IE", "pl" : "Benzo(b,j,k)fluorantheneInPM1", "shortpl" : "5380"}
+,{"ct" : "IE", "pl" : "Benzo(ghi)perylene", "shortpl" : "622"}
+,{"ct" : "IE", "pl" : "Benzo(j)fluoranthene in PM10", "shortpl" : "5759"}
+,{"ct" : "IE", "pl" : "Benzo(k)fluoranthene", "shortpl" : "627"}
+,{"ct" : "IE", "pl" : "Benzo(k)fluoranthene in PM10", "shortpl" : "5626"}
+,{"ct" : "IE", "pl" : "C6H5-C2H5", "shortpl" : "431"}
+,{"ct" : "IE", "pl" : "C6H5-CH3", "shortpl" : "21"}
+,{"ct" : "IE", "pl" : "C6H6", "shortpl" : "20"}
+,{"ct" : "IE", "pl" : "Ca2+ in PM2.5", "shortpl" : "1629"}
+,{"ct" : "IE", "pl" : "Cd", "shortpl" : "7014"}
+,{"ct" : "IE", "pl" : "Cd in PM10", "shortpl" : "5014"}
+,{"ct" : "IE", "pl" : "Chrysene", "shortpl" : "4406"}
+,{"ct" : "IE", "pl" : "Cl- in PM2.5", "shortpl" : "1631"}
+,{"ct" : "IE", "pl" : "CO", "shortpl" : "10"}
+,{"ct" : "IE", "pl" : "Dibenzo(ah)anthracene", "shortpl" : "7419"}
+,{"ct" : "IE", "pl" : "Dibenzo(ah)anthracene in PM10", "shortpl" : "5419"}
+,{"ct" : "IE", "pl" : "EC in PM2.5", "shortpl" : "1771"}
+,{"ct" : "IE", "pl" : "Fluoranthene", "shortpl" : "643"}
+,{"ct" : "IE", "pl" : "Fluorene", "shortpl" : "435"}
+,{"ct" : "IE", "pl" : "Hg0 + Hg-reactive", "shortpl" : "4813"}
+,{"ct" : "IE", "pl" : "Indeno-(1,2,3-cd)pyrene", "shortpl" : "656"}
+,{"ct" : "IE", "pl" : "Indeno-(1,2,3-cd)pyrene in PM", "shortpl" : "5655"}
+,{"ct" : "IE", "pl" : "K+ in PM2.5", "shortpl" : "1657"}
+,{"ct" : "IE", "pl" : "m,p-C6H4(CH3)2", "shortpl" : "464"}
+,{"ct" : "IE", "pl" : "Mg2+ in PM2.5", "shortpl" : "1659"}
+,{"ct" : "IE", "pl" : "Na+  in PM2.5", "shortpl" : "1668"}
+,{"ct" : "IE", "pl" : "Naphtalene", "shortpl" : "465"}
+,{"ct" : "IE", "pl" : "NH4+ in PM2.5", "shortpl" : "1045"}
+,{"ct" : "IE", "pl" : "Ni", "shortpl" : "7015"}
+,{"ct" : "IE", "pl" : "Ni in PM10", "shortpl" : "5015"}
+,{"ct" : "IE", "pl" : "NO2", "shortpl" : "8"}
+,{"ct" : "IE", "pl" : "NO3- in PM2.5", "shortpl" : "1046"}
+,{"ct" : "IE", "pl" : "NOX as NO2", "shortpl" : "9"}
+,{"ct" : "IE", "pl" : "O3", "shortpl" : "7"}
+,{"ct" : "IE", "pl" : "OC in PM2.5", "shortpl" : "1772"}
+,{"ct" : "IE", "pl" : "o-C6H4-(CH3)2", "shortpl" : "482"}
+,{"ct" : "IE", "pl" : "Pb", "shortpl" : "7012"}
+,{"ct" : "IE", "pl" : "Pb in PM10", "shortpl" : "5012"}
+,{"ct" : "IE", "pl" : "Phenanthrene", "shortpl" : "712"}
+,{"ct" : "IE", "pl" : "PM10", "shortpl" : "5"}
+,{"ct" : "IE", "pl" : "PM2.5", "shortpl" : "6001"}
+,{"ct" : "IE", "pl" : "Pyrene", "shortpl" : "715"}
+,{"ct" : "IE", "pl" : "SO2", "shortpl" : "1"}
+,{"ct" : "IE", "pl" : "SO42- in PM2.5", "shortpl" : "1047"}
+,{"ct" : "IS", "pl" : "CO", "shortpl" : "10"}
+,{"ct" : "IS", "pl" : "H2S", "shortpl" : "11"}
+,{"ct" : "IS", "pl" : "NO", "shortpl" : "38"}
+,{"ct" : "IS", "pl" : "NO2", "shortpl" : "8"}
+,{"ct" : "IS", "pl" : "NOX as NO2", "shortpl" : "9"}
+,{"ct" : "IS", "pl" : "PM10", "shortpl" : "5"}
+,{"ct" : "IS", "pl" : "PM2.5", "shortpl" : "6001"}
+,{"ct" : "IS", "pl" : "SO2", "shortpl" : "1"}
+,{"ct" : "IT", "pl" : "As in PM10", "shortpl" : "5018"}
+,{"ct" : "IT", "pl" : "BaP in PM10", "shortpl" : "5029"}
+,{"ct" : "IT", "pl" : "C6H6", "shortpl" : "20"}
+,{"ct" : "IT", "pl" : "Cd in PM10", "shortpl" : "5014"}
+,{"ct" : "IT", "pl" : "CO", "shortpl" : "10"}
+,{"ct" : "IT", "pl" : "Ni in PM10", "shortpl" : "5015"}
+,{"ct" : "IT", "pl" : "NO2", "shortpl" : "8"}
+,{"ct" : "IT", "pl" : "NOX as NO2", "shortpl" : "9"}
+,{"ct" : "IT", "pl" : "O3", "shortpl" : "7"}
+,{"ct" : "IT", "pl" : "Pb in PM10", "shortpl" : "5012"}
+,{"ct" : "IT", "pl" : "PM10", "shortpl" : "5"}
+,{"ct" : "IT", "pl" : "PM2.5", "shortpl" : "6001"}
+,{"ct" : "IT", "pl" : "SO2", "shortpl" : "1"}
+,{"ct" : "LT", "pl" : "1,2,3-C6H3(CH3)3", "shortpl" : "6012"}
+,{"ct" : "LT", "pl" : "1,2,4-C6H3(CH3)3", "shortpl" : "6011"}
+,{"ct" : "LT", "pl" : "1,3,5-C6H3(CH3)3", "shortpl" : "6013"}
+,{"ct" : "LT", "pl" : "As", "shortpl" : "7018"}
+,{"ct" : "LT", "pl" : "As in PM10", "shortpl" : "5018"}
+,{"ct" : "LT", "pl" : "BaP", "shortpl" : "7029"}
+,{"ct" : "LT", "pl" : "BaP in PM10", "shortpl" : "5029"}
+,{"ct" : "LT", "pl" : "Benzo(a)anthracene in PM10", "shortpl" : "5610"}
+,{"ct" : "LT", "pl" : "Benzo(b)fluoranthene in PM10", "shortpl" : "5617"}
+,{"ct" : "LT", "pl" : "Benzo(k)fluoranthene in PM10", "shortpl" : "5626"}
+,{"ct" : "LT", "pl" : "C2H6", "shortpl" : "428"}
+,{"ct" : "LT", "pl" : "C6H14", "shortpl" : "443"}
+,{"ct" : "LT", "pl" : "C6H5-CH3", "shortpl" : "21"}
+,{"ct" : "LT", "pl" : "C6H6", "shortpl" : "20"}
+,{"ct" : "LT", "pl" : "Ca2+ in PM2.5", "shortpl" : "1629"}
+,{"ct" : "LT", "pl" : "Cd", "shortpl" : "7014"}
+,{"ct" : "LT", "pl" : "Cd in PM10", "shortpl" : "5014"}
+,{"ct" : "LT", "pl" : "CH2=CH-CH=CH2", "shortpl" : "24"}
+,{"ct" : "LT", "pl" : "cis-H3C-CH=CH-CH3", "shortpl" : "6007"}
+,{"ct" : "LT", "pl" : "Cl- in PM2.5", "shortpl" : "1631"}
+,{"ct" : "LT", "pl" : "CO", "shortpl" : "10"}
+,{"ct" : "LT", "pl" : "Dibenzo(ah)anthracene in PM10", "shortpl" : "5419"}
+,{"ct" : "LT", "pl" : "EC in PM2.5", "shortpl" : "1771"}
+,{"ct" : "LT", "pl" : "H2C=CH-CH2-CH2-CH3", "shortpl" : "6008"}
+,{"ct" : "LT", "pl" : "H2C=CH-CH2-CH3", "shortpl" : "6005"}
+,{"ct" : "LT", "pl" : "H3C-CH(CH3)2", "shortpl" : "447"}
+,{"ct" : "LT", "pl" : "H3C-CH2-CH2-CH3", "shortpl" : "394"}
+,{"ct" : "LT", "pl" : "Hg", "shortpl" : "7013"}
+,{"ct" : "LT", "pl" : "Hg0 + Hg-reactive", "shortpl" : "4813"}
+,{"ct" : "LT", "pl" : "HNO3+NO3", "shortpl" : "67"}
+,{"ct" : "LT", "pl" : "Indeno-(1,2,3-cd)pyrene in PM", "shortpl" : "5655"}
+,{"ct" : "LT", "pl" : "K+ in PM2.5", "shortpl" : "1657"}
+,{"ct" : "LT", "pl" : "m,p-C6H4(CH3)2", "shortpl" : "464"}
+,{"ct" : "LT", "pl" : "Mg2+ in PM2.5", "shortpl" : "1659"}
+,{"ct" : "LT", "pl" : "Na+  in PM2.5", "shortpl" : "1668"}
+,{"ct" : "LT", "pl" : "NH3+NH4", "shortpl" : "68"}
+,{"ct" : "LT", "pl" : "NH4+ in PM2.5", "shortpl" : "1045"}
+,{"ct" : "LT", "pl" : "Ni", "shortpl" : "7015"}
+,{"ct" : "LT", "pl" : "Ni in PM10", "shortpl" : "5015"}
+,{"ct" : "LT", "pl" : "NO2", "shortpl" : "8"}
+,{"ct" : "LT", "pl" : "NO3- in PM2.5", "shortpl" : "1046"}
+,{"ct" : "LT", "pl" : "NOX as NO2", "shortpl" : "9"}
+,{"ct" : "LT", "pl" : "O3", "shortpl" : "7"}
+,{"ct" : "LT", "pl" : "OC in PM2.5", "shortpl" : "1772"}
+,{"ct" : "LT", "pl" : "Pb in PM10", "shortpl" : "5012"}
+,{"ct" : "LT", "pl" : "PM10", "shortpl" : "5"}
+,{"ct" : "LT", "pl" : "PM2.5", "shortpl" : "6001"}
+,{"ct" : "LT", "pl" : "SO2", "shortpl" : "1"}
+,{"ct" : "LT", "pl" : "SO42- in PM2.5", "shortpl" : "1047"}
+,{"ct" : "LU", "pl" : "As in PM10", "shortpl" : "5018"}
+,{"ct" : "LU", "pl" : "BaP in PM10", "shortpl" : "5029"}
+,{"ct" : "LU", "pl" : "C6H5-CH3", "shortpl" : "21"}
+,{"ct" : "LU", "pl" : "C6H6", "shortpl" : "20"}
+,{"ct" : "LU", "pl" : "Cd in PM10", "shortpl" : "5014"}
+,{"ct" : "LU", "pl" : "CO", "shortpl" : "10"}
+,{"ct" : "LU", "pl" : "Ni in PM10", "shortpl" : "5015"}
+,{"ct" : "LU", "pl" : "NO", "shortpl" : "38"}
+,{"ct" : "LU", "pl" : "NO2", "shortpl" : "8"}
+,{"ct" : "LU", "pl" : "NOX as NO2", "shortpl" : "9"}
+,{"ct" : "LU", "pl" : "O3", "shortpl" : "7"}
+,{"ct" : "LU", "pl" : "Pb in PM10", "shortpl" : "5012"}
+,{"ct" : "LU", "pl" : "PM10", "shortpl" : "5"}
+,{"ct" : "LU", "pl" : "PM2.5", "shortpl" : "6001"}
+,{"ct" : "LU", "pl" : "SO2", "shortpl" : "1"}
+,{"ct" : "LV", "pl" : "As", "shortpl" : "2018"}
+,{"ct" : "LV", "pl" : "As", "shortpl" : "7018"}
+,{"ct" : "LV", "pl" : "As in PM10", "shortpl" : "5018"}
+,{"ct" : "LV", "pl" : "BaP", "shortpl" : "29"}
+,{"ct" : "LV", "pl" : "BaP", "shortpl" : "7029"}
+,{"ct" : "LV", "pl" : "BaP in PM10", "shortpl" : "5029"}
+,{"ct" : "LV", "pl" : "Benzo(a)anthracene", "shortpl" : "610"}
+,{"ct" : "LV", "pl" : "Benzo(a)anthracene in PM10", "shortpl" : "5610"}
+,{"ct" : "LV", "pl" : "Benzo(b)fluoranthene", "shortpl" : "617"}
+,{"ct" : "LV", "pl" : "Benzo(b)fluoranthene in PM10", "shortpl" : "5617"}
+,{"ct" : "LV", "pl" : "Benzo(k)fluoranthene", "shortpl" : "626"}
+,{"ct" : "LV", "pl" : "Benzo(k)fluoranthene in PM10", "shortpl" : "5626"}
+,{"ct" : "LV", "pl" : "C6H5-CH3", "shortpl" : "21"}
+,{"ct" : "LV", "pl" : "C6H6", "shortpl" : "20"}
+,{"ct" : "LV", "pl" : "Ca2+ in PM2.5", "shortpl" : "1629"}
+,{"ct" : "LV", "pl" : "Cd", "shortpl" : "2014"}
+,{"ct" : "LV", "pl" : "Cd", "shortpl" : "7014"}
+,{"ct" : "LV", "pl" : "Cd in PM10", "shortpl" : "5014"}
+,{"ct" : "LV", "pl" : "Cl- in PM2.5", "shortpl" : "1631"}
+,{"ct" : "LV", "pl" : "CO", "shortpl" : "10"}
+,{"ct" : "LV", "pl" : "Dibenzo(ah)anthracene", "shortpl" : "419"}
+,{"ct" : "LV", "pl" : "Dibenzo(ah)anthracene in PM10", "shortpl" : "5419"}
+,{"ct" : "LV", "pl" : "Indeno-(1,2,3-cd)pyrene", "shortpl" : "655"}
+,{"ct" : "LV", "pl" : "Indeno-(1,2,3-cd)pyrene in PM", "shortpl" : "5655"}
+,{"ct" : "LV", "pl" : "K+ in PM2.5", "shortpl" : "1657"}
+,{"ct" : "LV", "pl" : "Mg2+ in PM2.5", "shortpl" : "1659"}
+,{"ct" : "LV", "pl" : "Na+  in PM2.5", "shortpl" : "1668"}
+,{"ct" : "LV", "pl" : "NH4+ in PM2.5", "shortpl" : "1045"}
+,{"ct" : "LV", "pl" : "Ni", "shortpl" : "2015"}
+,{"ct" : "LV", "pl" : "Ni", "shortpl" : "7015"}
+,{"ct" : "LV", "pl" : "Ni in PM10", "shortpl" : "5015"}
+,{"ct" : "LV", "pl" : "NO", "shortpl" : "38"}
+,{"ct" : "LV", "pl" : "NO2", "shortpl" : "8"}
+,{"ct" : "LV", "pl" : "NO3- in PM2.5", "shortpl" : "1046"}
+,{"ct" : "LV", "pl" : "NOX as NO2", "shortpl" : "9"}
+,{"ct" : "LV", "pl" : "O3", "shortpl" : "7"}
+,{"ct" : "LV", "pl" : "Pb", "shortpl" : "2012"}
+,{"ct" : "LV", "pl" : "Pb", "shortpl" : "7012"}
+,{"ct" : "LV", "pl" : "Pb in PM10", "shortpl" : "5012"}
+,{"ct" : "LV", "pl" : "PM10", "shortpl" : "5"}
+,{"ct" : "LV", "pl" : "PM2.5", "shortpl" : "6001"}
+,{"ct" : "LV", "pl" : "SO2", "shortpl" : "1"}
+,{"ct" : "LV", "pl" : "SO42- in PM2.5", "shortpl" : "1047"}
+,{"ct" : "ME", "pl" : "CO", "shortpl" : "10"}
+,{"ct" : "ME", "pl" : "NO", "shortpl" : "38"}
+,{"ct" : "ME", "pl" : "NO2", "shortpl" : "8"}
+,{"ct" : "ME", "pl" : "NOX as NO2", "shortpl" : "9"}
+,{"ct" : "ME", "pl" : "O3", "shortpl" : "7"}
+,{"ct" : "ME", "pl" : "PM10", "shortpl" : "5"}
+,{"ct" : "ME", "pl" : "SO2", "shortpl" : "1"}
+,{"ct" : "MK", "pl" : "BS", "shortpl" : "6"}
+,{"ct" : "MK", "pl" : "C6H6", "shortpl" : "20"}
+,{"ct" : "MK", "pl" : "CO", "shortpl" : "10"}
+,{"ct" : "MK", "pl" : "NO", "shortpl" : "38"}
+,{"ct" : "MK", "pl" : "NO2", "shortpl" : "8"}
+,{"ct" : "MK", "pl" : "NOX as NO2", "shortpl" : "9"}
+,{"ct" : "MK", "pl" : "O3", "shortpl" : "7"}
+,{"ct" : "MK", "pl" : "PM10", "shortpl" : "5"}
+,{"ct" : "MK", "pl" : "PM2.5", "shortpl" : "6001"}
+,{"ct" : "MK", "pl" : "SO2", "shortpl" : "1"}
+,{"ct" : "MT", "pl" : "BaP in PM10", "shortpl" : "5029"}
+,{"ct" : "MT", "pl" : "Benzo(a)anthracene in PM10", "shortpl" : "5610"}
+,{"ct" : "MT", "pl" : "Benzo(b)fluoranthene in PM10", "shortpl" : "5617"}
+,{"ct" : "MT", "pl" : "Benzo(j)fluoranthene in PM10", "shortpl" : "5759"}
+,{"ct" : "MT", "pl" : "Benzo(k)fluoranthene in PM10", "shortpl" : "5626"}
+,{"ct" : "MT", "pl" : "C6H5-C2H5", "shortpl" : "431"}
+,{"ct" : "MT", "pl" : "C6H5-CH3", "shortpl" : "21"}
+,{"ct" : "MT", "pl" : "C6H6", "shortpl" : "20"}
+,{"ct" : "MT", "pl" : "CO", "shortpl" : "10"}
+,{"ct" : "MT", "pl" : "Dibenzo(ah)anthracene in PM10", "shortpl" : "5419"}
+,{"ct" : "MT", "pl" : "Hg0", "shortpl" : "4013"}
+,{"ct" : "MT", "pl" : "Indeno-(1,2,3-cd)pyrene in PM", "shortpl" : "5655"}
+,{"ct" : "MT", "pl" : "m,p-C6H4(CH3)2", "shortpl" : "464"}
+,{"ct" : "MT", "pl" : "NO", "shortpl" : "38"}
+,{"ct" : "MT", "pl" : "NO2", "shortpl" : "8"}
+,{"ct" : "MT", "pl" : "NOX as NO2", "shortpl" : "9"}
+,{"ct" : "MT", "pl" : "O3", "shortpl" : "7"}
+,{"ct" : "MT", "pl" : "o-C6H4-(CH3)2", "shortpl" : "482"}
+,{"ct" : "MT", "pl" : "PM10", "shortpl" : "5"}
+,{"ct" : "MT", "pl" : "PM2.5", "shortpl" : "6001"}
+,{"ct" : "MT", "pl" : "SO2", "shortpl" : "1"}
+,{"ct" : "NL", "pl" : "As", "shortpl" : "2018"}
+,{"ct" : "NL", "pl" : "As in PM10", "shortpl" : "5018"}
+,{"ct" : "NL", "pl" : "As in PM2.5", "shortpl" : "1018"}
+,{"ct" : "NL", "pl" : "BaP in PM10", "shortpl" : "5029"}
+,{"ct" : "NL", "pl" : "Benzo(a)anthracene in PM10", "shortpl" : "5610"}
+,{"ct" : "NL", "pl" : "Benzo(b,j,k)fluorantheneInPM1", "shortpl" : "5380"}
+,{"ct" : "NL", "pl" : "Benzo(ghi)perylene", "shortpl" : "622"}
+,{"ct" : "NL", "pl" : "Black Carbon", "shortpl" : "391"}
+,{"ct" : "NL", "pl" : "BS", "shortpl" : "6"}
+,{"ct" : "NL", "pl" : "C6H5-CH3", "shortpl" : "21"}
+,{"ct" : "NL", "pl" : "C6H6", "shortpl" : "20"}
+,{"ct" : "NL", "pl" : "Ca++", "shortpl" : "629"}
+,{"ct" : "NL", "pl" : "Ca2+ in PM2.5", "shortpl" : "1629"}
+,{"ct" : "NL", "pl" : "Cd", "shortpl" : "2014"}
+,{"ct" : "NL", "pl" : "Cd in PM10", "shortpl" : "5014"}
+,{"ct" : "NL", "pl" : "Cd in PM2.5", "shortpl" : "1014"}
+,{"ct" : "NL", "pl" : "Chrysene", "shortpl" : "4406"}
+,{"ct" : "NL", "pl" : "Cl-", "shortpl" : "631"}
+,{"ct" : "NL", "pl" : "Cl- in PM2.5", "shortpl" : "1631"}
+,{"ct" : "NL", "pl" : "CO", "shortpl" : "10"}
+,{"ct" : "NL", "pl" : "Co", "shortpl" : "2064"}
+,{"ct" : "NL", "pl" : "Cr", "shortpl" : "2016"}
+,{"ct" : "NL", "pl" : "Cu", "shortpl" : "2073"}
+,{"ct" : "NL", "pl" : "Dibenzo(ah)anthracene in PM10", "shortpl" : "5419"}
+,{"ct" : "NL", "pl" : "EC in PM2.5", "shortpl" : "1771"}
+,{"ct" : "NL", "pl" : "Fe", "shortpl" : "2065"}
+,{"ct" : "NL", "pl" : "Indeno-(1,2,3-cd)pyrene in PM", "shortpl" : "5655"}
+,{"ct" : "NL", "pl" : "K+ in PM2.5", "shortpl" : "1657"}
+,{"ct" : "NL", "pl" : "m,p-C6H4(CH3)2", "shortpl" : "464"}
+,{"ct" : "NL", "pl" : "Mg++", "shortpl" : "659"}
+,{"ct" : "NL", "pl" : "Mg2+ in PM2.5", "shortpl" : "1659"}
+,{"ct" : "NL", "pl" : "Na+", "shortpl" : "668"}
+,{"ct" : "NL", "pl" : "Na+  in PM2.5", "shortpl" : "1668"}
+,{"ct" : "NL", "pl" : "N-DEP", "shortpl" : "36"}
+,{"ct" : "NL", "pl" : "NH3", "shortpl" : "35"}
+,{"ct" : "NL", "pl" : "NH4", "shortpl" : "45"}
+,{"ct" : "NL", "pl" : "NH4+ in PM2.5", "shortpl" : "1045"}
+,{"ct" : "NL", "pl" : "Ni", "shortpl" : "2015"}
+,{"ct" : "NL", "pl" : "Ni in PM10", "shortpl" : "5015"}
+,{"ct" : "NL", "pl" : "Ni in PM2.5", "shortpl" : "1015"}
+,{"ct" : "NL", "pl" : "NO", "shortpl" : "38"}
+,{"ct" : "NL", "pl" : "NO2", "shortpl" : "8"}
+,{"ct" : "NL", "pl" : "NO3", "shortpl" : "46"}
+,{"ct" : "NL", "pl" : "NO3- in PM2.5", "shortpl" : "1046"}
+,{"ct" : "NL", "pl" : "NOX as NO2", "shortpl" : "9"}
+,{"ct" : "NL", "pl" : "O3", "shortpl" : "7"}
+,{"ct" : "NL", "pl" : "OC in PM2.5", "shortpl" : "1772"}
+,{"ct" : "NL", "pl" : "Pb", "shortpl" : "2012"}
+,{"ct" : "NL", "pl" : "Pb in PM10", "shortpl" : "5012"}
+,{"ct" : "NL", "pl" : "Pb in PM2.5", "shortpl" : "1012"}
+,{"ct" : "NL", "pl" : "PM10", "shortpl" : "5"}
+,{"ct" : "NL", "pl" : "PM2.5", "shortpl" : "6001"}
+,{"ct" : "NL", "pl" : "precip_amount", "shortpl" : "753"}
+,{"ct" : "NL", "pl" : "S-DEP", "shortpl" : "37"}
+,{"ct" : "NL", "pl" : "SO2", "shortpl" : "1"}
+,{"ct" : "NL", "pl" : "SO4 (H2SO4 aerosols) (SO4--)", "shortpl" : "47"}
+,{"ct" : "NL", "pl" : "SO42- in PM2.5", "shortpl" : "1047"}
+,{"ct" : "NL", "pl" : "Vanadium", "shortpl" : "728"}
+,{"ct" : "NL", "pl" : "Zn", "shortpl" : "2063"}
+,{"ct" : "NL", "pl" : "Zn", "shortpl" : "63"}
+,{"ct" : "NL", "pl" : "Zn in PM2.5", "shortpl" : "1063"}
+,{"ct" : "NO", "pl" : "As", "shortpl" : "18"}
+,{"ct" : "NO", "pl" : "As in PM10", "shortpl" : "5018"}
+,{"ct" : "NO", "pl" : "BaP", "shortpl" : "6015"}
+,{"ct" : "NO", "pl" : "BaP in PM10", "shortpl" : "5029"}
+,{"ct" : "NO", "pl" : "BaP in PM10", "shortpl" : "5129"}
+,{"ct" : "NO", "pl" : "C6H6", "shortpl" : "20"}
+,{"ct" : "NO", "pl" : "Cd", "shortpl" : "14"}
+,{"ct" : "NO", "pl" : "Cd in PM10", "shortpl" : "5014"}
+,{"ct" : "NO", "pl" : "CO", "shortpl" : "10"}
+,{"ct" : "NO", "pl" : "Ni", "shortpl" : "15"}
+,{"ct" : "NO", "pl" : "Ni in PM10", "shortpl" : "5015"}
+,{"ct" : "NO", "pl" : "NO", "shortpl" : "38"}
+,{"ct" : "NO", "pl" : "NO2", "shortpl" : "8"}
+,{"ct" : "NO", "pl" : "NOX as NO2", "shortpl" : "9"}
+,{"ct" : "NO", "pl" : "O3", "shortpl" : "7"}
+,{"ct" : "NO", "pl" : "PM10", "shortpl" : "5"}
+,{"ct" : "NO", "pl" : "PM2.5", "shortpl" : "6001"}
+,{"ct" : "NO", "pl" : "SO2", "shortpl" : "1"}
+,{"ct" : "PL", "pl" : "(CH3)2-CH-CH2-CH2-CH3", "shortpl" : "316"}
+,{"ct" : "PL", "pl" : "(CH3)3-C-CH2-CH-(CH3)2", "shortpl" : "449"}
+,{"ct" : "PL", "pl" : "1,2,3-C6H3(CH3)3", "shortpl" : "6012"}
+,{"ct" : "PL", "pl" : "1,2,4-C6H3(CH3)3", "shortpl" : "6011"}
+,{"ct" : "PL", "pl" : "1,3,5-C6H3(CH3)3", "shortpl" : "6013"}
+,{"ct" : "PL", "pl" : "As", "shortpl" : "7018"}
+,{"ct" : "PL", "pl" : "As in PM10", "shortpl" : "5018"}
+,{"ct" : "PL", "pl" : "BaP", "shortpl" : "7029"}
+,{"ct" : "PL", "pl" : "BaP in PM10", "shortpl" : "5029"}
+,{"ct" : "PL", "pl" : "Benzo(a)anthracene", "shortpl" : "611"}
+,{"ct" : "PL", "pl" : "Benzo(a)anthracene in PM10", "shortpl" : "5610"}
+,{"ct" : "PL", "pl" : "Benzo(b)fluoranthene", "shortpl" : "618"}
+,{"ct" : "PL", "pl" : "Benzo(b)fluoranthene in PM10", "shortpl" : "5617"}
+,{"ct" : "PL", "pl" : "Benzo(j)fluoranthene", "shortpl" : "760"}
+,{"ct" : "PL", "pl" : "Benzo(j)fluoranthene in PM10", "shortpl" : "5759"}
+,{"ct" : "PL", "pl" : "Benzo(k)fluoranthene", "shortpl" : "627"}
+,{"ct" : "PL", "pl" : "Benzo(k)fluoranthene in PM10", "shortpl" : "5626"}
+,{"ct" : "PL", "pl" : "C2H6", "shortpl" : "428"}
+,{"ct" : "PL", "pl" : "C6H14", "shortpl" : "443"}
+,{"ct" : "PL", "pl" : "C6H5-C2H5", "shortpl" : "431"}
+,{"ct" : "PL", "pl" : "C6H5-CH3", "shortpl" : "21"}
+,{"ct" : "PL", "pl" : "C6H6", "shortpl" : "20"}
+,{"ct" : "PL", "pl" : "C7H16", "shortpl" : "441"}
+,{"ct" : "PL", "pl" : "C8H18", "shortpl" : "475"}
+,{"ct" : "PL", "pl" : "Ca2+ in PM2.5", "shortpl" : "1629"}
+,{"ct" : "PL", "pl" : "Cd", "shortpl" : "7014"}
+,{"ct" : "PL", "pl" : "Cd in PM10", "shortpl" : "5014"}
+,{"ct" : "PL", "pl" : "CH2=CH-C(CH3)=CH2", "shortpl" : "451"}
+,{"ct" : "PL", "pl" : "CH2=CH-CH=CH2", "shortpl" : "24"}
+,{"ct" : "PL", "pl" : "CH2=CH-CH3", "shortpl" : "505"}
+,{"ct" : "PL", "pl" : "cis-H3C-CH=CH-CH3", "shortpl" : "6007"}
+,{"ct" : "PL", "pl" : "Cl- in PM2.5", "shortpl" : "1631"}
+,{"ct" : "PL", "pl" : "CO", "shortpl" : "10"}
+,{"ct" : "PL", "pl" : "Dibenzo(ah)anthracene", "shortpl" : "7419"}
+,{"ct" : "PL", "pl" : "Dibenzo(ah)anthracene in PM10", "shortpl" : "5419"}
+,{"ct" : "PL", "pl" : "EC in PM2.5", "shortpl" : "1771"}
+,{"ct" : "PL", "pl" : "H2C=CH2", "shortpl" : "430"}
+,{"ct" : "PL", "pl" : "H2C=CH-CH2-CH2-CH3", "shortpl" : "6008"}
+,{"ct" : "PL", "pl" : "H2C=CH-CH2-CH3", "shortpl" : "6005"}
+,{"ct" : "PL", "pl" : "H3C-(CH2)3-CH3", "shortpl" : "486"}
+,{"ct" : "PL", "pl" : "H3C-CH(CH3)2", "shortpl" : "447"}
+,{"ct" : "PL", "pl" : "H3C-CH2-CH(CH3)2", "shortpl" : "450"}
+,{"ct" : "PL", "pl" : "H3C-CH2-CH2-CH3", "shortpl" : "394"}
+,{"ct" : "PL", "pl" : "H3C-CH2-CH3", "shortpl" : "503"}
+,{"ct" : "PL", "pl" : "H3C-HC=CH-CH2-CH3", "shortpl" : "6009"}
+,{"ct" : "PL", "pl" : "HC=CH", "shortpl" : "432"}
+,{"ct" : "PL", "pl" : "HCHO", "shortpl" : "25"}
+,{"ct" : "PL", "pl" : "Hg", "shortpl" : "7013"}
+,{"ct" : "PL", "pl" : "Hg0 + Hg-reactive", "shortpl" : "4813"}
+,{"ct" : "PL", "pl" : "Indeno-(1,2,3-cd)pyrene", "shortpl" : "656"}
+,{"ct" : "PL", "pl" : "Indeno-(1,2,3-cd)pyrene in PM", "shortpl" : "5655"}
+,{"ct" : "PL", "pl" : "K+ in PM2.5", "shortpl" : "1657"}
+,{"ct" : "PL", "pl" : "m,p-C6H4(CH3)2", "shortpl" : "464"}
+,{"ct" : "PL", "pl" : "Mg2+ in PM2.5", "shortpl" : "1659"}
+,{"ct" : "PL", "pl" : "Na+  in PM2.5", "shortpl" : "1668"}
+,{"ct" : "PL", "pl" : "NH4+ in PM2.5", "shortpl" : "1045"}
+,{"ct" : "PL", "pl" : "Ni", "shortpl" : "7015"}
+,{"ct" : "PL", "pl" : "Ni in PM10", "shortpl" : "5015"}
+,{"ct" : "PL", "pl" : "NO2", "shortpl" : "8"}
+,{"ct" : "PL", "pl" : "NO3- in PM2.5", "shortpl" : "1046"}
+,{"ct" : "PL", "pl" : "NOX as NO2", "shortpl" : "9"}
+,{"ct" : "PL", "pl" : "O3", "shortpl" : "7"}
+,{"ct" : "PL", "pl" : "OC in PM2.5", "shortpl" : "1772"}
+,{"ct" : "PL", "pl" : "o-C6H4-(CH3)2", "shortpl" : "482"}
+,{"ct" : "PL", "pl" : "Pb in PM10", "shortpl" : "5012"}
+,{"ct" : "PL", "pl" : "PM10", "shortpl" : "5"}
+,{"ct" : "PL", "pl" : "PM2.5", "shortpl" : "6001"}
+,{"ct" : "PL", "pl" : "SO2", "shortpl" : "1"}
+,{"ct" : "PL", "pl" : "SO42- in PM2.5", "shortpl" : "1047"}
+,{"ct" : "PL", "pl" : "trans-H3C-CH=CH-CH3", "shortpl" : "6006"}
+,{"ct" : "PT", "pl" : "Aldrin", "shortpl" : "356"}
+,{"ct" : "PT", "pl" : "alpha-HCH", "shortpl" : "730"}
+,{"ct" : "PT", "pl" : "Anthracene", "shortpl" : "607"}
+,{"ct" : "PT", "pl" : "Aromatics (except C6H6)", "shortpl" : "53"}
+,{"ct" : "PT", "pl" : "As", "shortpl" : "2018"}
+,{"ct" : "PT", "pl" : "As in PM10", "shortpl" : "5018"}
+,{"ct" : "PT", "pl" : "BaP", "shortpl" : "29"}
+,{"ct" : "PT", "pl" : "BaP in PM10", "shortpl" : "5029"}
+,{"ct" : "PT", "pl" : "Benzo(a)anthracene", "shortpl" : "610"}
+,{"ct" : "PT", "pl" : "Benzo(a)anthracene in PM10", "shortpl" : "5610"}
+,{"ct" : "PT", "pl" : "Benzo(b)fluoranthene", "shortpl" : "617"}
+,{"ct" : "PT", "pl" : "Benzo(b)fluoranthene in PM10", "shortpl" : "5617"}
+,{"ct" : "PT", "pl" : "Benzo(ghi)perylene", "shortpl" : "623"}
+,{"ct" : "PT", "pl" : "Benzo(k)fluoranthene", "shortpl" : "626"}
+,{"ct" : "PT", "pl" : "Benzo(k)fluoranthene in PM10", "shortpl" : "5626"}
+,{"ct" : "PT", "pl" : "C6H5-C2H5", "shortpl" : "431"}
+,{"ct" : "PT", "pl" : "C6H5-CH3", "shortpl" : "21"}
+,{"ct" : "PT", "pl" : "C6H6", "shortpl" : "20"}
+,{"ct" : "PT", "pl" : "Ca++", "shortpl" : "630"}
+,{"ct" : "PT", "pl" : "Ca2+ in PM10", "shortpl" : "5629"}
+,{"ct" : "PT", "pl" : "Ca2+ in PM2.5", "shortpl" : "1629"}
+,{"ct" : "PT", "pl" : "Cd", "shortpl" : "2014"}
+,{"ct" : "PT", "pl" : "Cd in PM10", "shortpl" : "5014"}
+,{"ct" : "PT", "pl" : "Chrysene", "shortpl" : "406"}
+,{"ct" : "PT", "pl" : "Cl-", "shortpl" : "632"}
+,{"ct" : "PT", "pl" : "Cl- in PM10", "shortpl" : "5631"}
+,{"ct" : "PT", "pl" : "Cl- in PM2.5", "shortpl" : "1631"}
+,{"ct" : "PT", "pl" : "CO", "shortpl" : "10"}
+,{"ct" : "PT", "pl" : "Cr", "shortpl" : "2016"}
+,{"ct" : "PT", "pl" : "Cu", "shortpl" : "2073"}
+,{"ct" : "PT", "pl" : "Dibenzo(ah)anthracene", "shortpl" : "419"}
+,{"ct" : "PT", "pl" : "Dibenzo(ah)anthracene in PM10", "shortpl" : "5419"}
+,{"ct" : "PT", "pl" : "Dieldrin", "shortpl" : "641"}
+,{"ct" : "PT", "pl" : "EC in PM10", "shortpl" : "5771"}
+,{"ct" : "PT", "pl" : "EC in PM2.5", "shortpl" : "1771"}
+,{"ct" : "PT", "pl" : "Endrin", "shortpl" : "426"}
+,{"ct" : "PT", "pl" : "Fluoranthene", "shortpl" : "644"}
+,{"ct" : "PT", "pl" : "gamma-HCH", "shortpl" : "739"}
+,{"ct" : "PT", "pl" : "HC > C6 (excl. AROM. & CHLH)", "shortpl" : "52"}
+,{"ct" : "PT", "pl" : "HC C2-C6(excl. AROM. & CHLH)", "shortpl" : "51"}
+,{"ct" : "PT", "pl" : "HCB", "shortpl" : "650"}
+,{"ct" : "PT", "pl" : "Heptachlor", "shortpl" : "440"}
+,{"ct" : "PT", "pl" : "Heptachlor Epoxide", "shortpl" : "652"}
+,{"ct" : "PT", "pl" : "Hg", "shortpl" : "2013"}
+,{"ct" : "PT", "pl" : "HNO3", "shortpl" : "50"}
+,{"ct" : "PT", "pl" : "Indeno-(1,2,3-cd)pyrene", "shortpl" : "655"}
+,{"ct" : "PT", "pl" : "Indeno-(1,2,3-cd)pyrene in PM", "shortpl" : "5655"}
+,{"ct" : "PT", "pl" : "K+", "shortpl" : "658"}
+,{"ct" : "PT", "pl" : "K+ in PM10", "shortpl" : "5657"}
+,{"ct" : "PT", "pl" : "K+ in PM2.5", "shortpl" : "1657"}
+,{"ct" : "PT", "pl" : "m,p-C6H4(CH3)2", "shortpl" : "464"}
+,{"ct" : "PT", "pl" : "Mg++", "shortpl" : "660"}
+,{"ct" : "PT", "pl" : "Mg2+ in PM10", "shortpl" : "5659"}
+,{"ct" : "PT", "pl" : "Mg2+ in PM2.5", "shortpl" : "1659"}
+,{"ct" : "PT", "pl" : "Na+", "shortpl" : "669"}
+,{"ct" : "PT", "pl" : "Na+  in PM10", "shortpl" : "5668"}
+,{"ct" : "PT", "pl" : "Na+  in PM2.5", "shortpl" : "1668"}
+,{"ct" : "PT", "pl" : "NH4", "shortpl" : "45"}
+,{"ct" : "PT", "pl" : "NH4+", "shortpl" : "664"}
+,{"ct" : "PT", "pl" : "NH4+ in PM10", "shortpl" : "5045"}
+,{"ct" : "PT", "pl" : "NH4+ in PM2.5", "shortpl" : "1045"}
+,{"ct" : "PT", "pl" : "Ni", "shortpl" : "2015"}
+,{"ct" : "PT", "pl" : "Ni in PM10", "shortpl" : "5015"}
+,{"ct" : "PT", "pl" : "NO", "shortpl" : "38"}
+,{"ct" : "PT", "pl" : "NO2", "shortpl" : "8"}
+,{"ct" : "PT", "pl" : "NO3-", "shortpl" : "666"}
+,{"ct" : "PT", "pl" : "NO3- in PM10", "shortpl" : "5046"}
+,{"ct" : "PT", "pl" : "NOX as NO2", "shortpl" : "9"}
+,{"ct" : "PT", "pl" : "O3", "shortpl" : "7"}
+,{"ct" : "PT", "pl" : "OC in PM10", "shortpl" : "5772"}
+,{"ct" : "PT", "pl" : "OC in PM2.5", "shortpl" : "1772"}
+,{"ct" : "PT", "pl" : "o-C6H4-(CH3)2", "shortpl" : "482"}
+,{"ct" : "PT", "pl" : "Pb", "shortpl" : "2012"}
+,{"ct" : "PT", "pl" : "Pb in PM10", "shortpl" : "5012"}
+,{"ct" : "PT", "pl" : "PCB-101", "shortpl" : "671"}
+,{"ct" : "PT", "pl" : "PCB-128", "shortpl" : "333"}
+,{"ct" : "PT", "pl" : "PCB-153", "shortpl" : "681"}
+,{"ct" : "PT", "pl" : "PCB-180", "shortpl" : "687"}
+,{"ct" : "PT", "pl" : "PCB-28", "shortpl" : "696"}
+,{"ct" : "PT", "pl" : "PCB-31", "shortpl" : "347"}
+,{"ct" : "PT", "pl" : "PCB-52", "shortpl" : "702"}
+,{"ct" : "PT", "pl" : "Phenanthrene", "shortpl" : "713"}
+,{"ct" : "PT", "pl" : "PM10", "shortpl" : "5"}
+,{"ct" : "PT", "pl" : "PM2.5", "shortpl" : "6001"}
+,{"ct" : "PT", "pl" : "Pyrene", "shortpl" : "716"}
+,{"ct" : "PT", "pl" : "SO2", "shortpl" : "1"}
+,{"ct" : "PT", "pl" : "SO4--", "shortpl" : "719"}
+,{"ct" : "PT", "pl" : "SO4 (H2SO4 aerosols) (SO4--)", "shortpl" : "47"}
+,{"ct" : "PT", "pl" : "SO42-  in PM10", "shortpl" : "5047"}
+,{"ct" : "PT", "pl" : "SO42- in PM2.5", "shortpl" : "1047"}
+,{"ct" : "PT", "pl" : "Valeraldehyde", "shortpl" : "485"}
+,{"ct" : "PT", "pl" : "Zn", "shortpl" : "2063"}
+,{"ct" : "RO", "pl" : "As in PM10", "shortpl" : "5018"}
+,{"ct" : "RO", "pl" : "C6H6", "shortpl" : "20"}
+,{"ct" : "RO", "pl" : "Cd in PM10", "shortpl" : "5014"}
+,{"ct" : "RO", "pl" : "CO", "shortpl" : "10"}
+,{"ct" : "RO", "pl" : "Ni in PM10", "shortpl" : "5015"}
+,{"ct" : "RO", "pl" : "NO2", "shortpl" : "8"}
+,{"ct" : "RO", "pl" : "NOX as NO2", "shortpl" : "9"}
+,{"ct" : "RO", "pl" : "O3", "shortpl" : "7"}
+,{"ct" : "RO", "pl" : "Pb in PM10", "shortpl" : "5012"}
+,{"ct" : "RO", "pl" : "PM10", "shortpl" : "5"}
+,{"ct" : "RO", "pl" : "PM2.5", "shortpl" : "6001"}
+,{"ct" : "RO", "pl" : "SO2", "shortpl" : "1"}
+,{"ct" : "RS", "pl" : "As in PM10", "shortpl" : "5018"}
+,{"ct" : "RS", "pl" : "C6H6", "shortpl" : "20"}
+,{"ct" : "RS", "pl" : "Cd in PM10", "shortpl" : "5014"}
+,{"ct" : "RS", "pl" : "CO", "shortpl" : "10"}
+,{"ct" : "RS", "pl" : "Ni in PM10", "shortpl" : "5015"}
+,{"ct" : "RS", "pl" : "NO", "shortpl" : "38"}
+,{"ct" : "RS", "pl" : "NO2", "shortpl" : "8"}
+,{"ct" : "RS", "pl" : "NOX as NO2", "shortpl" : "9"}
+,{"ct" : "RS", "pl" : "O3", "shortpl" : "7"}
+,{"ct" : "RS", "pl" : "Pb in PM10", "shortpl" : "5012"}
+,{"ct" : "RS", "pl" : "PM10", "shortpl" : "5"}
+,{"ct" : "RS", "pl" : "PM2.5", "shortpl" : "6001"}
+,{"ct" : "RS", "pl" : "SO2", "shortpl" : "1"}
+,{"ct" : "SE", "pl" : "(CH3)3-C-CH2-CH-(CH3)2", "shortpl" : "449"}
+,{"ct" : "SE", "pl" : "1,2,3-C6H3(CH3)3", "shortpl" : "6012"}
+,{"ct" : "SE", "pl" : "1,2,4-C6H3(CH3)3", "shortpl" : "6011"}
+,{"ct" : "SE", "pl" : "1,3,5-C6H3(CH3)3", "shortpl" : "6013"}
+,{"ct" : "SE", "pl" : "Anthracene", "shortpl" : "606"}
+,{"ct" : "SE", "pl" : "Anthracene", "shortpl" : "608"}
+,{"ct" : "SE", "pl" : "As", "shortpl" : "2018"}
+,{"ct" : "SE", "pl" : "As in PM10", "shortpl" : "5018"}
+,{"ct" : "SE", "pl" : "BaP", "shortpl" : "6015"}
+,{"ct" : "SE", "pl" : "BaP", "shortpl" : "7029"}
+,{"ct" : "SE", "pl" : "Benzo(a)anthracene", "shortpl" : "609"}
+,{"ct" : "SE", "pl" : "Benzo(a)anthracene", "shortpl" : "611"}
+,{"ct" : "SE", "pl" : "Benzo(b)fluoranthene", "shortpl" : "616"}
+,{"ct" : "SE", "pl" : "Benzo(b)fluoranthene", "shortpl" : "618"}
+,{"ct" : "SE", "pl" : "Benzo(ghi)perylene", "shortpl" : "622"}
+,{"ct" : "SE", "pl" : "Benzo(ghi)perylene", "shortpl" : "624"}
+,{"ct" : "SE", "pl" : "Benzo(k)fluoranthene", "shortpl" : "625"}
+,{"ct" : "SE", "pl" : "Benzo(k)fluoranthene", "shortpl" : "627"}
+,{"ct" : "SE", "pl" : "Black Carbon", "shortpl" : "391"}
+,{"ct" : "SE", "pl" : "BS", "shortpl" : "6"}
+,{"ct" : "SE", "pl" : "C2H6", "shortpl" : "428"}
+,{"ct" : "SE", "pl" : "C6H14", "shortpl" : "443"}
+,{"ct" : "SE", "pl" : "C6H5-C2H5", "shortpl" : "431"}
+,{"ct" : "SE", "pl" : "C6H5-CH3", "shortpl" : "21"}
+,{"ct" : "SE", "pl" : "C6H6", "shortpl" : "20"}
+,{"ct" : "SE", "pl" : "C7H16", "shortpl" : "441"}
+,{"ct" : "SE", "pl" : "C8H18", "shortpl" : "475"}
+,{"ct" : "SE", "pl" : "C9H20", "shortpl" : "454"}
+,{"ct" : "SE", "pl" : "Ca++", "shortpl" : "629"}
+,{"ct" : "SE", "pl" : "Ca++", "shortpl" : "630"}
+,{"ct" : "SE", "pl" : "Cd", "shortpl" : "2014"}
+,{"ct" : "SE", "pl" : "Cd in PM10", "shortpl" : "5014"}
+,{"ct" : "SE", "pl" : "CH2=CH-C(CH3)=CH2", "shortpl" : "451"}
+,{"ct" : "SE", "pl" : "CH2=CH-CH=CH2", "shortpl" : "24"}
+,{"ct" : "SE", "pl" : "CH2=CH-CH3", "shortpl" : "505"}
+,{"ct" : "SE", "pl" : "Chrysene", "shortpl" : "4406"}
+,{"ct" : "SE", "pl" : "Chrysene", "shortpl" : "7406"}
+,{"ct" : "SE", "pl" : "cis-H3C-CH=CH-CH3", "shortpl" : "6007"}
+,{"ct" : "SE", "pl" : "cis-H3C-HC=CH-CH2-CH3", "shortpl" : "83"}
+,{"ct" : "SE", "pl" : "Cl-", "shortpl" : "631"}
+,{"ct" : "SE", "pl" : "Cl-", "shortpl" : "632"}
+,{"ct" : "SE", "pl" : "CO", "shortpl" : "10"}
+,{"ct" : "SE", "pl" : "Co", "shortpl" : "2064"}
+,{"ct" : "SE", "pl" : "Co in PM10", "shortpl" : "5064"}
+,{"ct" : "SE", "pl" : "Cr", "shortpl" : "2016"}
+,{"ct" : "SE", "pl" : "Cr in PM10", "shortpl" : "5016"}
+,{"ct" : "SE", "pl" : "Cu", "shortpl" : "2073"}
+,{"ct" : "SE", "pl" : "Cu in PM10", "shortpl" : "5073"}
+,{"ct" : "SE", "pl" : "Dibenzo(ah)anthracene", "shortpl" : "7419"}
+,{"ct" : "SE", "pl" : "Dibenzo(ah)anthracene", "shortpl" : "763"}
+,{"ct" : "SE", "pl" : "EC in PM10", "shortpl" : "5771"}
+,{"ct" : "SE", "pl" : "Fluoranthene", "shortpl" : "643"}
+,{"ct" : "SE", "pl" : "Fluoranthene", "shortpl" : "645"}
+,{"ct" : "SE", "pl" : "H+", "shortpl" : "648"}
+,{"ct" : "SE", "pl" : "H2C=CH2", "shortpl" : "430"}
+,{"ct" : "SE", "pl" : "H2C=CH-CH2-CH2-CH3", "shortpl" : "6008"}
+,{"ct" : "SE", "pl" : "H2C=CH-CH2-CH3", "shortpl" : "6005"}
+,{"ct" : "SE", "pl" : "H3C-(CH2)3-CH3", "shortpl" : "486"}
+,{"ct" : "SE", "pl" : "H3C-CH(CH3)2", "shortpl" : "447"}
+,{"ct" : "SE", "pl" : "H3C-CH2-CH(CH3)2", "shortpl" : "450"}
+,{"ct" : "SE", "pl" : "H3C-CH2-CH2-CH3", "shortpl" : "394"}
+,{"ct" : "SE", "pl" : "H3C-CH2-CH3", "shortpl" : "503"}
+,{"ct" : "SE", "pl" : "HC=CH", "shortpl" : "432"}
+,{"ct" : "SE", "pl" : "Hg", "shortpl" : "13"}
+,{"ct" : "SE", "pl" : "Hg", "shortpl" : "2013"}
+,{"ct" : "SE", "pl" : "Hg0 + Hg-reactive", "shortpl" : "4813"}
+,{"ct" : "SE", "pl" : "HNO3", "shortpl" : "50"}
+,{"ct" : "SE", "pl" : "HNO3+NO3", "shortpl" : "67"}
+,{"ct" : "SE", "pl" : "Indeno-(1,2,3-cd)pyrene", "shortpl" : "654"}
+,{"ct" : "SE", "pl" : "Indeno-(1,2,3-cd)pyrene", "shortpl" : "656"}
+,{"ct" : "SE", "pl" : "k", "shortpl" : "412"}
+,{"ct" : "SE", "pl" : "K+", "shortpl" : "657"}
+,{"ct" : "SE", "pl" : "K+", "shortpl" : "658"}
+,{"ct" : "SE", "pl" : "m,p-C6H4(CH3)2", "shortpl" : "464"}
+,{"ct" : "SE", "pl" : "m-C6H4-(CH3)2", "shortpl" : "81"}
+,{"ct" : "SE", "pl" : "Mg++", "shortpl" : "659"}
+,{"ct" : "SE", "pl" : "Mg++", "shortpl" : "660"}
+,{"ct" : "SE", "pl" : "Mn", "shortpl" : "2017"}
+,{"ct" : "SE", "pl" : "Mn in PM10", "shortpl" : "5017"}
+,{"ct" : "SE", "pl" : "Na+", "shortpl" : "668"}
+,{"ct" : "SE", "pl" : "Na+", "shortpl" : "669"}
+,{"ct" : "SE", "pl" : "NH3", "shortpl" : "35"}
+,{"ct" : "SE", "pl" : "NH3+NH4", "shortpl" : "68"}
+,{"ct" : "SE", "pl" : "NH4", "shortpl" : "45"}
+,{"ct" : "SE", "pl" : "NH4+", "shortpl" : "664"}
+,{"ct" : "SE", "pl" : "Ni", "shortpl" : "2015"}
+,{"ct" : "SE", "pl" : "Ni in PM10", "shortpl" : "5015"}
+,{"ct" : "SE", "pl" : "NO", "shortpl" : "38"}
+,{"ct" : "SE", "pl" : "NO2", "shortpl" : "8"}
+,{"ct" : "SE", "pl" : "NO3", "shortpl" : "46"}
+,{"ct" : "SE", "pl" : "NO3-", "shortpl" : "666"}
+,{"ct" : "SE", "pl" : "NOX as NO2", "shortpl" : "9"}
+,{"ct" : "SE", "pl" : "O3", "shortpl" : "7"}
+,{"ct" : "SE", "pl" : "OC in PM10", "shortpl" : "5772"}
+,{"ct" : "SE", "pl" : "o-C6H4-(CH3)2", "shortpl" : "482"}
+,{"ct" : "SE", "pl" : "Pb", "shortpl" : "2012"}
+,{"ct" : "SE", "pl" : "Pb in PM10", "shortpl" : "5012"}
+,{"ct" : "SE", "pl" : "pH", "shortpl" : "2076"}
+,{"ct" : "SE", "pl" : "Phenanthrene", "shortpl" : "712"}
+,{"ct" : "SE", "pl" : "Phenanthrene", "shortpl" : "714"}
+,{"ct" : "SE", "pl" : "PM10", "shortpl" : "5"}
+,{"ct" : "SE", "pl" : "PM2.5", "shortpl" : "6001"}
+,{"ct" : "SE", "pl" : "precip_amount", "shortpl" : "753"}
+,{"ct" : "SE", "pl" : "Pyrene", "shortpl" : "715"}
+,{"ct" : "SE", "pl" : "Pyrene", "shortpl" : "717"}
+,{"ct" : "SE", "pl" : "SO2", "shortpl" : "1"}
+,{"ct" : "SE", "pl" : "SO4--", "shortpl" : "719"}
+,{"ct" : "SE", "pl" : "SO4 (H2SO4 aerosols) (SO4--)", "shortpl" : "47"}
+,{"ct" : "SE", "pl" : "trans-H3C-CH=CH-CH3", "shortpl" : "6006"}
+,{"ct" : "SE", "pl" : "V in PM10", "shortpl" : "5049"}
+,{"ct" : "SE", "pl" : "Vanadium", "shortpl" : "728"}
+,{"ct" : "SE", "pl" : "Zn", "shortpl" : "2063"}
+,{"ct" : "SE", "pl" : "Zn in PM10", "shortpl" : "5063"}
+,{"ct" : "SI", "pl" : "As", "shortpl" : "7018"}
+,{"ct" : "SI", "pl" : "As in PM10", "shortpl" : "5018"}
+,{"ct" : "SI", "pl" : "BaP", "shortpl" : "7029"}
+,{"ct" : "SI", "pl" : "BaP in PM10", "shortpl" : "5029"}
+,{"ct" : "SI", "pl" : "Benzo(a)anthracene", "shortpl" : "611"}
+,{"ct" : "SI", "pl" : "Benzo(a)anthracene in PM10", "shortpl" : "5610"}
+,{"ct" : "SI", "pl" : "Benzo(b,j,k)fluoranthene", "shortpl" : "7380"}
+,{"ct" : "SI", "pl" : "Benzo(b,j,k)fluorantheneInPM1", "shortpl" : "5380"}
+,{"ct" : "SI", "pl" : "C6H5-C2H5", "shortpl" : "431"}
+,{"ct" : "SI", "pl" : "C6H5-CH3", "shortpl" : "21"}
+,{"ct" : "SI", "pl" : "C6H6", "shortpl" : "20"}
+,{"ct" : "SI", "pl" : "Ca2+ in PM2.5", "shortpl" : "1629"}
+,{"ct" : "SI", "pl" : "Cd", "shortpl" : "7014"}
+,{"ct" : "SI", "pl" : "Cd in PM10", "shortpl" : "5014"}
+,{"ct" : "SI", "pl" : "Cl- in PM2.5", "shortpl" : "1631"}
+,{"ct" : "SI", "pl" : "CO", "shortpl" : "10"}
+,{"ct" : "SI", "pl" : "Dibenzo(ah)anthracene", "shortpl" : "7419"}
+,{"ct" : "SI", "pl" : "Dibenzo(ah)anthracene in PM10", "shortpl" : "5419"}
+,{"ct" : "SI", "pl" : "EC in PM2.5", "shortpl" : "1771"}
+,{"ct" : "SI", "pl" : "Hg", "shortpl" : "2013"}
+,{"ct" : "SI", "pl" : "Hg0 + Hg-reactive", "shortpl" : "4813"}
+,{"ct" : "SI", "pl" : "Indeno-(1,2,3-cd)pyrene", "shortpl" : "656"}
+,{"ct" : "SI", "pl" : "Indeno-(1,2,3-cd)pyrene in PM", "shortpl" : "5655"}
+,{"ct" : "SI", "pl" : "K+ in PM2.5", "shortpl" : "1657"}
+,{"ct" : "SI", "pl" : "m,p-C6H4(CH3)2", "shortpl" : "464"}
+,{"ct" : "SI", "pl" : "Mg2+ in PM2.5", "shortpl" : "1659"}
+,{"ct" : "SI", "pl" : "Na+  in PM2.5", "shortpl" : "1668"}
+,{"ct" : "SI", "pl" : "NH4+ in PM2.5", "shortpl" : "1045"}
+,{"ct" : "SI", "pl" : "Ni", "shortpl" : "7015"}
+,{"ct" : "SI", "pl" : "Ni in PM10", "shortpl" : "5015"}
+,{"ct" : "SI", "pl" : "NO2", "shortpl" : "8"}
+,{"ct" : "SI", "pl" : "NO3- in PM2.5", "shortpl" : "1046"}
+,{"ct" : "SI", "pl" : "NOX as NO2", "shortpl" : "9"}
+,{"ct" : "SI", "pl" : "O3", "shortpl" : "7"}
+,{"ct" : "SI", "pl" : "OC in PM2.5", "shortpl" : "1772"}
+,{"ct" : "SI", "pl" : "o-C6H4-(CH3)2", "shortpl" : "482"}
+,{"ct" : "SI", "pl" : "Pb", "shortpl" : "7012"}
+,{"ct" : "SI", "pl" : "Pb in PM10", "shortpl" : "5012"}
+,{"ct" : "SI", "pl" : "PM10", "shortpl" : "5"}
+,{"ct" : "SI", "pl" : "PM2.5", "shortpl" : "6001"}
+,{"ct" : "SI", "pl" : "SO2", "shortpl" : "1"}
+,{"ct" : "SI", "pl" : "SO42- in PM2.5", "shortpl" : "1047"}
+,{"ct" : "SK", "pl" : "As in PM10", "shortpl" : "5018"}
+,{"ct" : "SK", "pl" : "BaP in PM10", "shortpl" : "5029"}
+,{"ct" : "SK", "pl" : "C6H6", "shortpl" : "20"}
+,{"ct" : "SK", "pl" : "Cd in PM10", "shortpl" : "5014"}
+,{"ct" : "SK", "pl" : "CO", "shortpl" : "10"}
+,{"ct" : "SK", "pl" : "Ni in PM10", "shortpl" : "5015"}
+,{"ct" : "SK", "pl" : "NO2", "shortpl" : "8"}
+,{"ct" : "SK", "pl" : "NOX as NO2", "shortpl" : "9"}
+,{"ct" : "SK", "pl" : "O3", "shortpl" : "7"}
+,{"ct" : "SK", "pl" : "Pb in PM10", "shortpl" : "5012"}
+,{"ct" : "SK", "pl" : "PM10", "shortpl" : "5"}
+,{"ct" : "SK", "pl" : "PM2.5", "shortpl" : "6001"}
+,{"ct" : "SK", "pl" : "SO2", "shortpl" : "1"}
+,{"ct" : "TR", "pl" : "As in PM10", "shortpl" : "5018"}
+,{"ct" : "TR", "pl" : "BaP in PM10", "shortpl" : "5029"}
+,{"ct" : "TR", "pl" : "C6H6", "shortpl" : "20"}
+,{"ct" : "TR", "pl" : "Cd in PM10", "shortpl" : "5014"}
+,{"ct" : "TR", "pl" : "CO", "shortpl" : "10"}
+,{"ct" : "TR", "pl" : "Ni in PM10", "shortpl" : "5015"}
+,{"ct" : "TR", "pl" : "NO2", "shortpl" : "8"}
+,{"ct" : "TR", "pl" : "NOX as NO2", "shortpl" : "9"}
+,{"ct" : "TR", "pl" : "O3", "shortpl" : "7"}
+,{"ct" : "TR", "pl" : "Pb in PM10", "shortpl" : "5012"}
+,{"ct" : "TR", "pl" : "PM10", "shortpl" : "5"}
+,{"ct" : "TR", "pl" : "PM2.5", "shortpl" : "6001"}
+,{"ct" : "TR", "pl" : "SO2", "shortpl" : "1"}
+,{"ct" : "XK", "pl" : "CO", "shortpl" : "10"}
+,{"ct" : "XK", "pl" : "NO2", "shortpl" : "8"}
+,{"ct" : "XK", "pl" : "NOX as NO2", "shortpl" : "9"}
+,{"ct" : "XK", "pl" : "O3", "shortpl" : "7"}
+,{"ct" : "XK", "pl" : "PM10", "shortpl" : "5"}
+,{"ct" : "XK", "pl" : "PM2.5", "shortpl" : "6001"}
+,{"ct" : "XK", "pl" : "SO2", "shortpl" : "1"}
+]

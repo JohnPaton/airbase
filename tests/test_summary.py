@@ -1,23 +1,15 @@
-import pytest
-
-from airbase.summary import Summary
-from tests.resources import SUMMARY
+from airbase.summary.db import DB
 
 
-@pytest.fixture
-def summary():
-    return Summary(SUMMARY)
-
-
-def test_countries(summary: Summary):
-    countries = summary.countries()
+def test_countries():
+    countries = DB.countries()
     assert isinstance(countries, list)
     assert countries
     assert all(isinstance(country, str) for country in countries)
 
 
-def test_pollutants(summary: Summary):
-    pollutants = summary.pollutants()
+def test_pollutants():
+    pollutants = DB.pollutants()
     assert isinstance(pollutants, dict)
     assert pollutants
     assert all(isinstance(id, int) for id in pollutants.values())
@@ -25,8 +17,8 @@ def test_pollutants(summary: Summary):
         assert pollutants.get(poll) == id
 
 
-def test_pollutants_per_country(summary: Summary):
-    output = summary.pollutants_per_country()
+def test_pollutants_per_country():
+    output = DB.pollutants_per_country()
     assert isinstance(output, dict)
     assert output
 
