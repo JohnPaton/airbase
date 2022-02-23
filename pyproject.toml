@@ -85,7 +85,7 @@ extras =
 skipsdist=True
 commands =
     mypy --strict airbase/
-    mypy tests/
+    mypy --ignore-missing-imports tests/
 extras =
     lint
 
