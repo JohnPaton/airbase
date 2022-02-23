@@ -1,7 +1,6 @@
 import pytest
 
 from airbase import util
-from tests.resources import SUMMARY
 
 
 class TestStringSafeList:
