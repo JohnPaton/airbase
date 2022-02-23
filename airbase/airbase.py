@@ -2,30 +2,23 @@ from __future__ import annotations
 
 import sys
 from datetime import datetime
-from functools import lru_cache
 from pathlib import Path
 
 from .fetch import (
-    fetch_json,
     fetch_text,
     fetch_to_directory,
     fetch_to_file,
     fetch_unique_lines,
 )
-from .resources import CURRENT_YEAR, E1A_SUMMARY_URL, METADATA_URL
-from .summary import Summary
+from .resources import CURRENT_YEAR, METADATA_URL
+from .summary import DB
 from .util import link_list_url, string_safe_list
 
 
 class AirbaseClient:
-    def __init__(self, connect: bool = True) -> None:
+    def __init__(self) -> None:
         """
         The central point for requesting Airbase data.
-
-        :param connect: (optional) Immediately test network
-            connection and download available countries and pollutants.
-            If False, `.connect()` must be called before making data
-            requests. Default True.
 
         :example:
             >>> client = AirbaseClient()
@@ -38,25 +31,20 @@ class AirbaseClient:
             100%|██████████| 5164/5164 [43:39<00:00,  1.95it/s]
             >>> r.download_metadata("data/metadata.tsv")
             Writing metadata to data/metadata.tsv...
-
         """
-        self._db: Summary | None = None
-        if connect:
-            self.connect()
 
-    def connect(self, timeout: float | None = None) -> AirbaseClient:
-        """
-        Download the available countries and pollutants for validation.
+        """All countries available from AirBase"""
+        self.all_countries = DB.countries()
 
-        :param timeout: Raise ConnectionError if the server takes
-            longer than `timeout` seconds to respond.
+        """All pollutants available from AirBase"""
+        self.all_pollutants = DB.pollutants()
 
-        :return: self
-        """
-        summary = fetch_json(E1A_SUMMARY_URL, timeout=timeout)
-        self._db = Summary(summary)
-
-        return self
+        """The pollutants available in each country from AirBase."""
+        self.pollutants_per_country: dict[str, list[dict[str, str]]] = dict()
+        for country, pollutants in DB.pollutants_per_country().items():
+            self.pollutants_per_country[country] = [
+                dict(pl=pl, shortpl=str(id)) for pl, id in pollutants.items()
+            ]
 
     def request(
         self,
@@ -176,13 +164,7 @@ class AirbaseClient:
             >>> [{"pl": "O3", "shortpl": "7"}, {"pl": "NO3", "shortpl": "46"}]
 
         """
-        if self._db is None:
-            raise AttributeError(
-                "Pollutant list has not yet been downloaded. "
-                "Please .connect() first."
-            )
-
-        results = self._db.search_pollutant(query, limit=limit)
+        results = DB.search_pollutant(query, limit=limit)
         return [dict(pl=pl, shortpl=str(id)) for pl, id in results.items()]
 
     @staticmethod
@@ -212,45 +194,6 @@ class AirbaseClient:
                 raise ValueError(
                     f"'{c}' is not an available 2-letter country code."
                 )
-
-    @property  # type:ignore[misc]
-    @lru_cache(maxsize=1)
-    def all_countries(self) -> list[str]:
-        """All countries available from AirBase."""
-        if self._db is None:
-            raise AttributeError(
-                "Country list has not yet been downloaded. "
-                "Please .connect() first."
-            )
-        return self._db.countries()
-
-    @property  # type:ignore[misc]
-    @lru_cache(maxsize=1)
-    def all_pollutants(self) -> dict[str, str]:
-        """All pollutants available from AirBase."""
-        if self._db is None:
-            raise AttributeError(
-                "Pollutant list has not yet been downloaded. "
-                "Please .connect() first."
-            )
-        return self._db.pollutants()
-
-    @property  # type:ignore[misc]
-    @lru_cache(maxsize=1)
-    def pollutants_per_country(self) -> dict[str, list[dict[str, str]]]:
-        """The pollutants available in each country from AirBase."""
-        if self._db is None:
-            raise AttributeError(
-                "Country-Pollutant map has not yet been downloaded. "
-                "Please .connect() first."
-            )
-
-        output: dict[str, list[dict[str, str]]] = dict()
-        for country, pollutants in self._db.pollutants_per_country().items():
-            output[country] = [
-                dict(pl=pl, shortpl=str(id)) for pl, id in pollutants.items()
-            ]
-        return output
 
 
 class AirbaseRequest:
