@@ -4,13 +4,12 @@ import json
 import sqlite3
 from contextlib import closing
 from importlib import resources
+from pathlib import Path
 
 
-def summary() -> list[dict[str, str]]:
-    summary: list[dict[str, str]] = json.loads(
-        resources.read_text(__package__, "summary.json")
-    )
-    return summary
+def summary() -> Path:
+    with resources.path(__package__, "summary.sqlite") as path:
+        return path
 
 
 class DB:
@@ -18,58 +17,7 @@ class DB:
     In memory DB containing the available country and pollutants
     """
 
-    db = sqlite3.connect(":memory:")
-
-    with closing(db.cursor()) as cur:
-        cur.executescript(
-            """            
-            CREATE TABLE summary (
-                country_code TEXT NOT NULL,
-                pollutant TEXT NOT NULL,
-                pollutant_id INTEGER NOT NULL,
-                UNIQUE (country_code, pollutant, pollutant_id)
-            );
-
-            
-            CREATE VIEW countries AS
-            SELECT DISTINCT
-                country_code
-            FROM
-                summary
-            ORDER BY
-                country_code;
-
-
-            CREATE VIEW pollutants AS
-            SELECT DISTINCT
-                pollutant, pollutant_id
-            FROM
-                summary
-            ORDER BY
-                length(pollutant);
-
-
-            CREATE VIEW pollutants_per_country AS
-            SELECT
-               country_code,
-               GROUP_CONCAT(pollutant),
-               GROUP_CONCAT(pollutant_id)
-            FROM
-               summary
-            GROUP BY
-               country_code
-            ORDER BY
-               country_code;
-            """
-        )
-
-        cur.executemany(
-            """
-            INSERT OR IGNORE INTO summary (country_code, pollutant, pollutant_id)
-            VALUES (:ct, :pl, :shortpl);
-            """,
-            summary(),
-        )
+    db = sqlite3.connect(f"file:{summary()}?mode=ro", uri=True)
 
     @classmethod
     def countries(self) -> list[str]:
