@@ -9,14 +9,7 @@ from tests.resources import CSV_RESPONSE, METADATA_RESPONSE
 @pytest.fixture(scope="module")
 def client():
     """Return initialized AirbaseClient instance"""
-    return airbase.AirbaseClient(connect=True)
-
-
-def test_client_connects(client: airbase.AirbaseClient):
-    assert client.all_countries is not None
-    assert client.all_pollutants is not None
-    assert client.pollutants_per_country is not None
-    assert client.search_pollutant("O3") is not None
+    return airbase.AirbaseClient()
 
 
 def test_download_to_directory(client: airbase.AirbaseClient, tmp_path: Path):

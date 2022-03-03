@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from pathlib import Path
 
 import pytest
@@ -7,42 +9,23 @@ from tests import resources
 
 
 @pytest.fixture
-def client(summary_response, metadata_response) -> airbase.AirbaseClient:
+def client(metadata_response) -> airbase.AirbaseClient:
     """initialied client with mocked responses"""
     return airbase.AirbaseClient()
 
 
 @pytest.fixture()
-def all_responses(
-    summary_response, csv_links_response, csv_response, metadata_response
-):
+def all_responses(csv_links_response, csv_response, metadata_response):
     """mock responses from relevant urls"""
     return
 
 
 class TestAirbaseClient:
-    def test_init_connect_false(self, summary_response):
-        client = airbase.AirbaseClient(connect=False)
-        with pytest.raises(AttributeError):
-            client.all_countries
-        with pytest.raises(AttributeError):
-            client.all_pollutants
-        with pytest.raises(AttributeError):
-            client.pollutants_per_country
-        with pytest.raises(AttributeError):
-            client.request()
-
-        client.connect()
-        assert client.all_countries is not None
-        assert client.all_pollutants is not None
-        assert client.pollutants_per_country is not None
-        assert client.request() is not None
-
-    def test_init_connect(self, summary_response):
-        client = airbase.AirbaseClient(connect=True)
-        assert client.all_countries is not None
-        assert client.all_pollutants is not None
-        assert client.pollutants_per_country is not None
+    def test_init(self):
+        client = airbase.AirbaseClient()
+        assert isinstance(client.all_countries, list)
+        assert isinstance(client.all_pollutants, dict)
+        assert isinstance(client.pollutants_per_country, dict)
 
     def test_download_metadata(
         self, tmp_path: Path, capsys, client: airbase.AirbaseClient
@@ -94,7 +77,7 @@ class TestAirbaseClient:
 
     def test_search_pl_shortest_first(self, client: airbase.AirbaseClient):
         result = client.search_pollutant("N")
-        names = [r["pl"] for r in result]
+        names: list[str] = [r["pl"] for r in result]
         assert len(names[0]) <= len(names[1])
         assert len(names[0]) <= len(names[-1])
 

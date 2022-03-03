@@ -4,26 +4,31 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-from . import util
+if sys.version_info >= (3, 8):
+    from typing import TypedDict
+else:
+    from typing_extensions import TypedDict
+
 from .fetch import (
-    fetch_json,
     fetch_text,
     fetch_to_directory,
     fetch_to_file,
     fetch_unique_lines,
 )
-from .resources import CURRENT_YEAR, E1A_SUMMARY_URL, METADATA_URL
+from .resources import CURRENT_YEAR, METADATA_URL
+from .summary import DB
+from .util import link_list_url, string_safe_list
+
+
+class PollutantDict(TypedDict):
+    pl: str
+    shortpl: int
 
 
 class AirbaseClient:
-    def __init__(self, connect: bool = True) -> None:
+    def __init__(self) -> None:
         """
         The central point for requesting Airbase data.
-
-        :param connect: (optional) Immediately test network
-            connection and download available countries and pollutants.
-            If False, `.connect()` must be called before making data
-            requests. Default True.
 
         :example:
             >>> client = AirbaseClient()
@@ -36,32 +41,20 @@ class AirbaseClient:
             100%|██████████| 5164/5164 [43:39<00:00,  1.95it/s]
             >>> r.download_metadata("data/metadata.tsv")
             Writing metadata to data/metadata.tsv...
-
         """
-        self._all_countries: list[str] | None = None
-        self._all_pollutants: dict[str, str] | None = None
-        self._pollutants_per_country: dict[
-            str, list[dict[str, str]]
-        ] | None = None
 
-        if connect:
-            self.connect()
+        """All countries available from AirBase"""
+        self.all_countries = DB.countries()
 
-    def connect(self, timeout: float | None = None) -> AirbaseClient:
-        """
-        Download the available countries and pollutants for validation.
+        """All pollutants available from AirBase"""
+        self.all_pollutants = DB.pollutants()
 
-        :param timeout: Raise ConnectionError if the server takes
-            longer than `timeout` seconds to respond.
-
-        :return: self
-        """
-        summary = fetch_json(E1A_SUMMARY_URL, timeout=timeout)
-        self._all_countries = util.countries_from_summary(summary)
-        self._all_pollutants = util.pollutants_from_summary(summary)
-        self._pollutants_per_country = util.pollutants_per_country(summary)
-
-        return self
+        """The pollutants available in each country from AirBase."""
+        self.pollutants_per_country: dict[str, list[PollutantDict]] = dict()
+        for country, pollutants in DB.pollutants_per_country().items():
+            self.pollutants_per_country[country] = [
+                dict(pl=pl, shortpl=id) for pl, id in pollutants.items()
+            ]
 
     def request(
         self,
@@ -137,7 +130,7 @@ class AirbaseClient:
         if country is None:
             country = self.all_countries
         else:
-            country = util.string_safe_list(country)
+            country = string_safe_list(country)
             self._validate_country(country)
 
         if pl is not None and shortpl is not None:
@@ -145,15 +138,13 @@ class AirbaseClient:
 
         # construct shortpl form pl if applicable
         if pl is not None:
-            pl_list = util.string_safe_list(pl)
-            shortpl = []
-            for p in pl_list:
-                try:
-                    shortpl.append(self.all_pollutants[p])
-                except KeyError:
-                    raise ValueError(
-                        "'{}' is not a valid pollutant name".format(p)
-                    )
+            pl_list = string_safe_list(pl)
+            try:
+                shortpl = [self.all_pollutants[p] for p in pl_list]
+            except KeyError as e:
+                raise ValueError(
+                    f"'{e.args[0]}' is not a valid pollutant name"
+                ) from e
 
         return AirbaseRequest(
             country,
@@ -168,7 +159,7 @@ class AirbaseClient:
 
     def search_pollutant(
         self, query: str, limit: int | None = None
-    ) -> list[dict[str, str]]:
+    ) -> list[PollutantDict]:
         """
         Search for a pollutant's `shortpl` number based on its name.
 
@@ -183,20 +174,8 @@ class AirbaseClient:
             >>> [{"pl": "O3", "shortpl": "7"}, {"pl": "NO3", "shortpl": "46"}]
 
         """
-        names = list(self.all_pollutants.keys())
-        # substring search
-        results = [n for n in names if query.lower() in n.lower()]
-
-        # shortest results first
-        results.sort(key=lambda x: len(x))
-
-        if limit:
-            results = results[:limit]
-
-        return [
-            {"pl": name, "shortpl": self.all_pollutants[name]}
-            for name in results
-        ]
+        results = DB.search_pollutant(query, limit=limit)
+        return [dict(pl=pl, shortpl=id) for pl, id in results.items()]
 
     @staticmethod
     def download_metadata(filepath: str | Path, verbose: bool = True) -> None:
@@ -219,42 +198,12 @@ class AirbaseClient:
 
         :param country: The 2-letter country code to validate.
         """
-        country_list = util.string_safe_list(country)
+        country_list = string_safe_list(country)
         for c in country_list:
             if c not in self.all_countries:
                 raise ValueError(
-                    "'{}' is not an available 2-letter country code.".format(c)
+                    f"'{c}' is not an available 2-letter country code."
                 )
-
-    @property
-    def all_countries(self) -> list[str]:
-        """All countries available from AirBase."""
-        if self._all_countries is None:
-            raise AttributeError(
-                "Country list has not yet been downloaded. "
-                "Please .connect() first."
-            )
-        return self._all_countries
-
-    @property
-    def all_pollutants(self) -> dict[str, str]:
-        """All pollutants available from AirBase."""
-        if self._all_pollutants is None:
-            raise AttributeError(
-                "Pollutant list has not yet been downloaded. "
-                "Please .connect() first."
-            )
-        return self._all_pollutants
-
-    @property
-    def pollutants_per_country(self) -> dict[str, list[dict[str, str]]]:
-        """The pollutants available in each country from AirBase."""
-        if self._pollutants_per_country is None:
-            raise AttributeError(
-                "Country-Pollutant map has not yet been downloaded. "
-                "Please .connect() first."
-            )
-        return self._pollutants_per_country
 
 
 class AirbaseRequest:
@@ -310,16 +259,14 @@ class AirbaseRequest:
         self.update_date = update_date
         self.verbose = verbose
 
-        self._country_list = util.string_safe_list(country)
-        self._shortpl_list = util.string_safe_list(shortpl)
+        self._country_list = string_safe_list(country)
+        self._shortpl_list = string_safe_list(shortpl)
         self._download_links = []
 
         for c in self._country_list:
             for p in self._shortpl_list:
                 self._download_links.append(
-                    util.link_list_url(
-                        c, p, year_from, year_to, source, update_date
-                    )
+                    link_list_url(c, p, year_from, year_to, source, update_date)
                 )
 
         self._csv_links: list[str] = []

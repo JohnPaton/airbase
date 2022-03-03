@@ -15,15 +15,6 @@ def response():
 
 
 @pytest.fixture()
-def summary_response(response: aioresponses):
-    """mock response from summary url"""
-    response.get(
-        airbase.resources.E1A_SUMMARY_URL,
-        payload=resources.SUMMARY,
-    )
-
-
-@pytest.fixture()
 def csv_links_response(response: aioresponses):
     """mock response from station data links url"""
     response.get(

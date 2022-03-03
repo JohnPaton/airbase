@@ -1,7 +1,6 @@
 import pytest
 
 from airbase import util
-from tests.resources import SUMMARY
 
 
 class TestStringSafeList:
@@ -19,32 +18,6 @@ class TestStringSafeList:
         input = None
         output = [input]
         assert util.string_safe_list(input) == output
-
-
-def test_countries_from_summary():
-    output = util.countries_from_summary(SUMMARY)
-    assert type(output) is list
-    assert len(output) > 0
-    assert type(output[0]) is str
-
-
-def test_pollutants_from_summary():
-    output = util.pollutants_from_summary(SUMMARY)
-    assert type(output) is dict
-    assert len(output) > 0
-    assert "PM10" in output
-    assert type(output["PM10"]) is str
-
-
-def test_pollutants_per_country():
-    output = util.pollutants_per_country(SUMMARY)
-    assert type(output) is dict
-    assert len(output) > 0
-    assert "AD" in output
-    assert type(output["AD"]) is list
-    assert len(output["AD"]) > 0
-    assert "pl" in output["AD"][0]
-    assert "shortpl" in output["AD"][0]
 
 
 class TestLinkListURL:

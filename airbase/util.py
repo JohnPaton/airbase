@@ -38,52 +38,6 @@ def string_safe_list(obj: str | Iterable[str] | None) -> list[str] | list[None]:
     return list(obj)
 
 
-def countries_from_summary(summary: list[dict[str, str]]) -> list[str]:
-    """
-    Get the list of unique countries from the summary.
-
-    :param summary: The E1a summary.
-
-    :return: The available countries.
-    """
-    return list({d["ct"] for d in summary})
-
-
-def pollutants_from_summary(summary: list[dict[str, str]]) -> dict[str, str]:
-    """
-    Get the list of unique pollutants from the summary.
-
-    :param summary: The E1a summary.
-
-    :return: The available pollutants, with name ("pl") as key
-        and pollutant number ("shortpl") as value.
-    """
-    return {d["pl"]: d["shortpl"] for d in summary}
-
-
-def pollutants_per_country(
-    summary: list[dict[str, str]]
-) -> dict[str, list[dict[str, str]]]:
-    """
-    Get the available pollutants per country from the summary.
-
-    :param summary: The E1a summary.
-
-    :return: All available pollutants per country.
-    """
-    output: dict[str, list[dict[str, str]]] = dict()
-
-    for d in summary.copy():
-        country = d.pop("ct")
-
-        if country in output:
-            output[country].append(d)
-        else:
-            output[country] = [d]
-
-    return output
-
-
 def link_list_url(
     country: str | None,
     shortpl: str | None = None,
