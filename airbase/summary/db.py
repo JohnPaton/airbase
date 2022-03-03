@@ -28,7 +28,7 @@ class DB:
         """
 
         with closing(self.db.cursor()) as cur:
-            cur.execute("SELECT * FROM countries;")
+            cur.execute("SELECT country_code FROM countries;")
             return list(row[0] for row in cur.fetchall())
 
     @classmethod
@@ -43,7 +43,7 @@ class DB:
         """
 
         with closing(self.db.cursor()) as cur:
-            cur.execute("SELECT * FROM pollutants;")
+            cur.execute("SELECT pollutant, pollutant_id FROM pollutants;")
             return dict(cur.fetchall())
 
     @classmethod
@@ -63,7 +63,7 @@ class DB:
         with closing(self.db.cursor()) as cur:
             cur.execute(
                 f"""
-                SELECT * FROM pollutants
+                SELECT pollutant, pollutant_id FROM pollutants
                 WHERE pollutant LIKE '%{query}%'
                 {f"LIMIT {limit}" if limit else ""};
                 """
@@ -81,8 +81,10 @@ class DB:
         """
 
         with closing(self.db.cursor()) as cur:
-            cur.execute("SELECT * FROM summary")
+            cur.execute(
+                "SELECT country_code, pollutant, pollutant_id FROM summary"
+            )
             output: dict[str, dict[str, int]] = defaultdict(dict)
-            for country, pollutant, pollutant_id in cur:
-                output[country][pollutant] = pollutant_id
+            for country_code, pollutant, pollutant_id in cur:
+                output[country_code][pollutant] = pollutant_id
             return dict(output)
