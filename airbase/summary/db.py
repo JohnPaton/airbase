@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 import sqlite3
 from contextlib import closing
 from importlib import resources
@@ -14,7 +13,7 @@ def summary() -> Path:
 
 class DB:
     """
-    In memory DB containing the available country and pollutants
+    In DB containing the available country and pollutants
     """
 
     db = sqlite3.connect(f"file:{summary()}?mode=ro", uri=True)
