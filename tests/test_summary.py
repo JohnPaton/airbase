@@ -6,6 +6,8 @@ def test_countries():
     assert isinstance(countries, list)
     assert countries
     assert all(isinstance(country, str) for country in countries)
+    for country in ["NO", "DK", "SE", "DE", "IT", "FR", "NL", "GB"]:
+        assert country in countries
 
 
 def test_pollutants():
