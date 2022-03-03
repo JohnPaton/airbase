@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import sqlite3
+from collections import defaultdict
 from contextlib import closing
 from importlib import resources
 from pathlib import Path
@@ -76,12 +77,12 @@ class DB:
 
         :return: All available pollutants per country, as a dictionary with
         with country code as keys and a dictionary of pollutant/ids
-        (e.g. {"NO": "38", ...}) as values.
+        (e.g. {"NO": 38, ...}) as values.
         """
 
         with closing(self.db.cursor()) as cur:
-            cur.execute("SELECT * FROM pollutants_per_country;")
-            return {
-                ct: dict(zip(pollutants.split(","), map(int, ids.split(","))))
-                for ct, pollutants, ids in cur
-            }
+            cur.execute("SELECT * FROM summary")
+            output: dict[str, dict[str, int]] = defaultdict(dict)
+            for country, pollutant, pollutant_id in cur:
+                output[country][pollutant] = pollutant_id
+            return dict(output)

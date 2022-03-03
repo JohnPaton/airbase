@@ -36,20 +36,6 @@ FROM
     summary
 ORDER BY
     length(pollutant);
-
-
-DROP VIEW IF EXISTS pollutants_per_country;
-CREATE VIEW pollutants_per_country AS
-SELECT
-    country_code,
-    GROUP_CONCAT(pollutant),
-    GROUP_CONCAT(pollutant_id)
-FROM
-    summary
-GROUP BY
-    country_code
-ORDER BY
-    country_code;
 """
 
 INSERT_JSON = """
