@@ -43,14 +43,15 @@ class AirbaseClient:
             Writing metadata to data/metadata.tsv...
         """
 
-        """All countries available from AirBase"""
         self.all_countries = DB.countries()
+        """All countries available from AirBase"""
 
-        """All pollutants available from AirBase"""
         self.all_pollutants = DB.pollutants()
+        """All pollutants available from AirBase"""
 
-        """The pollutants available in each country from AirBase."""
         self.pollutants_per_country: dict[str, list[PollutantDict]] = dict()
+        """The pollutants available in each country from AirBase."""
+
         for country, pollutants in DB.pollutants_per_country().items():
             self.pollutants_per_country[country] = [
                 dict(pl=pl, shortpl=id) for pl, id in pollutants.items()
