@@ -30,7 +30,7 @@ To install ``airbase``, simply run
 
    $ pip install airbase
 
-``airbase`` has been tested on Python 3.4 and higher.
+``airbase`` has been tested on Python 3.7 and higher.
 
 Quickstart
 ==========
