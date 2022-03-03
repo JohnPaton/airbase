@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from pathlib import Path
 
 import pytest
@@ -69,7 +71,7 @@ class TestAirbaseClient:
 
     def test_search_pl_shortest_first(self, client: airbase.AirbaseClient):
         result = client.search_pollutant("N")
-        names = [r["pl"] for r in result]
+        names: list[str] = [r["pl"] for r in result]
         assert len(names[0]) <= len(names[1])
         assert len(names[0]) <= len(names[-1])
 

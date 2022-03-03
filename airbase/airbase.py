@@ -4,6 +4,11 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
+if sys.version_info >= (3, 8):
+    from typing import TypedDict
+else:
+    from typing_extensions import TypedDict
+
 from .fetch import (
     fetch_text,
     fetch_to_directory,
@@ -13,6 +18,11 @@ from .fetch import (
 from .resources import CURRENT_YEAR, METADATA_URL
 from .summary import DB
 from .util import link_list_url, string_safe_list
+
+
+class PollutantDict(TypedDict):
+    pl: str
+    shortpl: int
 
 
 class AirbaseClient:
@@ -40,10 +50,10 @@ class AirbaseClient:
         self.all_pollutants = DB.pollutants()
 
         """The pollutants available in each country from AirBase."""
-        self.pollutants_per_country: dict[str, list[dict[str, str]]] = dict()
+        self.pollutants_per_country: dict[str, list[PollutantDict]] = dict()
         for country, pollutants in DB.pollutants_per_country().items():
             self.pollutants_per_country[country] = [
-                dict(pl=pl, shortpl=str(id)) for pl, id in pollutants.items()
+                dict(pl=pl, shortpl=id) for pl, id in pollutants.items()
             ]
 
     def request(
@@ -149,7 +159,7 @@ class AirbaseClient:
 
     def search_pollutant(
         self, query: str, limit: int | None = None
-    ) -> list[dict[str, str]]:
+    ) -> list[PollutantDict]:
         """
         Search for a pollutant's `shortpl` number based on its name.
 
@@ -165,7 +175,7 @@ class AirbaseClient:
 
         """
         results = DB.search_pollutant(query, limit=limit)
-        return [dict(pl=pl, shortpl=str(id)) for pl, id in results.items()]
+        return [dict(pl=pl, shortpl=id) for pl, id in results.items()]
 
     @staticmethod
     def download_metadata(filepath: str | Path, verbose: bool = True) -> None:
