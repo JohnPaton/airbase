@@ -2,9 +2,10 @@ from __future__ import annotations
 
 import sqlite3
 from collections import defaultdict
-from contextlib import closing
+from contextlib import closing, contextmanager
 from importlib import resources
 from pathlib import Path
+from typing import Iterator
 
 
 def summary() -> Path:
@@ -20,19 +21,26 @@ class DB:
     db = sqlite3.connect(f"file:{summary()}?mode=ro", uri=True)
 
     @classmethod
-    def countries(self) -> list[str]:
+    @contextmanager
+    def cursor(cls) -> Iterator[sqlite3.Cursor]:
+        """db cursor as a "self closing" context manager"""
+        with closing(cls.db.cursor()) as cur:
+            yield cur
+
+    @classmethod
+    def countries(cls) -> list[str]:
         """
         Get the list of unique countries from the summary.
 
         :return: list of available country codes
         """
 
-        with closing(self.db.cursor()) as cur:
+        with cls.cursor() as cur:
             cur.execute("SELECT country_code FROM countries;")
             return list(row[0] for row in cur.fetchall())
 
     @classmethod
-    def pollutants(self) -> dict[str, str]:
+    def pollutants(cls) -> dict[str, str]:
         """
         Get the list of unique pollutants from the summary.
 
@@ -42,13 +50,13 @@ class DB:
         with name as keys with name as values, e.g. {"NO": "38", ...}
         """
 
-        with closing(self.db.cursor()) as cur:
+        with cls.cursor() as cur:
             cur.execute("SELECT pollutant, pollutant_id FROM pollutants;")
             return dict(cur.fetchall())
 
     @classmethod
     def search_pollutant(
-        self, query: str, *, limit: int | None = None
+        cls, query: str, *, limit: int | None = None
     ) -> dict[str, int]:
         """
         Search for a pollutant's ID number based on its name.
@@ -60,7 +68,7 @@ class DB:
         with name as keys with name as values, e.g. {"NO": 38, ...}
         """
 
-        with closing(self.db.cursor()) as cur:
+        with cls.cursor() as cur:
             cur.execute(
                 f"""
                 SELECT pollutant, pollutant_id FROM pollutants
@@ -71,7 +79,7 @@ class DB:
             return dict(cur.fetchall())
 
     @classmethod
-    def pollutants_per_country(self) -> dict[str, dict[str, int]]:
+    def pollutants_per_country(cls) -> dict[str, dict[str, int]]:
         """
         Get the available pollutants per country from the summary.
 
@@ -80,7 +88,7 @@ class DB:
         (e.g. {"NO": 38, ...}) as values.
         """
 
-        with closing(self.db.cursor()) as cur:
+        with cls.cursor() as cur:
             cur.execute(
                 "SELECT country_code, pollutant, pollutant_id FROM summary"
             )

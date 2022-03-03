@@ -1,8 +1,5 @@
 from __future__ import annotations
 
-import sqlite3
-from contextlib import closing
-
 import pytest
 
 from airbase.fetch import fetch_json
@@ -12,7 +9,7 @@ from airbase.summary import DB
 
 @pytest.fixture(scope="module")
 def db_dump() -> list[dict[str, str]]:
-    with closing(DB.db.cursor()) as cur:
+    with DB.cursor() as cur:
         cur.execute(
             """
             SELECT
