@@ -17,16 +17,8 @@ def version_callback(value: bool):  # pragma: no cover
     raise typer.Exit()
 
 
-@main.command()
-def download(
-    path: Path = typer.Option(
-        "data", exists=True, dir_okay=True, writable=True
-    ),
-    year: int = typer.Option(date.today().year),
-    overwrite: bool = typer.Option(
-        False, "--overwrite", "-O", help="Re-download existing files."
-    ),
-    quiet: bool = typer.Option(False, "--quiet", "-q", help="No progress-bar."),
+@main.callback()
+def root_options(
     version: bool = typer.Option(
         False,
         "--version",
@@ -36,6 +28,20 @@ def download(
     ),
 ):
     """Download Air Quality Data from the European Environment Agency (EEA)"""
+
+
+@main.command(name="all")
+def download_all(
+    path: Path = typer.Option(
+        "data", exists=True, dir_okay=True, writable=True
+    ),
+    year: int = typer.Option(date.today().year),
+    overwrite: bool = typer.Option(
+        False, "--overwrite", "-O", help="Re-download existing files."
+    ),
+    quiet: bool = typer.Option(False, "--quiet", "-q", help="No progress-bar."),
+):
+    """Download all pollutants for all countries"""
 
     client = AirbaseClient()
     request = client.request(
