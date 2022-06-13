@@ -53,12 +53,12 @@ class TestAirbaseClient:
 
     def test_request_pl(self, client: airbase.AirbaseClient):
         r = client.request(pollutant="NO")
-        assert r.pollutant_id is not None
-        assert len(r.pollutant_id) == 1
+        assert r._download_links
+        assert len(r._download_links) == len(client.all_countries)
 
         r = client.request(pollutant=["NO", "NO3"])
-        assert r.pollutant_id is not None
-        assert len(r.pollutant_id) == 2
+        assert r._download_links
+        assert len(r._download_links) == 2 * len(client.all_countries)
 
         with pytest.raises(ValueError):
             r = client.request(pollutant=["NO", "NO3", "Not a pl"])

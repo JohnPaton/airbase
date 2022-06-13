@@ -267,17 +267,14 @@ class AirbaseRequest:
             download links from the Airbase server at object
             initialization. Default False.
         """
-        self.country = string_safe_list(country)
-        self.pollutant_id = string_safe_list(pollutant_id)
-        self.year_from = year_from
-        self.year_to = year_to
-        self.source = source
-        self.update_date = update_date
+
         self.verbose = verbose
 
+        countries = string_safe_list(country)
+        pollutant_ids = string_safe_list(pollutant_id)
         self._download_links = [
             link_list_url(c, p, year_from, year_to, source, update_date)
-            for c, p in product(self.country, self.pollutant_id)
+            for c, p in product(countries, pollutant_ids)
         ]
 
         self._csv_links: list[str] = []
