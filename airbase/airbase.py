@@ -22,11 +22,6 @@ from .summary import DB
 from .util import link_list_url, string_safe_list
 
 
-class PollutantDict(TypedDict):
-    pl: str
-    shortpl: int
-
-
 class AirbaseClient:
     def __init__(self) -> None:
         """
@@ -52,12 +47,10 @@ class AirbaseClient:
         self._pollutants_ids = DB.pollutants()
 
         """The pollutants available in each country from AirBase."""
-        self.pollutants_per_country: dict[str, list[PollutantDict]] = dict()
-
-        for country, pollutants in DB.pollutants_per_country().items():
-            self.pollutants_per_country[country] = [
-                dict(pl=pl, shortpl=id) for pl, id in pollutants.items()
-            ]
+        self.pollutants_per_country = {
+            country: list(pollutants)
+            for country, pollutants in DB.pollutants_per_country().items()
+        }
 
     @property
     def all_countries(self) -> list[str]:

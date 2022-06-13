@@ -40,11 +40,11 @@ $ pip install airbase
 >>> client.pollutants
 ['k', 'CO', 'NO', 'O3', 'As', 'Cd', ...
 
->>> client.pollutants_per_country
-{'AD': [{'pl': 'CO', 'shortpl': 10}, {'pl': 'NO', 'shortpl': 38}, ...
-
 >>> client.search_pollutant("O3")
 ['O3', 'NO3', ...
+
+>>> client.pollutants_per_country
+{'AD': ['CO', 'NO', ...
 ```
 
 🗂 Request download links from the server and save the resulting CSVs into a directory:

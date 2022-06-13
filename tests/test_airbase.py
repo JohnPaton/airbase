@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from itertools import chain
 from pathlib import Path
 
 import pytest
@@ -25,9 +26,18 @@ class TestAirbaseClient:
         client = airbase.AirbaseClient()
         assert isinstance(client.countries, list)
         assert isinstance(client.pollutants, list)
-        assert isinstance(client.pollutants_per_country, dict)
-        assert isinstance(client._pollutants_ids, dict)
-        assert list(client._pollutants_ids) == client.pollutants
+
+        pollutants_per_country = client.pollutants_per_country
+        assert isinstance(pollutants_per_country, dict)
+        assert all(isinstance(p, list) for p in pollutants_per_country.values())
+        assert all(
+            isinstance(p, str)
+            for p in chain.from_iterable(pollutants_per_country.values())
+        )
+
+        pollutants_ids = client._pollutants_ids
+        assert isinstance(pollutants_ids, dict)
+        assert list(pollutants_ids) == client.pollutants
 
     def test_download_metadata(
         self, tmp_path: Path, capsys, client: airbase.AirbaseClient
