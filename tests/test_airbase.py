@@ -71,13 +71,12 @@ class TestAirbaseClient:
 
     def test_search_pl_exact(self, client: airbase.AirbaseClient):
         result = client.search_pollutant("NO3")
-        assert result[0]["pl"] == "NO3"
+        assert result[0] == "NO3"
 
     def test_search_pl_shortest_first(self, client: airbase.AirbaseClient):
         result = client.search_pollutant("N")
-        names: list[str] = [r["pl"] for r in result]
-        assert len(names[0]) <= len(names[1])
-        assert len(names[0]) <= len(names[-1])
+        assert len(result[0]) <= len(result[1])
+        assert len(result[0]) <= len(result[-1])
 
     def test_search_pl_limit(self, client: airbase.AirbaseClient):
         result = client.search_pollutant("N", limit=1)
@@ -89,7 +88,7 @@ class TestAirbaseClient:
 
     def test_search_pl_case_insensitive(self, client: airbase.AirbaseClient):
         result = client.search_pollutant("no3")
-        assert result[0]["pl"] == "NO3"
+        assert result[0] == "NO3"
 
 
 @pytest.mark.usefixtures("all_responses")

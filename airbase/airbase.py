@@ -169,23 +169,22 @@ class AirbaseClient:
 
     def search_pollutant(
         self, query: str, limit: int | None = None
-    ) -> list[PollutantDict]:
+    ) -> list[str]:
         """
-        Search for a pollutant's `shortpl` number based on its name.
+        Search for a pollutant's ID number based on its name.
 
         :param query: The pollutant to search for.
         :param limit: (optional) Max number of results.
 
         :return: The best pollutant matches. Pollutants
-            are dicts with keys "pl" and "shortpl".
 
         :example:
             >>> AirbaseClient().search_pollutant("o3", limit=2)
-            >>> [{"pl": "O3", "shortpl": "7"}, {"pl": "NO3", "shortpl": "46"}]
+            >>> {"O3, "NO3"}
 
         """
         results = DB.search_pollutant(query, limit=limit)
-        return [dict(pl=pl, shortpl=id) for pl, id in results.items()]
+        return list(results)
 
     @staticmethod
     def download_metadata(filepath: str | Path, verbose: bool = True) -> None:
