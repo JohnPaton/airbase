@@ -81,8 +81,7 @@ class AirbaseClient:
     def request(
         self,
         country: str | list[str] | None = None,
-        pl: str | list[str] | None = None,
-        shortpl: str | list[str] | None = None,
+        pollutant: str | list[str] | None = None,
         year_from: str = "2013",
         year_to: str = CURRENT_YEAR,
         source: str = "All",
@@ -93,8 +92,7 @@ class AirbaseClient:
         """
         Initialize an AirbaseRequest for a query.
 
-        Pollutants can be specified either by name (`pl`) or by code
-        (`shortpl`). If no pollutants are specified, data for all
+        If no pollutants are specified, data for all
         available pollutants will be requested. If a pollutant is not
         available for a country, then we simply do not try to download
         those CSVs.
@@ -110,13 +108,8 @@ class AirbaseClient:
             country. Will raise ValueError if a country is not available
             on the server. If None, data for all countries will be
             requested. See `self.all_countries`.
-        :param pl: (optional) The pollutant(s) to request data
+        :param pollutant: (optional) The pollutant(s) to request data
             for. Must be one of the pollutants in `self.all_pollutants`.
-            Cannot be used in conjunction with `shortpl`.
-        :param shortpl: (optional). The pollutant code(s) to
-            request data for. Will be applied to each country requested.
-            Cannot be used in conjunction with `pl`.
-            Deprecated, will be removed on v1.
         :param year_from: (optional) The first year of data. Can
             not be earlier than 2013. Default 2013.
         :param year_to: (optional) The last year of data. Can not be
@@ -139,7 +132,7 @@ class AirbaseClient:
 
         :example:
             >>> client = AirbaseClient()
-            >>> r = client.request(["NL", "DE"], pl=["O3", "NO2"])
+            >>> r = client.request(["NL", "DE"], ["O3", "NO2"])
             >>> r.download_to_directory("data/raw")
             Generating CSV download links...
             100%|██████████| 4/4 [00:09<00:00,  2.64s/it]
@@ -156,22 +149,13 @@ class AirbaseClient:
             country = string_safe_list(country)
             self._validate_country(country)
 
-        if shortpl is not None:
-            warnings.warn(
-                f"the shortpl option has been deprecated and will be removed on v1. "
-                f"Use client.request([client._pollutants_ids[p] for p in shortpl], ...) instead.",
-                DeprecationWarning,
-                stacklevel=2,
-            )
-
-        if pl is not None and shortpl is not None:
-            raise ValueError("You cannot specify both 'pl' and 'shortpl'")
-
-        # construct shortpl form pl if applicable
-        if pl is not None:
-            pl_list = string_safe_list(pl)
+        if pollutant is None:
+            shortpl = None
+        else:
             try:
-                shortpl = [self._pollutants_ids[p] for p in pl_list]
+                shortpl = [
+                    self._pollutants_ids[p] for p in string_safe_list(pollutant)
+                ]
             except KeyError as e:
                 raise ValueError(
                     f"'{e.args[0]}' is not a valid pollutant name"

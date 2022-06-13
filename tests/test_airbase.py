@@ -10,7 +10,7 @@ from tests import resources
 
 @pytest.fixture
 def client(metadata_response) -> airbase.AirbaseClient:
-    """initialied client with mocked responses"""
+    """initialized client with mocked responses"""
     return airbase.AirbaseClient()
 
 
@@ -52,24 +52,20 @@ class TestAirbaseClient:
             client.request(year_to="9999")
 
     def test_request_pl(self, client: airbase.AirbaseClient):
-        r = client.request(pl="NO")
+        r = client.request(pollutant="NO")
         assert r.shortpl is not None
         assert len(r.shortpl) == 1
 
-        r = client.request(pl=["NO", "NO3"])
+        r = client.request(pollutant=["NO", "NO3"])
         assert r.shortpl is not None
         assert len(r.shortpl) == 2
 
         with pytest.raises(ValueError):
-            r = client.request(pl=["NO", "NO3", "Not a pl"])
+            r = client.request(pollutant=["NO", "NO3", "Not a pl"])
 
     def test_request_response_generated(self, client: airbase.AirbaseClient):
         r = client.request()
         assert isinstance(r, airbase.AirbaseRequest)
-
-    def test_request_not_pl_and_shortpl(self, client: airbase.AirbaseClient):
-        with pytest.raises(ValueError), pytest.warns(DeprecationWarning):
-            client.request(pl="O3", shortpl="123")
 
     def test_search_pl_exact(self, client: airbase.AirbaseClient):
         result = client.search_pollutant("NO3")
