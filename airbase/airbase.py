@@ -6,11 +6,6 @@ from datetime import datetime
 from itertools import product
 from pathlib import Path
 
-if sys.version_info >= (3, 8):
-    from typing import TypedDict
-else:
-    from typing_extensions import TypedDict
-
 from .fetch import (
     fetch_text,
     fetch_to_directory,
