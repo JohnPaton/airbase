@@ -3,6 +3,7 @@ from __future__ import annotations
 import sys
 import warnings
 from datetime import datetime
+from itertools import product
 from pathlib import Path
 
 if sys.version_info >= (3, 8):
@@ -150,10 +151,10 @@ class AirbaseClient:
             self._validate_country(country)
 
         if pollutant is None:
-            shortpl = None
+            pollutant_id = None
         else:
             try:
-                shortpl = [
+                pollutant_id = [
                     self._pollutants_ids[p] for p in string_safe_list(pollutant)
                 ]
             except KeyError as e:
@@ -163,7 +164,7 @@ class AirbaseClient:
 
         return AirbaseRequest(
             country,
-            shortpl,
+            pollutant_id,
             year_from,
             year_to,
             source,
@@ -225,7 +226,7 @@ class AirbaseRequest:
     def __init__(
         self,
         country: str | list[str] | None = None,
-        shortpl: str | list[str] | None = None,
+        pollutant_id: str | list[str] | None = None,
         year_from: str = "2013",
         year_to: str = CURRENT_YEAR,
         source: str = "All",
@@ -244,7 +245,7 @@ class AirbaseRequest:
 
         :param country: 2-letter country code or a list of
             them. If a list, data will be requested for each country.
-        :param shortpl: (optional). The pollutant code to
+        :param pollutant_id: (optional). The pollutant code to
             request data for. Will be applied to each country requested.
             If None, all available pollutants will be requested. If a
             pollutant is not available for a country, then we simply
@@ -266,26 +267,20 @@ class AirbaseRequest:
             download links from the Airbase server at object
             initialization. Default False.
         """
-        self.country = country
-        self.shortpl = shortpl
+        self.country = string_safe_list(country)
+        self.pollutant_id = string_safe_list(pollutant_id)
         self.year_from = year_from
         self.year_to = year_to
         self.source = source
         self.update_date = update_date
         self.verbose = verbose
 
-        self._country_list = string_safe_list(country)
-        self._shortpl_list = string_safe_list(shortpl)
-        self._download_links = []
-
-        for c in self._country_list:
-            for p in self._shortpl_list:
-                self._download_links.append(
-                    link_list_url(c, p, year_from, year_to, source, update_date)
-                )
+        self._download_links = [
+            link_list_url(c, p, year_from, year_to, source, update_date)
+            for c, p in product(self.country, self.pollutant_id)
+        ]
 
         self._csv_links: list[str] = []
-
         if preload_csv_links:
             self._get_csv_links()
 
