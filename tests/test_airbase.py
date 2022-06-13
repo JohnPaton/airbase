@@ -24,8 +24,10 @@ class TestAirbaseClient:
     def test_init(self):
         client = airbase.AirbaseClient()
         assert isinstance(client.countries, list)
-        assert isinstance(client._pollutants_ids, dict)
+        assert isinstance(client.pollutants, list)
         assert isinstance(client.pollutants_per_country, dict)
+        assert isinstance(client._pollutants_ids, dict)
+        assert list(client._pollutants_ids) == client.pollutants
 
     def test_download_metadata(
         self, tmp_path: Path, capsys, client: airbase.AirbaseClient
@@ -54,11 +56,11 @@ class TestAirbaseClient:
     def test_request_pl(self, client: airbase.AirbaseClient):
         r = client.request(pollutant="NO")
         assert r._download_links
-        assert len(r._download_links) == len(client.all_countries)
+        assert len(r._download_links) == len(client.countries)
 
         r = client.request(pollutant=["NO", "NO3"])
         assert r._download_links
-        assert len(r._download_links) == 2 * len(client.all_countries)
+        assert len(r._download_links) == 2 * len(client.countries)
 
         with pytest.raises(ValueError):
             r = client.request(pollutant=["NO", "NO3", "Not a pl"])

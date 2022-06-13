@@ -70,14 +70,8 @@ class AirbaseClient:
         return self.countries
 
     @property
-    def all_pollutants(self) -> dict[str, str]:
-        warnings.warn(
-            f"{type(self).__qualname__}.all_pollutants has been deprecated and will be removed on v1. "
-            f"Use {type(self).__qualname__}._pollutants_ids instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return self._pollutants_ids
+    def pollutants(self) -> list[str]:
+        return list(self._pollutants_ids)
 
     def request(
         self,
