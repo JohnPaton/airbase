@@ -25,7 +25,10 @@ class TestAirbaseClient:
     def test_init(self):
         client = airbase.AirbaseClient()
         assert isinstance(client.countries, list)
-        assert isinstance(client.pollutants, list)
+
+        pollutants = client.pollutants
+        assert isinstance(pollutants, list)
+        assert all(isinstance(p, str) for p in pollutants)
 
         pollutants_per_country = client.pollutants_per_country
         assert isinstance(pollutants_per_country, dict)

@@ -53,16 +53,6 @@ class AirbaseClient:
         }
 
     @property
-    def all_countries(self) -> list[str]:
-        warnings.warn(
-            f"{type(self).__qualname__}.all_countries has been deprecated and will be removed on v1. "
-            f"Use {type(self).__qualname__}.countries instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return self.countries
-
-    @property
     def pollutants(self) -> list[str]:
         return list(self._pollutants_ids)
 

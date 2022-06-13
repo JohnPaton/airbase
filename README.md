@@ -34,14 +34,14 @@ $ pip install airbase
 ```pycon
 >>> import airbase
 >>> client = airbase.AirbaseClient()
->>> client.all_countries
-['GR', 'ES', 'IS', 'CY', 'NL', 'AT', 'LV', 'BE', 'CH', 'EE', 'FR', 'DE', ...
-
 >>> client.pollutants
 ['k', 'CO', 'NO', 'O3', 'As', 'Cd', ...
 
 >>> client.search_pollutant("O3")
 ['O3', 'NO3', ...
+
+>>> client.countries
+['GR', 'ES', 'IS', 'CY', 'NL', 'AT', 'LV', 'BE', 'CH', 'EE', 'FR', 'DE', ...
 
 >>> client.pollutants_per_country
 {'AD': ['CO', 'NO', ...
