@@ -110,7 +110,12 @@ activate
 # PyCharm
 .idea
 
+# VS code
+.vscode
+
+# Poetry
+poetry.lock
+
 # custom
 data
 !**/.gitkeep
-.vscode
