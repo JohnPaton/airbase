@@ -93,5 +93,5 @@ Writing metadata to data/metadata.tsv...
 ## 🛣 Roadmap
 
 * ~~Parallel CSV downloads~~ Contributed by @avaldebe
-* CLI to avoid using Python all together
+* ~~CLI to avoid using Python all together~~ Contributed by @avaldebe
 * Data wrangling module for AirBase output data
