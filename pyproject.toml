@@ -34,11 +34,11 @@ python = ">=3.7,<4"
 aiohttp = ""
 aiofiles = ""
 tqdm = ""
+importlib-metadata = { version = "", python = "<3.8" }
 typing-extensions = { version = "", python = "<3.8" }
 # docs
 sphinx = { version = ">=4.2.0", optional = true }
 sphinx-rtd-theme = { version = "", optional = true }
-importlib-metadata = { version = "", python = "<3.8", optional = true }
 # test
 pytest = { version = ">=6.0", optional = true }
 aioresponses = { version = "", optional = true }
