@@ -27,13 +27,14 @@ classifiers = [
 exclude = ["docs", "tests", "data", "scripts", ".git*", ".*.yaml"]
 
 [tool.poetry.scripts]
-#airbase = "airbase.cli:main"
+airbase = "airbase.cli:main"
 
 [tool.poetry.dependencies]
 python = ">=3.7,<4"
 aiohttp = ""
 aiofiles = ""
 tqdm = ""
+typer = ""
 importlib-metadata = { version = "", python = "<3.8" }
 typing-extensions = { version = "", python = "<3.8" }
 # docs
