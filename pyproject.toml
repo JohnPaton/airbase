@@ -46,10 +46,8 @@ aioresponses = { version = "", optional = true }
 pytest-cov = { version = "", optional = true }
 
 [tool.poetry.extras]
-docs = ["sphinx", "sphinx-rtd-theme", "importlib-metadata"]
+docs = ["sphinx", "sphinx-rtd-theme"]
 test = ["pytest", "aioresponses", "pytest-cov"]
-format = ["black", "isort"]
-lint = ["mypy", "types-aiofiles"]
 
 [tool.poetry.dev-dependencies]
 pytest-sugar = "^0.9.5"
