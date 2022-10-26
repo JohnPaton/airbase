@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import sqlite3
+import sys
 from collections import defaultdict
 from contextlib import closing, contextmanager
 from importlib import resources
@@ -9,6 +10,11 @@ from typing import Iterator
 
 
 def summary() -> Path:
+    if sys.version_info >= (3, 11):
+        source = resources.files(__package__) / "summary.sqlite"
+        with resources.as_file(source) as path:
+            return path
+
     with resources.path(__package__, "summary.sqlite") as path:
         return path
 
