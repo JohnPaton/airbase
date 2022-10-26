@@ -46,7 +46,7 @@ ignore_missing_imports = true
 [tool.tox]
 legacy_tox_ini = """
 [tox]
-envlist = py37, py38, py39, py310, py311, format, lint, docs, integration, pre-commit
+envlist = py37, py38, py39, py310, py311, lint, docs, integration
 skip_missing_interpreters = True
 isolated_build = True
 
@@ -66,28 +66,12 @@ commands =
 extras = 
     test
 
-[testenv:pre-commit]
-skipsdist=True
-commands =
-    pre-commit run --all-files
-deps =
-    pre-commit
-
-[testenv:format]
-skipsdist=True
-commands =
-    black --check .
-    isort --check .
-extras = 
-    format
-
 [testenv:lint]
 skipsdist=True
 commands =
-    mypy --strict airbase/
-    mypy --ignore-missing-imports tests/
-extras =
-    lint
+    pre-commit run --all-files --show-diff-on-failure
+deps =
+    pre-commit
 
 [testenv:docs]
 skipsdist=True
