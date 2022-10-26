@@ -46,7 +46,7 @@ ignore_missing_imports = true
 [tool.tox]
 legacy_tox_ini = """
 [tox]
-envlist = py37, py38, py39, py310, format, lint, docs, integration, pre-commit
+envlist = py37, py38, py39, py310, py311, format, lint, docs, integration, pre-commit
 skip_missing_interpreters = True
 isolated_build = True
 
