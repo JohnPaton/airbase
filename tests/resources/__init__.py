@@ -1,19 +1,19 @@
 import sys
-from importlib import resources
+
+if sys.version_info >= (3, 11):
+    from importlib import resources
+else:
+    import importlib_resources as resources
 
 
-def _read_text(resource: str) -> str:
-    """compatibility wrapper for Python 3.11 importlib.resources"""
-    if sys.version_info >= (3, 11):
-        source = resources.files(__package__) / resource
-        with resources.as_file(source) as path:
-            return path.read_text()
+CSV_LINKS_RESPONSE_TEXT: str = (
+    resources.files(__package__).joinpath("csv_links_response.txt").read_text()
+)
 
-    return resources.read_text(__package__, resource)
+CSV_RESPONSE: str = (
+    resources.files(__package__).joinpath("csv_response.csv").read_text()
+)
 
-
-CSV_LINKS_RESPONSE_TEXT = _read_text("csv_links_response.txt")
-
-CSV_RESPONSE = _read_text("csv_response.csv")
-
-METADATA_RESPONSE = _read_text("metadata.tsv")
+METADATA_RESPONSE: str = (
+    resources.files(__package__).joinpath("metadata.tsv").read_text()
+)
