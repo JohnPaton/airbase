@@ -21,7 +21,7 @@ class Country(str, Enum):
     _ignore_ = "country Country"  # type:ignore[misc]
 
     Country = vars()
-    for country in client.all_countries:
+    for country in client.countries:
         Country[country] = country
 
 
@@ -29,7 +29,7 @@ class Pollutant(str, Enum):
     _ignore_ = "poll Pollutant"  # type:ignore[misc]
 
     Pollutant = vars()
-    for poll in client.all_pollutants:
+    for poll in client._pollutants_ids:
         Pollutant[poll] = poll
 
 
@@ -56,6 +56,8 @@ def root_options(
 
 @main.command(name="all")
 def download_all(
+    countries: List[Country] = typer.Option([], "--country", "-c"),
+    pollutants: List[Pollutant] = typer.Option([], "--pollutant", "-p"),
     path: Path = typer.Option(
         "data", exists=True, dir_okay=True, writable=True
     ),
@@ -65,9 +67,19 @@ def download_all(
     ),
     quiet: bool = typer.Option(False, "--quiet", "-q", help="No progress-bar."),
 ):
-    """Download all pollutants for all countries"""
+    """Download all pollutants for all countries
+
+    \b
+    The -c/--country and -p/--pollutant allow to specify which data to download, e.g.
+    - download only Norwegian, Danish and Finish sites
+      airbase all -c NO -c DK -c FI
+    - download only SO2, PM10 and PM2.5 observations
+      airbase all -p SO2 -p PM10 -p PM2.5
+    """
 
     request = client.request(
+        countries or None,  # type:ignore[arg-type]
+        pollutants or None,  # type:ignore[arg-type]
         year_from=str(year),
         year_to=str(year),
         verbose=not quiet,
