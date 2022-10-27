@@ -1,10 +1,19 @@
-import json
-from importlib import resources
+import sys
 
-CSV_LINKS_RESPONSE_TEXT = resources.read_text(
-    __package__, "csv_links_response.txt"
+if sys.version_info >= (3, 11):
+    from importlib import resources
+else:
+    import importlib_resources as resources
+
+
+CSV_LINKS_RESPONSE_TEXT: str = (
+    resources.files(__package__).joinpath("csv_links_response.txt").read_text()
 )
 
-CSV_RESPONSE = resources.read_text(__package__, "csv_response.csv")
+CSV_RESPONSE: str = (
+    resources.files(__package__).joinpath("csv_response.csv").read_text()
+)
 
-METADATA_RESPONSE = resources.read_text(__package__, "metadata.tsv")
+METADATA_RESPONSE: str = (
+    resources.files(__package__).joinpath("metadata.tsv").read_text()
+)

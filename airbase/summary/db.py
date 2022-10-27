@@ -1,15 +1,22 @@
 from __future__ import annotations
 
 import sqlite3
+import sys
 from collections import defaultdict
 from contextlib import closing, contextmanager
-from importlib import resources
 from pathlib import Path
 from typing import Iterator
 
+if sys.version_info >= (3, 11):
+    from importlib import resources
+else:
+    import importlib_resources as resources
+
 
 def summary() -> Path:
-    with resources.path(__package__, "summary.sqlite") as path:
+    source = resources.files(__package__) / "summary.sqlite"
+    path: Path
+    with resources.as_file(source) as path:
         return path
 
 
