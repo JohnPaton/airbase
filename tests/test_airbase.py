@@ -23,8 +23,8 @@ def all_responses(csv_links_response, csv_response, metadata_response):
 class TestAirbaseClient:
     def test_init(self):
         client = airbase.AirbaseClient()
-        assert isinstance(client.all_countries, list)
-        assert isinstance(client.all_pollutants, dict)
+        assert isinstance(client.countries, list)
+        assert isinstance(client._pollutants_ids, dict)
         assert isinstance(client.pollutants_per_country, dict)
 
     def test_download_metadata(
