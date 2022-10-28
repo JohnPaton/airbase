@@ -8,6 +8,10 @@ build-backend = "setuptools.build_meta"
 minversion = "6.0"
 addopts = "--showlocals"
 testpaths = ["tests"]
+filterwarnings = [
+    # DeprecationWarning are errors
+    "error::DeprecationWarning:(airbase|tests).*:",
+]
 
 [tool.coverage.run]
 source = ["airbase"]
