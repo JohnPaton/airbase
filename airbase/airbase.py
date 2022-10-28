@@ -116,6 +116,7 @@ class AirbaseClient:
         :param shortpl: (optional). The pollutant code(s) to
             request data for. Will be applied to each country requested.
             Cannot be used in conjunction with `pl`.
+            Deprecated, will be removed on v1.
         :param year_from: (optional) The first year of data. Can
             not be earlier than 2013. Default 2013.
         :param year_to: (optional) The last year of data. Can not be
@@ -154,6 +155,14 @@ class AirbaseClient:
         else:
             country = string_safe_list(country)
             self._validate_country(country)
+
+        if shortpl is not None:
+            warnings.warn(
+                f"the shortpl option has been deprecated and will be removed on v1. "
+                f"Use client.request([client._pollutants_ids[p] for p in shortpl], ...) instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
 
         if pl is not None and shortpl is not None:
             raise ValueError("You cannot specify both 'pl' and 'shortpl'")

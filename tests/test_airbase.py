@@ -68,7 +68,7 @@ class TestAirbaseClient:
         assert isinstance(r, airbase.AirbaseRequest)
 
     def test_request_not_pl_and_shortpl(self, client: airbase.AirbaseClient):
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError), pytest.warns(DeprecationWarning):
             client.request(pl="O3", shortpl="123")
 
     def test_search_pl_exact(self, client: airbase.AirbaseClient):
