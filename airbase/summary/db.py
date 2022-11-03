@@ -7,9 +7,9 @@ from contextlib import closing, contextmanager
 from pathlib import Path
 from typing import Iterator
 
-if sys.version_info >= (3, 11):
+if sys.version_info >= (3, 11):  # pragma: no cover
     from importlib import resources
-else:
+else:  # pragma: no cover
     import importlib_resources as resources
 
 
