@@ -87,7 +87,7 @@ def download(
     request.download_to_directory(path, skip_existing=not overwrite)
 
 
-def deprecation_message(old: str, new: str):
+def deprecation_message(old: str, new: str):  # pragma: no cover
     old = typer.style(f"{__package__} {old}", fg=typer.colors.RED, bold=True)
     new = typer.style(f"{__package__} {new}", fg=typer.colors.GREEN, bold=True)
     typer.echo(
@@ -107,7 +107,7 @@ def download_all(
         False, "--overwrite", "-O", help="Re-download existing files."
     ),
     quiet: bool = typer.Option(False, "--quiet", "-q", help="No progress-bar."),
-):
+):  # pragma: no cover
     """Download all pollutants for all countries (deprecated)"""
     deprecation_message("all", "download")
     download(countries, pollutants, path, year, overwrite, quiet)
@@ -125,7 +125,7 @@ def download_country(
         False, "--overwrite", "-O", help="Re-download existing files."
     ),
     quiet: bool = typer.Option(False, "--quiet", "-q", help="No progress-bar."),
-):
+):  # pragma: no cover
     """Download specific pollutants for one country (deprecated)"""
     deprecation_message("country", "download")
     download([country], pollutants, path, year, overwrite, quiet)
@@ -143,7 +143,7 @@ def download_pollutant(
         False, "--overwrite", "-O", help="Re-download existing files."
     ),
     quiet: bool = typer.Option(False, "--quiet", "-q", help="No progress-bar."),
-):
+):  # pragma: no cover
     """Download specific countries for one pollutant (deprecated)"""
     deprecation_message("pollutant", "download")
     download(countries, [pollutant], path, year, overwrite, quiet)
