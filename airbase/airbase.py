@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import sys
+import warnings
 from datetime import datetime
 from pathlib import Path
 
@@ -43,19 +44,39 @@ class AirbaseClient:
             Writing metadata to data/metadata.tsv...
         """
 
-        self.all_countries = DB.countries()
         """All countries available from AirBase"""
+        self.countries = DB.countries()
 
-        self.all_pollutants = DB.pollutants()
         """All pollutants available from AirBase"""
+        self._pollutants_ids = DB.pollutants()
 
-        self.pollutants_per_country: dict[str, list[PollutantDict]] = dict()
         """The pollutants available in each country from AirBase."""
+        self.pollutants_per_country: dict[str, list[PollutantDict]] = dict()
 
         for country, pollutants in DB.pollutants_per_country().items():
             self.pollutants_per_country[country] = [
                 dict(pl=pl, shortpl=id) for pl, id in pollutants.items()
             ]
+
+    @property
+    def all_countries(self) -> list[str]:
+        warnings.warn(
+            f"{type(self).__qualname__}.all_countries has been deprecated and will be removed on v1. "
+            f"Use {type(self).__qualname__}.countries instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self.countries
+
+    @property
+    def all_pollutants(self) -> dict[str, str]:
+        warnings.warn(
+            f"{type(self).__qualname__}.all_pollutants has been deprecated and will be removed on v1. "
+            f"Use {type(self).__qualname__}._pollutants_ids instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self._pollutants_ids
 
     def request(
         self,
@@ -95,6 +116,7 @@ class AirbaseClient:
         :param shortpl: (optional). The pollutant code(s) to
             request data for. Will be applied to each country requested.
             Cannot be used in conjunction with `pl`.
+            Deprecated, will be removed on v1.
         :param year_from: (optional) The first year of data. Can
             not be earlier than 2013. Default 2013.
         :param year_to: (optional) The last year of data. Can not be
@@ -129,10 +151,18 @@ class AirbaseClient:
         """
         # validation
         if country is None:
-            country = self.all_countries
+            country = self.countries
         else:
             country = string_safe_list(country)
             self._validate_country(country)
+
+        if shortpl is not None:
+            warnings.warn(
+                f"the shortpl option has been deprecated and will be removed on v1. "
+                f"Use client.request([client._pollutants_ids[p] for p in shortpl], ...) instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
 
         if pl is not None and shortpl is not None:
             raise ValueError("You cannot specify both 'pl' and 'shortpl'")
@@ -141,7 +171,7 @@ class AirbaseClient:
         if pl is not None:
             pl_list = string_safe_list(pl)
             try:
-                shortpl = [self.all_pollutants[p] for p in pl_list]
+                shortpl = [self._pollutants_ids[p] for p in pl_list]
             except KeyError as e:
                 raise ValueError(
                     f"'{e.args[0]}' is not a valid pollutant name"
@@ -201,7 +231,7 @@ class AirbaseClient:
         """
         country_list = string_safe_list(country)
         for c in country_list:
-            if c not in self.all_countries:
+            if c not in self.countries:
                 raise ValueError(
                     f"'{c}' is not an available 2-letter country code."
                 )

@@ -23,8 +23,8 @@ def all_responses(csv_links_response, csv_response, metadata_response):
 class TestAirbaseClient:
     def test_init(self):
         client = airbase.AirbaseClient()
-        assert isinstance(client.all_countries, list)
-        assert isinstance(client.all_pollutants, dict)
+        assert isinstance(client.countries, list)
+        assert isinstance(client._pollutants_ids, dict)
         assert isinstance(client.pollutants_per_country, dict)
 
     def test_download_metadata(
@@ -68,7 +68,7 @@ class TestAirbaseClient:
         assert isinstance(r, airbase.AirbaseRequest)
 
     def test_request_not_pl_and_shortpl(self, client: airbase.AirbaseClient):
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError), pytest.warns(DeprecationWarning):
             client.request(pl="O3", shortpl="123")
 
     def test_search_pl_exact(self, client: airbase.AirbaseClient):
