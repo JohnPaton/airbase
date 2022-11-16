@@ -56,7 +56,7 @@ def fetch_json(
 
     :param url: requested url
     :param timeout: maximum time to complete request (seconds)
-    :param encoding: text encoding used for decodding the response's body
+    :param encoding: text encoding used for decoding the response's body
 
     :return: decoded text from response's body as JSON
     """
@@ -100,12 +100,12 @@ async def fetcher(
     raise_for_status: bool = DEFAULT.raise_for_status,
     max_concurrent: int = DEFAULT.max_concurrent,
 ) -> AsyncIterator[str | Path]:
-    """Request multiple urls and write resquest text into individual paths
+    """Request multiple urls and write request text into individual paths
     it a `dict[url, path]` is provided, or return the decoded text from each request
     if only a `list[url]` is provided.
 
     :param urls: requested urls
-    :param encoding: text encoding used for decodding each response's body
+    :param encoding: text encoding used for decoding each response's body
     :param progress: show progress bar
     :param raise_for_status: Raise exceptions if download links
         return "bad" HTTP status codes. If False,
@@ -160,7 +160,7 @@ def fetch_unique_lines(
     """Request a list of url and return only the unique lines among all the responses
 
     :param urls: requested urls
-    :param encoding: text encoding used for decodding each response's body
+    :param encoding: text encoding used for decoding each response's body
     :param progress: show progress bar
     :param raise_for_status: Raise exceptions if download links
         return "bad" HTTP status codes. If False,
@@ -198,7 +198,7 @@ def fetch_to_file(
 
     :param urls: requested urls
     :param path: text file for all combined responses
-    :param encoding: text encoding used for decodding each response's body
+    :param encoding: text encoding used for decoding each response's body
     :param progress: show progress bar
     :param raise_for_status: Raise exceptions if download links
         return "bad" HTTP status codes. If False,
@@ -245,7 +245,7 @@ def fetch_to_directory(
     :param root: directory to write all responses
     :param bool skip_existing: Do not re-download url if the corresponding file
         is found in `root`
-    :param encoding: text encoding used for decodding each response's body
+    :param encoding: text encoding used for decoding each response's body
     :param progress: show progress bar
     :param raise_for_status: Raise exceptions if download links
         return "bad" HTTP status codes. If False,
