@@ -90,6 +90,33 @@ Downloading CSVs to data...
 Writing metadata to data/metadata.tsv...
 ```
 
+## 🚆 Command line interface
+
+``` bash
+$ airbase download --help
+```
+
+``` man
+Usage: airbase download [OPTIONS]
+
+  Download all pollutants for all countries
+
+  The -c/--country and -p/--pollutant allow to specify which data to download, e.g.
+  - download only Norwegian, Danish and Finish sites
+    airbase all -c NO -c DK -c FI
+  - download only SO2, PM10 and PM2.5 observations
+    airbase all -p SO2 -p PM10 -p PM2.5
+
+Options:
+  -c, --country [AD|AL|AT|...]
+  -p, --pollutant [k|CO|NO|...]
+  --path PATH                     [default: data]
+  --year INTEGER                  [default: 2022]
+  -O, --overwrite                 Re-download existing files.
+  -q, --quiet                     No progress-bar.
+  --help                          Show this message and exit.
+```
+
 ## 🛣 Roadmap
 
 * ~~Parallel CSV downloads~~ Contributed by @avaldebe
