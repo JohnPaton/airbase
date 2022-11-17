@@ -24,6 +24,9 @@ class Country(str, Enum):
     for country in client.countries:
         Country[country] = country
 
+    def __str__(self) -> str:
+        return self.name
+
 
 class Pollutant(str, Enum):
     _ignore_ = "poll Pollutant"  # type:ignore[misc]
@@ -31,6 +34,9 @@ class Pollutant(str, Enum):
     Pollutant = vars()
     for poll in client._pollutants_ids:
         Pollutant[poll] = poll
+
+    def __str__(self) -> str:
+        return self.name
 
 
 def version_callback(value: bool):  # pragma: no cover
