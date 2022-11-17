@@ -39,7 +39,7 @@ class Pollutant(str, Enum):
         return self.name
 
 
-def version_callback(value: bool):  # pragma: no cover
+def version_callback(value: bool):
     if not value:
         return
 
