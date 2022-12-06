@@ -40,7 +40,7 @@ def string_safe_list(obj: str | Iterable[str] | None) -> list[str] | list[None]:
 
 def link_list_url(
     country: str | None,
-    shortpl: str | None = None,
+    pollutant_id: str | None = None,
     year_from: str = "2013",
     year_to: str = CURRENT_YEAR,
     source: str = "All",
@@ -51,7 +51,7 @@ def link_list_url(
 
     :param country: The 2-letter country code. See
         AirbaseClient.countries for options.
-    :param shortpl: (optional) The pollutant number. Leave blank to
+    :param pollutant_id: (optional) The pollutant number. Leave blank to
         get all pollutants. See AirbaseClient.pollutants_per_country for
         options.
     :param year_from: (optional) The first year of data. Can not be
@@ -87,7 +87,7 @@ def link_list_url(
 
     return LINK_LIST_URL_TEMPLATE.format(
         country=country or "",
-        shortpl=shortpl or "",
+        pollutant_id=pollutant_id or "",
         year_from=year_from,
         year_to=year_to,
         source=source,

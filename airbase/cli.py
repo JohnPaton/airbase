@@ -21,7 +21,7 @@ class Country(str, Enum):
     _ignore_ = "country Country"  # type:ignore[misc]
 
     Country = vars()
-    for country in client.all_countries:
+    for country in client.countries:
         Country[country] = country
 
 
@@ -29,7 +29,7 @@ class Pollutant(str, Enum):
     _ignore_ = "poll Pollutant"  # type:ignore[misc]
 
     Pollutant = vars()
-    for poll in client.all_pollutants:
+    for poll in client.pollutants:
         Pollutant[poll] = poll
 
 

@@ -34,23 +34,23 @@ $ pip install airbase
 ```pycon
 >>> import airbase
 >>> client = airbase.AirbaseClient()
->>> client.all_countries
-['GR', 'ES', 'IS', 'CY', 'NL', 'AT', 'LV', 'BE', 'CH', 'EE', 'FR', 'DE', ...
-
->>> client.all_pollutants
-{'k': 412, 'CO': 10, 'NO': 38, 'O3': 7, 'As': 2018, 'Cd': 2014, ...
-
->>> client.pollutants_per_country
-{'AD': [{'pl': 'CO', 'shortpl': 10}, {'pl': 'NO', 'shortpl': 38}, ...
+>>> client.pollutants
+['k', 'CO', 'NO', 'O3', 'As', 'Cd', ...
 
 >>> client.search_pollutant("O3")
-[{'pl': 'O3', 'shortpl': 7}, {'pl': 'NO3', 'shortpl': 46}, ...
+['O3', 'NO3', ...
+
+>>> client.countries
+['GR', 'ES', 'IS', 'CY', 'NL', 'AT', 'LV', 'BE', 'CH', 'EE', 'FR', 'DE', ...
+
+>>> client.pollutants_per_country
+{'AD': ['CO', 'NO', ...
 ```
 
 🗂 Request download links from the server and save the resulting CSVs into a directory:
 
 ```pycon
->>> r = client.request(country=["NL", "DE"], pl="NO3", year_from=2015)
+>>> r = client.request(country=["NL", "DE"], pollutant="NO3", year_from=2015)
 >>> r.download_to_directory(dir="data", skip_existing=True)
 Generating CSV download links...
 100%|██████████| 2/2 [00:03<00:00,  2.03s/it]
@@ -62,7 +62,7 @@ Downloading CSVs to data...
 💾 Or concatenate them into one big file:
 
 ```pycon
->>> r = client.request(country="FR", pl=["O3", "PM10"], year_to=2014)
+>>> r = client.request(country="FR", pollutant=["O3", "PM10"], year_to=2014)
 >>> r.download_to_file("data/raw.csv")
 Generating CSV download links...
 100%|██████████| 2/2 [00:12<00:00,  7.40s/it]

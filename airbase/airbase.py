@@ -3,12 +3,8 @@ from __future__ import annotations
 import sys
 import warnings
 from datetime import datetime
+from itertools import product
 from pathlib import Path
-
-if sys.version_info >= (3, 8):
-    from typing import TypedDict
-else:
-    from typing_extensions import TypedDict
 
 from .fetch import (
     fetch_text,
@@ -19,11 +15,6 @@ from .fetch import (
 from .resources import CURRENT_YEAR, METADATA_URL
 from .summary import DB
 from .util import link_list_url, string_safe_list
-
-
-class PollutantDict(TypedDict):
-    pl: str
-    shortpl: int
 
 
 class AirbaseClient:
@@ -51,38 +42,19 @@ class AirbaseClient:
         self._pollutants_ids = DB.pollutants()
 
         """The pollutants available in each country from AirBase."""
-        self.pollutants_per_country: dict[str, list[PollutantDict]] = dict()
-
-        for country, pollutants in DB.pollutants_per_country().items():
-            self.pollutants_per_country[country] = [
-                dict(pl=pl, shortpl=id) for pl, id in pollutants.items()
-            ]
+        self.pollutants_per_country = {
+            country: list(pollutants)
+            for country, pollutants in DB.pollutants_per_country().items()
+        }
 
     @property
-    def all_countries(self) -> list[str]:
-        warnings.warn(
-            f"{type(self).__qualname__}.all_countries has been deprecated and will be removed on v1. "
-            f"Use {type(self).__qualname__}.countries instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return self.countries
-
-    @property
-    def all_pollutants(self) -> dict[str, str]:
-        warnings.warn(
-            f"{type(self).__qualname__}.all_pollutants has been deprecated and will be removed on v1. "
-            f"Use {type(self).__qualname__}._pollutants_ids instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return self._pollutants_ids
+    def pollutants(self) -> list[str]:
+        return list(self._pollutants_ids)
 
     def request(
         self,
         country: str | list[str] | None = None,
-        pl: str | list[str] | None = None,
-        shortpl: str | list[str] | None = None,
+        pollutant: str | list[str] | None = None,
         year_from: str = "2013",
         year_to: str = CURRENT_YEAR,
         source: str = "All",
@@ -93,8 +65,7 @@ class AirbaseClient:
         """
         Initialize an AirbaseRequest for a query.
 
-        Pollutants can be specified either by name (`pl`) or by code
-        (`shortpl`). If no pollutants are specified, data for all
+        If no pollutants are specified, data for all
         available pollutants will be requested. If a pollutant is not
         available for a country, then we simply do not try to download
         those CSVs.
@@ -110,13 +81,8 @@ class AirbaseClient:
             country. Will raise ValueError if a country is not available
             on the server. If None, data for all countries will be
             requested. See `self.all_countries`.
-        :param pl: (optional) The pollutant(s) to request data
+        :param pollutant: (optional) The pollutant(s) to request data
             for. Must be one of the pollutants in `self.all_pollutants`.
-            Cannot be used in conjunction with `shortpl`.
-        :param shortpl: (optional). The pollutant code(s) to
-            request data for. Will be applied to each country requested.
-            Cannot be used in conjunction with `pl`.
-            Deprecated, will be removed on v1.
         :param year_from: (optional) The first year of data. Can
             not be earlier than 2013. Default 2013.
         :param year_to: (optional) The last year of data. Can not be
@@ -139,7 +105,7 @@ class AirbaseClient:
 
         :example:
             >>> client = AirbaseClient()
-            >>> r = client.request(["NL", "DE"], pl=["O3", "NO2"])
+            >>> r = client.request(["NL", "DE"], ["O3", "NO2"])
             >>> r.download_to_directory("data/raw")
             Generating CSV download links...
             100%|██████████| 4/4 [00:09<00:00,  2.64s/it]
@@ -156,22 +122,13 @@ class AirbaseClient:
             country = string_safe_list(country)
             self._validate_country(country)
 
-        if shortpl is not None:
-            warnings.warn(
-                f"the shortpl option has been deprecated and will be removed on v1. "
-                f"Use client.request([client._pollutants_ids[p] for p in shortpl], ...) instead.",
-                DeprecationWarning,
-                stacklevel=2,
-            )
-
-        if pl is not None and shortpl is not None:
-            raise ValueError("You cannot specify both 'pl' and 'shortpl'")
-
-        # construct shortpl form pl if applicable
-        if pl is not None:
-            pl_list = string_safe_list(pl)
+        if pollutant is None:
+            pollutant_id = None
+        else:
             try:
-                shortpl = [self._pollutants_ids[p] for p in pl_list]
+                pollutant_id = [
+                    self._pollutants_ids[p] for p in string_safe_list(pollutant)
+                ]
             except KeyError as e:
                 raise ValueError(
                     f"'{e.args[0]}' is not a valid pollutant name"
@@ -179,7 +136,7 @@ class AirbaseClient:
 
         return AirbaseRequest(
             country,
-            shortpl,
+            pollutant_id,
             year_from,
             year_to,
             source,
@@ -190,23 +147,22 @@ class AirbaseClient:
 
     def search_pollutant(
         self, query: str, limit: int | None = None
-    ) -> list[PollutantDict]:
+    ) -> list[str]:
         """
-        Search for a pollutant's `shortpl` number based on its name.
+        Search for a pollutant's ID number based on its name.
 
         :param query: The pollutant to search for.
         :param limit: (optional) Max number of results.
 
         :return: The best pollutant matches. Pollutants
-            are dicts with keys "pl" and "shortpl".
 
         :example:
             >>> AirbaseClient().search_pollutant("o3", limit=2)
-            >>> [{"pl": "O3", "shortpl": "7"}, {"pl": "NO3", "shortpl": "46"}]
+            >>> {"O3, "NO3"}
 
         """
         results = DB.search_pollutant(query, limit=limit)
-        return [dict(pl=pl, shortpl=id) for pl, id in results.items()]
+        return list(results)
 
     @staticmethod
     def download_metadata(filepath: str | Path, verbose: bool = True) -> None:
@@ -241,7 +197,7 @@ class AirbaseRequest:
     def __init__(
         self,
         country: str | list[str] | None = None,
-        shortpl: str | list[str] | None = None,
+        pollutant_id: str | list[str] | None = None,
         year_from: str = "2013",
         year_to: str = CURRENT_YEAR,
         source: str = "All",
@@ -260,7 +216,7 @@ class AirbaseRequest:
 
         :param country: 2-letter country code or a list of
             them. If a list, data will be requested for each country.
-        :param shortpl: (optional). The pollutant code to
+        :param pollutant_id: (optional). The pollutant code to
             request data for. Will be applied to each country requested.
             If None, all available pollutants will be requested. If a
             pollutant is not available for a country, then we simply
@@ -282,26 +238,17 @@ class AirbaseRequest:
             download links from the Airbase server at object
             initialization. Default False.
         """
-        self.country = country
-        self.shortpl = shortpl
-        self.year_from = year_from
-        self.year_to = year_to
-        self.source = source
-        self.update_date = update_date
+
         self.verbose = verbose
 
-        self._country_list = string_safe_list(country)
-        self._shortpl_list = string_safe_list(shortpl)
-        self._download_links = []
-
-        for c in self._country_list:
-            for p in self._shortpl_list:
-                self._download_links.append(
-                    link_list_url(c, p, year_from, year_to, source, update_date)
-                )
+        countries = string_safe_list(country)
+        pollutant_ids = string_safe_list(pollutant_id)
+        self._download_links = [
+            link_list_url(c, p, year_from, year_to, source, update_date)
+            for c, p in product(countries, pollutant_ids)
+        ]
 
         self._csv_links: list[str] = []
-
         if preload_csv_links:
             self._get_csv_links()
 

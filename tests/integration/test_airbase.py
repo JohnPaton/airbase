@@ -14,7 +14,7 @@ def client():
 
 def test_download_to_directory(client: airbase.AirbaseClient, tmp_path: Path):
     r = client.request(
-        country=["AD", "BE"], pl="CO", year_from="2017", year_to="2017"
+        country=["AD", "BE"], pollutant="CO", year_from="2017", year_to="2017"
     )
 
     r.download_to_directory(dir=str(tmp_path), skip_existing=True)
@@ -23,7 +23,7 @@ def test_download_to_directory(client: airbase.AirbaseClient, tmp_path: Path):
 
 def test_download_to_file(client: airbase.AirbaseClient, tmp_path: Path):
     r = client.request(
-        country="CY", pl=["As", "NO2"], year_from="2014", year_to="2014"
+        country="CY", pollutant=["As", "NO2"], year_from="2014", year_to="2014"
     )
 
     path = tmp_path / "raw.csv"
