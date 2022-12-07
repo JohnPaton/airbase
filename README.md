@@ -92,13 +92,9 @@ Writing metadata to data/metadata.tsv...
 
 ## 🚆 Command line interface
 
-``` bash
+``` console
 $ airbase download --help
-```
-
-``` man
 Usage: airbase download [OPTIONS]
-
   Download all pollutants for all countries
 
   The -c/--country and -p/--pollutant allow to specify which data to download, e.g.
