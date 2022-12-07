@@ -21,19 +21,25 @@ class Country(str, Enum):
     _ignore_ = "country Country"  # type:ignore[misc]
 
     Country = vars()
-    for country in client.all_countries:
+    for country in client.countries:
         Country[country] = country
+
+    def __str__(self) -> str:
+        return self.name
 
 
 class Pollutant(str, Enum):
     _ignore_ = "poll Pollutant"  # type:ignore[misc]
 
     Pollutant = vars()
-    for poll in client.all_pollutants:
+    for poll in client._pollutants_ids:
         Pollutant[poll] = poll
 
+    def __str__(self) -> str:
+        return self.name
 
-def version_callback(value: bool):  # pragma: no cover
+
+def version_callback(value: bool):
     if not value:
         return
 
@@ -54,8 +60,10 @@ def root_options(
     """Download Air Quality Data from the European Environment Agency (EEA)"""
 
 
-@main.command(name="all")
-def download_all(
+@main.command()
+def download(
+    countries: List[Country] = typer.Option([], "--country", "-c"),
+    pollutants: List[Pollutant] = typer.Option([], "--pollutant", "-p"),
     path: Path = typer.Option(
         "data", exists=True, dir_okay=True, writable=True
     ),
@@ -65,14 +73,50 @@ def download_all(
     ),
     quiet: bool = typer.Option(False, "--quiet", "-q", help="No progress-bar."),
 ):
-    """Download all pollutants for all countries"""
+    """Download all pollutants for all countries
+
+    \b
+    The -c/--country and -p/--pollutant allow to specify which data to download, e.g.
+    - download only Norwegian, Danish and Finish sites
+      airbase download -c NO -c DK -c FI
+    - download only SO2, PM10 and PM2.5 observations
+      airbase download -p SO2 -p PM10 -p PM2.5
+    """
 
     request = client.request(
+        countries or None,  # type:ignore[arg-type]
+        pollutants or None,  # type:ignore[arg-type]
         year_from=str(year),
         year_to=str(year),
         verbose=not quiet,
     )
     request.download_to_directory(path, skip_existing=not overwrite)
+
+
+def deprecation_message(old: str, new: str):  # pragma: no cover
+    old = typer.style(f"{__package__} {old}", fg=typer.colors.RED, bold=True)
+    new = typer.style(f"{__package__} {new}", fg=typer.colors.GREEN, bold=True)
+    typer.echo(
+        f"{old} has been deprecated and will be removed on v1. Use {new} all instead.",
+    )
+
+
+@main.command(name="all")
+def download_all(
+    countries: List[Country] = typer.Option([], "--country", "-c"),
+    pollutants: List[Pollutant] = typer.Option([], "--pollutant", "-p"),
+    path: Path = typer.Option(
+        "data", exists=True, dir_okay=True, writable=True
+    ),
+    year: int = typer.Option(date.today().year),
+    overwrite: bool = typer.Option(
+        False, "--overwrite", "-O", help="Re-download existing files."
+    ),
+    quiet: bool = typer.Option(False, "--quiet", "-q", help="No progress-bar."),
+):  # pragma: no cover
+    """Download all pollutants for all countries (deprecated)"""
+    deprecation_message("all", "download")
+    download(countries, pollutants, path, year, overwrite, quiet)
 
 
 @main.command(name="country")
@@ -87,16 +131,10 @@ def download_country(
         False, "--overwrite", "-O", help="Re-download existing files."
     ),
     quiet: bool = typer.Option(False, "--quiet", "-q", help="No progress-bar."),
-):
-    """Download specific pollutants for one country"""
-    request = client.request(
-        country,
-        pollutants or None,  # type:ignore[arg-type]
-        year_from=str(year),
-        year_to=str(year),
-        verbose=not quiet,
-    )
-    request.download_to_directory(path, skip_existing=not overwrite)
+):  # pragma: no cover
+    """Download specific pollutants for one country (deprecated)"""
+    deprecation_message("country", "download")
+    download([country], pollutants, path, year, overwrite, quiet)
 
 
 @main.command(name="pollutant")
@@ -111,13 +149,7 @@ def download_pollutant(
         False, "--overwrite", "-O", help="Re-download existing files."
     ),
     quiet: bool = typer.Option(False, "--quiet", "-q", help="No progress-bar."),
-):
-    """Download specific countries for one pollutant"""
-    request = client.request(
-        countries or None,  # type:ignore[arg-type]
-        pollutant,
-        year_from=str(year),
-        year_to=str(year),
-        verbose=not quiet,
-    )
-    request.download_to_directory(path, skip_existing=not overwrite)
+):  # pragma: no cover
+    """Download specific countries for one pollutant (deprecated)"""
+    deprecation_message("pollutant", "download")
+    download(countries, [pollutant], path, year, overwrite, quiet)

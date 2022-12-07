@@ -5,9 +5,9 @@ import warnings
 from datetime import datetime
 from pathlib import Path
 
-if sys.version_info >= (3, 8):
+if sys.version_info >= (3, 8):  # pragma: no cover
     from typing import TypedDict
-else:
+else:  # pragma: no cover
     from typing_extensions import TypedDict
 
 from .fetch import (
@@ -59,7 +59,7 @@ class AirbaseClient:
             ]
 
     @property
-    def all_countries(self) -> list[str]:
+    def all_countries(self) -> list[str]:  # pragma: no cover
         warnings.warn(
             f"{type(self).__qualname__}.all_countries has been deprecated and will be removed on v1. "
             f"Use {type(self).__qualname__}.countries instead.",
@@ -69,7 +69,7 @@ class AirbaseClient:
         return self.countries
 
     @property
-    def all_pollutants(self) -> dict[str, str]:
+    def all_pollutants(self) -> dict[str, str]:  # pragma: no cover
         warnings.warn(
             f"{type(self).__qualname__}.all_pollutants has been deprecated and will be removed on v1. "
             f"Use {type(self).__qualname__}._pollutants_ids instead.",
