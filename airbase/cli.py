@@ -78,9 +78,9 @@ def download(
     \b
     The -c/--country and -p/--pollutant allow to specify which data to download, e.g.
     - download only Norwegian, Danish and Finish sites
-      airbase all -c NO -c DK -c FI
+      airbase download -c NO -c DK -c FI
     - download only SO2, PM10 and PM2.5 observations
-      airbase all -p SO2 -p PM10 -p PM2.5
+      airbase download -p SO2 -p PM10 -p PM2.5
     """
 
     request = client.request(
