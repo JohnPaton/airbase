@@ -25,9 +25,13 @@ def test_version(options: str):
     result = runner.invoke(main, options.split())
     assert result.exit_code == 0
     assert "airbase" in result.output
-    assert str(__version__) in result.output
+    assert __version__ in result.output
 
 
+@pytest.mark.xfail(
+    reason="typer has problems with Enum cases https://github.com/tiangolo/typer/discussions/570",
+    strict=True,
+)
 def test_CO_vs_Co():
     app = Typer()
 

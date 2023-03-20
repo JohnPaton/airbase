@@ -10,7 +10,10 @@ import typer
 from . import __version__
 from .airbase import AirbaseClient
 
-main = typer.Typer(no_args_is_help=True, add_completion=False)
+main = typer.Typer(
+    no_args_is_help=True,
+    add_completion=False,
+)
 client = AirbaseClient()
 
 
@@ -30,9 +33,6 @@ class Pollutant(str, Enum):
 
     Pollutant = vars()
     for poll in client._pollutants_ids:
-        if poll.upper() in set(Pollutant):
-            # skipp options that will confuse typer
-            continue
         Pollutant[poll] = poll
 
     def __str__(self) -> str:
