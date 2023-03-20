@@ -3,17 +3,14 @@ from __future__ import annotations
 from datetime import date
 from enum import Enum
 from pathlib import Path
-from typing import List
 
+import click
 import typer
 
 from . import __version__
 from .airbase import AirbaseClient
 
-main = typer.Typer(
-    no_args_is_help=True,
-    add_completion=False,
-)
+app = typer.Typer(no_args_is_help=True, add_completion=False)
 client = AirbaseClient()
 
 
@@ -47,7 +44,7 @@ def version_callback(value: bool):
     raise typer.Exit()
 
 
-@main.callback()
+@app.callback()
 def root_options(
     version: bool = typer.Option(
         False,
@@ -60,29 +57,59 @@ def root_options(
     """Download Air Quality Data from the European Environment Agency (EEA)"""
 
 
-@main.command()
-def download(
-    countries: List[Country] = typer.Option([], "--country", "-c"),
-    pollutants: List[Pollutant] = typer.Option([], "--pollutant", "-p"),
-    path: Path = typer.Option(
-        "data", exists=True, dir_okay=True, writable=True
-    ),
-    year: int = typer.Option(date.today().year),
-    overwrite: bool = typer.Option(
-        False, "--overwrite", "-O", help="Re-download existing files."
-    ),
-    quiet: bool = typer.Option(False, "--quiet", "-q", help="No progress-bar."),
+countries = click.option(
+    "-c",
+    "--country",
+    "countries",
+    type=click.Choice(Country),  # type:ignore [arg-type]
+    multiple=True,
+)
+country = click.argument(
+    "country",
+    type=click.Choice(Country),  # type:ignore [arg-type]
+)
+
+pollutants = click.option(
+    "-p",
+    "--pollutant",
+    "pollutants",
+    type=click.Choice(Pollutant),  # type:ignore [arg-type]
+    multiple=True,
+)
+pollutant = click.argument(
+    "pollutant",
+    type=click.Choice(Pollutant),  # type:ignore [arg-type]
+)
+
+
+path = click.option(
+    "--path",
+    default="data",
+    type=click.Path(exists=True, dir_okay=True, writable=True),
+)
+year = click.option("--year", default=date.today().year, type=int)
+overwrite = click.option(
+    "-O",
+    "--overwrite",
+    is_flag=True,
+    help="Re-download existing files.",
+)
+quiet = click.option(
+    "-q",
+    "--quiet",
+    is_flag=True,
+    help="No progress-bar.",
+)
+
+
+def _download(
+    countries: list[Country],
+    pollutants: list[Pollutant],
+    path: Path,
+    year: int,
+    overwrite: bool,
+    quiet: bool,
 ):
-    """Download all pollutants for all countries
-
-    \b
-    The -c/--country and -p/--pollutant allow to specify which data to download, e.g.
-    - download only Norwegian, Danish and Finish sites
-      airbase download -c NO -c DK -c FI
-    - download only SO2, PM10 and PM2.5 observations
-      airbase download -p SO2 -p PM10 -p PM2.5
-    """
-
     request = client.request(
         countries or None,  # type:ignore[arg-type]
         pollutants or None,  # type:ignore[arg-type]
@@ -93,6 +120,33 @@ def download(
     request.download_to_directory(path, skip_existing=not overwrite)
 
 
+@click.command()
+@countries
+@pollutants
+@path
+@year
+@overwrite
+@quiet
+def download(
+    countries: list[Country],
+    pollutants: list[Pollutant],
+    path: Path,
+    year: int,
+    overwrite: bool,
+    quiet: bool,
+):
+    """Download all pollutants for all countries
+
+    \b
+    The -c/--country and -p/--pollutant allow to specify which data to download, e.g.
+    - download only Norwegian, Danish and Finish sites
+      airbase download -c NO -c DK -c FI
+    - download only SO2, PM10 and PM2.5 observations
+      airbase download -p SO2 -p PM10 -p PM2.5
+    """
+    _download(countries, pollutants, path, year, overwrite, quiet)
+
+
 def deprecation_message(old: str, new: str):  # pragma: no cover
     old = typer.style(f"{__package__} {old}", fg=typer.colors.RED, bold=True)
     new = typer.style(f"{__package__} {new}", fg=typer.colors.GREEN, bold=True)
@@ -101,55 +155,69 @@ def deprecation_message(old: str, new: str):  # pragma: no cover
     )
 
 
-@main.command(name="all")
+@click.command()
+@countries
+@pollutants
+@path
+@year
+@overwrite
+@quiet
 def download_all(
-    countries: List[Country] = typer.Option([], "--country", "-c"),
-    pollutants: List[Pollutant] = typer.Option([], "--pollutant", "-p"),
-    path: Path = typer.Option(
-        "data", exists=True, dir_okay=True, writable=True
-    ),
-    year: int = typer.Option(date.today().year),
-    overwrite: bool = typer.Option(
-        False, "--overwrite", "-O", help="Re-download existing files."
-    ),
-    quiet: bool = typer.Option(False, "--quiet", "-q", help="No progress-bar."),
+    countries: list[Country],
+    pollutants: list[Pollutant],
+    path: Path,
+    year: int,
+    overwrite: bool,
+    quiet: bool,
 ):  # pragma: no cover
     """Download all pollutants for all countries (deprecated)"""
     deprecation_message("all", "download")
-    download(countries, pollutants, path, year, overwrite, quiet)
+    _download(countries, pollutants, path, year, overwrite, quiet)
 
 
-@main.command(name="country")
+@click.command()
+@country
+@pollutants
+@path
+@year
+@overwrite
+@quiet
 def download_country(
     country: Country,
-    pollutants: List[Pollutant] = typer.Option([], "--pollutant", "-p"),
-    path: Path = typer.Option(
-        "data", exists=True, dir_okay=True, writable=True
-    ),
-    year: int = typer.Option(date.today().year),
-    overwrite: bool = typer.Option(
-        False, "--overwrite", "-O", help="Re-download existing files."
-    ),
-    quiet: bool = typer.Option(False, "--quiet", "-q", help="No progress-bar."),
+    pollutants: list[Pollutant],
+    path: Path,
+    year: int,
+    overwrite: bool,
+    quiet: bool,
 ):  # pragma: no cover
     """Download specific pollutants for one country (deprecated)"""
     deprecation_message("country", "download")
-    download([country], pollutants, path, year, overwrite, quiet)
+    _download([country], pollutants, path, year, overwrite, quiet)
 
 
-@main.command(name="pollutant")
+@click.command()
+@pollutant
+@countries
+@path
+@year
+@overwrite
+@quiet
 def download_pollutant(
     pollutant: Pollutant,
-    countries: List[Country] = typer.Option([], "--country", "-c"),
-    path: Path = typer.Option(
-        "data", exists=True, dir_okay=True, writable=True
-    ),
-    year: int = typer.Option(date.today().year),
-    overwrite: bool = typer.Option(
-        False, "--overwrite", "-O", help="Re-download existing files."
-    ),
-    quiet: bool = typer.Option(False, "--quiet", "-q", help="No progress-bar."),
+    countries: list[Country],
+    path: Path,
+    year: int,
+    overwrite: bool,
+    quiet: bool,
 ):  # pragma: no cover
     """Download specific countries for one pollutant (deprecated)"""
     deprecation_message("pollutant", "download")
-    download(countries, [pollutant], path, year, overwrite, quiet)
+    _download(countries, [pollutant], path, year, overwrite, quiet)
+
+
+# click object
+main: click.Group = typer.main.get_command(app)  # type:ignore [assignment]
+main.add_command(download, "download")
+main.add_command(download_all, "all")
+main.add_command(download_country, "country")
+main.add_command(download_pollutant, "pollutant")
