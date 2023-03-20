@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 import pytest
+from typer import Typer
 from typer.testing import CliRunner
 
 from airbase import __version__
@@ -23,3 +26,21 @@ def test_version(options: str):
     assert result.exit_code == 0
     assert "airbase" in result.output
     assert __version__ in result.output
+
+
+@pytest.mark.xfail(
+    reason="typer has problems with Enum cases https://github.com/tiangolo/typer/discussions/570",
+    strict=True,
+)
+def test_CO_vs_Co():
+    app = Typer()
+
+    pollutants = set()
+
+    @app.command()
+    def CO_vs_Co(poll: Pollutant):
+        pollutants.add(poll)
+
+    result = runner.invoke(app, ["CO"])
+    assert result.exit_code == 0
+    assert pollutants == {Pollutant.CO}
