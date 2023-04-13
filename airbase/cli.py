@@ -1,16 +1,15 @@
 from __future__ import annotations
 
+import sys
 from datetime import date
 from enum import Enum
 from pathlib import Path
 
 import click
-import typer
 
 from . import __version__
 from .airbase import AirbaseClient
 
-app = typer.Typer(no_args_is_help=True, add_completion=False)
 client = AirbaseClient()
 
 
@@ -36,25 +35,18 @@ class Pollutant(str, Enum):
         return self.name
 
 
-def version_callback(value: bool):
-    if not value:
-        return
-
-    typer.echo(f"{__package__} v{__version__}")
-    raise typer.Exit()
-
-
-@app.callback()
-def root_options(
-    version: bool = typer.Option(
-        False,
-        "--version",
-        "-V",
-        callback=version_callback,
-        help=f"Show {__package__} version and exit.",
-    ),
-):
+@click.group(invoke_without_command=True, no_args_is_help=True)
+@click.option(
+    "--version",
+    "-V",
+    is_flag=True,
+    help=f"Show {__package__} version and exit.",
+)
+def main(version: bool):
     """Download Air Quality Data from the European Environment Agency (EEA)"""
+    if version:
+        click.echo(f"{__package__} v{__version__}")
+        sys.exit(0)
 
 
 countries = click.option(
@@ -120,7 +112,7 @@ def _download(
     request.download_to_directory(path, skip_existing=not overwrite)
 
 
-@click.command()
+@main.command()
 @countries
 @pollutants
 @path
@@ -148,14 +140,14 @@ def download(
 
 
 def deprecation_message(old: str, new: str):  # pragma: no cover
-    old = typer.style(f"{__package__} {old}", fg=typer.colors.RED, bold=True)
-    new = typer.style(f"{__package__} {new}", fg=typer.colors.GREEN, bold=True)
-    typer.echo(
+    old = click.style(f"{__package__} {old}", fg="red", bold=True)
+    new = click.style(f"{__package__} {new}", fg="green", bold=True)
+    click.echo(
         f"{old} has been deprecated and will be removed on v1. Use {new} all instead.",
     )
 
 
-@click.command()
+@main.command(name="all")
 @countries
 @pollutants
 @path
@@ -175,7 +167,7 @@ def download_all(
     _download(countries, pollutants, path, year, overwrite, quiet)
 
 
-@click.command()
+@main.command(name="country")
 @country
 @pollutants
 @path
@@ -195,7 +187,7 @@ def download_country(
     _download([country], pollutants, path, year, overwrite, quiet)
 
 
-@click.command()
+@main.command(name="pollutant")
 @pollutant
 @countries
 @path
@@ -213,11 +205,3 @@ def download_pollutant(
     """Download specific countries for one pollutant (deprecated)"""
     deprecation_message("pollutant", "download")
     _download(countries, [pollutant], path, year, overwrite, quiet)
-
-
-# click object
-main: click.Group = typer.main.get_command(app)  # type:ignore [assignment]
-main.add_command(download, "download")
-main.add_command(download_all, "all")
-main.add_command(download_country, "country")
-main.add_command(download_pollutant, "pollutant")
