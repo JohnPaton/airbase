@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 import pytest
-from typer.testing import CliRunner
+from click.testing import CliRunner
 
 from airbase import __version__
 from airbase.cli import Country, Pollutant, main
@@ -22,4 +24,4 @@ def test_version(options: str):
     result = runner.invoke(main, options.split())
     assert result.exit_code == 0
     assert "airbase" in result.output
-    assert __version__ in result.output
+    assert str(__version__) in result.output
