@@ -11,14 +11,21 @@ jobs:
     strategy:
       matrix:
         python: [3.7, 3.8, 3.9, '3.10', '3.11']
+        prerelease: [false]
+        include:
+          - python: '3.12'
+            prerelease: true
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python }}
-      - run: |
+          allow-prereleases: ${{ matrix.prerelease }}
+      - continue-on-error: ${{ matrix.prerelease }}
+        run: |
           pip install .[test]
-      - run: |
+      - continue-on-error: ${{ matrix.prerelease }}
+        run: |
           pytest -lk "not integration" --cov
 
   integration-test:
