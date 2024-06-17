@@ -117,6 +117,7 @@ async def fetcher(
 
     async with aiohttp.ClientSession() as session:
         semaphore = asyncio.Semaphore(max_concurrent)
+        semaphore_files = asyncio.Semaphore(max_concurrent)
 
         async def fetch(url: str) -> str:
             async with semaphore:
@@ -126,10 +127,11 @@ async def fetcher(
                     return text
 
         async def download(url: str, path: Path) -> Path:
-            text = await fetch(url)
-            async with aiofiles.open(str(path), mode="w") as f:
-                await f.write(text)
-            return path
+            async with semaphore_files:
+                text = await fetch(url)
+                async with aiofiles.open(str(path), mode="w") as f:
+                    await f.write(text)
+                return path
 
         jobs: list[Awaitable[str | Path]]
         if isinstance(urls, dict):
