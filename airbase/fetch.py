@@ -1,4 +1,5 @@
 """Helper functions encapsulating async HTTP request and file IO"""
+
 from __future__ import annotations
 
 import asyncio
@@ -116,19 +117,22 @@ async def fetcher(
     """
 
     async with aiohttp.ClientSession() as session:
-        semaphore_fetch = asyncio.Semaphore(max_concurrent)
-        semaphore_files = asyncio.Semaphore(max_concurrent)
+        semaphore = asyncio.Semaphore(max_concurrent)
 
         async def fetch(url: str) -> str:
-            async with semaphore_fetch:
+            """retrieve text, nothing more"""
+            async with semaphore:
                 async with session.get(url, ssl=False) as r:
                     r.raise_for_status()
                     text: str = await r.text(encoding=encoding)
                     return text
 
         async def download(url: str, path: Path) -> Path:
-            async with semaphore_files:
-                text = await fetch(url)
+            """retrieve text and write into path"""
+            async with semaphore:
+                async with session.get(url, ssl=False) as r:
+                    r.raise_for_status()
+                    text: str = await r.text(encoding=encoding)
                 async with aiofiles.open(str(path), mode="w") as f:
                     await f.write(text)
                 return path
