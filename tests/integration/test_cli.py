@@ -1,7 +1,7 @@
 from pathlib import Path
 
 import pytest
-from click.testing import CliRunner
+from typer.testing import CliRunner
 
 from airbase.cli import main
 
