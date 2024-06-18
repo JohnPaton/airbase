@@ -116,11 +116,11 @@ async def fetcher(
     """
 
     async with aiohttp.ClientSession() as session:
-        semaphore = asyncio.Semaphore(max_concurrent)
+        semaphore_fetch = asyncio.Semaphore(max_concurrent)
         semaphore_files = asyncio.Semaphore(max_concurrent)
 
         async def fetch(url: str) -> str:
-            async with semaphore:
+            async with semaphore_fetch:
                 async with session.get(url, ssl=False) as r:
                     r.raise_for_status()
                     text: str = await r.text(encoding=encoding)
