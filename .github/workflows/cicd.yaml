@@ -12,9 +12,9 @@ jobs:
       matrix:
         python: [3.7, 3.8, 3.9, '3.10', '3.11', '3.12']
         prerelease: [false]
-        #include:
-        #  - python: '3.13'
-        #    prerelease: true
+        include:
+          - python: '3.13'
+            prerelease: true
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
