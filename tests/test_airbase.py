@@ -175,4 +175,4 @@ class TestAirbaseRequest:
 
         r = airbase.AirbaseRequest()
         r.download_metadata(path.name)
-        assert path.exists
+        assert path.exists()
