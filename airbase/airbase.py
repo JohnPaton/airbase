@@ -330,9 +330,7 @@ class AirbaseRequest:
 
         if self.verbose:
             print(
-                "Generated {:,} CSV links ready for downloading".format(
-                    len(self._csv_links)
-                ),
+                f"Generated {len(self._csv_links):,} CSV links ready for downloading",
                 file=sys.stderr,
             )
 
