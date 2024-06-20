@@ -4,11 +4,7 @@ import sys
 import warnings
 from datetime import datetime
 from pathlib import Path
-
-if sys.version_info >= (3, 8):  # pragma: no cover
-    from typing import TypedDict
-else:  # pragma: no cover
-    from typing_extensions import TypedDict
+from typing import TypedDict
 
 from .fetch import (
     fetch_text,
