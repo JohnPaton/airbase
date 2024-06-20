@@ -156,7 +156,7 @@ class TestAirbaseRequest:
         assert header == header_expected
 
         # make sure header only there once
-        is_header = (l.strip() == header_expected for l in lines)
+        is_header = (line.strip() == header_expected for line in lines)
         assert sum(is_header) == 1
 
     def test_download_metadata(self, tmp_path: Path):
