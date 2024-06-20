@@ -134,7 +134,9 @@ def test_fetch_to_file(tmp_path: Path, csv_urls: dict[str, str]):
     assert path.exists()
 
     # drop the header and compare data rows
-    rows = lambda text: text.splitlines()[1:]
+    def rows(text: str) -> list[str]:
+        return text.splitlines()[1:]
+
     data_on_file = rows(path.read_text())
     data_rows = list(
         itertools.chain.from_iterable(rows(text) for text in csv_urls.values())
