@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import pytest
-from click.testing import CliRunner
+from typer.testing import CliRunner
 
 from airbase import __version__
 from airbase.cli import Country, Pollutant, main
