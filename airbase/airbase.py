@@ -154,8 +154,8 @@ class AirbaseClient:
 
         if shortpl is not None:
             warnings.warn(
-                f"the shortpl option has been deprecated and will be removed on v1. "
-                f"Use client.request([client._pollutants_ids[p] for p in shortpl], ...) instead.",
+                "the shortpl option has been deprecated and will be removed on v1. "
+                "Use client.request([client._pollutants_ids[p] for p in shortpl], ...) instead.",
                 DeprecationWarning,
                 stacklevel=2,
             )
