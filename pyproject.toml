@@ -23,16 +23,17 @@ show_missing = true
 
 [tool.black]
 line-length = 80
-target-version = ["py37"]
+target-version = ["py38"]
 
 [tool.isort]
 line_length = 80
-py_version = "37"
+py_version = "38"
 profile = "black"
 src_paths = ["airbase", "tests"]
 extend_skip = ["scripts"]
 
 [tool.mypy]
+python_version = "3.8"
 warn_unused_configs = true
 warn_unused_ignores = false
 warn_no_return = true
@@ -41,7 +42,7 @@ warn_unreachable = true
 show_error_codes = true
 pretty = true
 sqlite_cache = true
-exclude = "docs|scripts"
+exclude = "docs|scripts|build"
 
 [[tool.mypy.overrides]]
 module = ["tqdm"]
@@ -50,7 +51,7 @@ ignore_missing_imports = true
 [tool.tox]
 legacy_tox_ini = """
 [tox]
-envlist = py37, py38, py39, py310, py311, py312, lint, docs, integration
+envlist = py38, py39, py310, py311, py312, lint, docs, integration
 skip_missing_interpreters = True
 isolated_build = True
 
