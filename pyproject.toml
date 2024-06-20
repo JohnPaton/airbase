@@ -38,7 +38,10 @@ line-length = 80
 extend-exclude = ["docs", "scripts", "build"]
 
 [tool.ruff.lint]
-select = ["F", "UP"]
+select = ["E", "W", "F", "UP"]
+ignore = [
+    "E501", # https://docs.astral.sh/ruff/rules/line-too-long/
+]
 
 [tool.ruff.lint.per-file-ignores]
 "cli.py" = [ # typer needs typing.Optional and typing.List
