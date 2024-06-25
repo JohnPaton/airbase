@@ -21,17 +21,6 @@ skip_covered = true
 skip_empty = true
 show_missing = true
 
-[tool.black]
-line-length = 80
-target-version = ["py38"]
-
-[tool.isort]
-line_length = 80
-py_version = "38"
-profile = "black"
-src_paths = ["airbase", "tests"]
-extend_skip = ["scripts"]
-
 [tool.ruff]
 target-version = "py38"
 line-length = 80

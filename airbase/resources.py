@@ -1,4 +1,5 @@
 """Global variables for URL templating"""
+
 import datetime
 
 E1A_SUMMARY_URL = "http://discomap.eea.europa.eu/map/fme/E1a/summaryE1a.js"

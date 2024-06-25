@@ -1,21 +1,12 @@
 repos:
-- repo: https://github.com/psf/black
-  rev: "22.3.0"
+- repo: https://github.com/astral-sh/ruff-pre-commit
+  rev: v0.4.9
   hooks:
-  - id: black
-    args: [-l, "80"]
+    - id: ruff-format # formatter
+    - id: ruff        # linter
 - repo: https://github.com/pre-commit/mirrors-mypy
   rev: v1.10.0
   hooks:
   - id: mypy
     exclude: '(docs/.*)|(setup\.py)'
     additional_dependencies: [types-aiofiles, types-requests]
-- repo: https://github.com/pycqa/isort
-  rev: 5.12.0
-  hooks:
-  - id: isort
-    name: isort (python)
-- repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: v0.4.9
-  hooks:
-    - id: ruff # run the linter
