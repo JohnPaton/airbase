@@ -4,11 +4,7 @@ import sys
 import warnings
 from datetime import datetime
 from pathlib import Path
-
-if sys.version_info >= (3, 8):  # pragma: no cover
-    from typing import TypedDict
-else:  # pragma: no cover
-    from typing_extensions import TypedDict
+from typing import TypedDict
 
 from .fetch import (
     fetch_text,
@@ -158,8 +154,8 @@ class AirbaseClient:
 
         if shortpl is not None:
             warnings.warn(
-                f"the shortpl option has been deprecated and will be removed on v1. "
-                f"Use client.request([client._pollutants_ids[p] for p in shortpl], ...) instead.",
+                "the shortpl option has been deprecated and will be removed on v1. "
+                "Use client.request([client._pollutants_ids[p] for p in shortpl], ...) instead.",
                 DeprecationWarning,
                 stacklevel=2,
             )
@@ -334,9 +330,7 @@ class AirbaseRequest:
 
         if self.verbose:
             print(
-                "Generated {:,} CSV links ready for downloading".format(
-                    len(self._csv_links)
-                ),
+                f"Generated {len(self._csv_links):,} CSV links ready for downloading",
                 file=sys.stderr,
             )
 
