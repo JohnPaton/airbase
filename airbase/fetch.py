@@ -4,7 +4,10 @@ from __future__ import annotations
 
 import asyncio
 import json
+import sys
+import shutil
 import warnings
+import tempfile
 from pathlib import Path
 from types import SimpleNamespace
 from typing import AsyncIterator, Awaitable, overload
@@ -12,6 +15,7 @@ from typing import AsyncIterator, Awaitable, overload
 import aiofiles
 import aiohttp
 from tqdm import tqdm
+from pyarrow import dataset
 
 DEFAULT = SimpleNamespace(
     progress=False,
@@ -128,13 +132,13 @@ async def fetcher(
                     return text
 
         async def download(url: str, path: Path) -> Path:
-            """retrieve text and write into path"""
+            """retrieve content and write into path"""
             async with semaphore:
                 async with session.get(url, ssl=False) as r:
                     r.raise_for_status()
-                    text: str = await r.text(encoding=encoding)
-                async with aiofiles.open(str(path), mode="w") as f:
-                    await f.write(text)
+                    content = await r.content.read()
+                async with aiofiles.open(str(path), mode="wb") as f:
+                    await f.write(content)
                 return path
 
         jobs: list[Awaitable[str | Path]]
@@ -276,3 +280,38 @@ def fetch_to_directory(
             pass
 
     asyncio.run(fetch())
+
+
+def fetch_to_single_parquet(
+    urls: list[str],
+    path: Path,
+    *,
+    progress: bool = DEFAULT.progress,
+    raise_for_status: bool = DEFAULT.raise_for_status,
+    max_concurrent: int = DEFAULT.max_concurrent,
+) -> None:
+    """Request a list of url write out all responses into a single parquet file
+
+    :param urls: requested urls
+    :param path: parquet file for all combined responses
+    :param progress: show progress bar
+    :param raise_for_status: Raise exceptions if download links
+        return "bad" HTTP status codes. If False,
+        a :py:func:`warnings.warn` will be issued instead.
+    :param max_concurrent: maximum concurrent requests
+    """
+    with tempfile.TemporaryDirectory() as tempdir:
+        fetch_to_directory(
+            urls=urls,
+            root=Path(tempdir),
+            progress=progress,
+            raise_for_status=raise_for_status,
+            max_concurrent=max_concurrent
+        )
+        if progress:
+            print("Merging results into single file...", file=sys.stderr)
+        ds = dataset.dataset(tempdir, format="parquet")
+        merged_dir = Path(tempdir) / "merged"
+        merged_file = merged_dir / "part-0.parquet"
+        dataset.write_dataset(ds, base_dir=merged_dir)
+        shutil.move(str(merged_file), str(path))

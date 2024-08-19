@@ -97,21 +97,21 @@ class TestAirbaseClient:
 @pytest.mark.usefixtures("all_responses")
 class TestAirbaseRequest:
     def test_preload_csv_links(self):
-        r = airbase.AirbaseRequest(preload_csv_links=False)
+        r = airbase.AirbaseRequest(preload_parquet_links=False)
         assert r._csv_links == []
 
-        r = airbase.AirbaseRequest(preload_csv_links=True)
+        r = airbase.AirbaseRequest(preload_parquet_links=True)
         assert len(r._csv_links) > 0
 
     def test_verbose_produces_output(self, capsys, tmp_path: Path):
-        r = airbase.AirbaseRequest(verbose=False, preload_csv_links=True)
+        r = airbase.AirbaseRequest(verbose=False, preload_parquet_links=True)
         r.download_to_directory(tmp_path)
 
         output = capsys.readouterr()
         assert len(output.out) == 0
         assert len(output.err) == 0
 
-        r = airbase.AirbaseRequest(verbose=True, preload_csv_links=True)
+        r = airbase.AirbaseRequest(verbose=True, preload_parquet_links=True)
         r.download_to_directory(tmp_path)
 
         output = capsys.readouterr()

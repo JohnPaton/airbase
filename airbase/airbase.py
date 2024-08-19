@@ -1,16 +1,19 @@
 from __future__ import annotations
 
 import sys
+import asyncio
 import warnings
 from datetime import datetime
 from pathlib import Path
-from typing import TypedDict
+from typing import TypedDict, List
+
+import aiohttp
 
 from .fetch import (
     fetch_text,
     fetch_to_directory,
     fetch_to_file,
-    fetch_unique_lines,
+    fetch_to_single_parquet,
 )
 from .resources import CURRENT_YEAR, METADATA_URL
 from .summary import DB
@@ -20,6 +23,14 @@ from .util import link_list_url, string_safe_list
 class PollutantDict(TypedDict):
     pl: str
     shortpl: int
+
+class LinkRequestBody(TypedDict):
+    cities: List[str]
+    countries: List[str]
+    datasets: List[int]
+    properties: List[str]
+    source: str
+
 
 
 class AirbaseClient:
@@ -243,7 +254,7 @@ class AirbaseRequest:
         source: str = "All",
         update_date: str | datetime | None = None,
         verbose: bool = True,
-        preload_csv_links: bool = False,
+        preload_parquet_links: bool = False,
     ) -> None:
         """
         Handler for Airbase data requests.
@@ -274,7 +285,7 @@ class AirbaseRequest:
             updated after a certain date is of interest.
         :param bool verbose: (optional) print status messages to stderr.
             Default True.
-        :param bool preload_csv_links: (optional) Request all the csv
+        :param bool preload_parquet_links: (optional) Request all the csv
             download links from the Airbase server at object
             initialization. Default False.
         """
@@ -288,49 +299,56 @@ class AirbaseRequest:
 
         self._country_list = string_safe_list(country)
         self._shortpl_list = string_safe_list(shortpl)
-        self._download_links = []
+        self._link_request_body = LinkRequestBody(
+            cities=[],
+            countries=self._country_list,
+            datasets=[],
+            properties=[
+                f"http://dd.eionet.europa.eu/vocabulary/aq/pollutant/{pl}"
+                for pl in self._shortpl_list
+            ],
+            source="python-airbase",
+        )
 
-        for c in self._country_list:
-            for p in self._shortpl_list:
-                self._download_links.append(
-                    link_list_url(c, p, year_from, year_to, source, update_date)
-                )
+        self._parquet_links: list[str] = []
 
-        self._csv_links: list[str] = []
+        if preload_parquet_links:
+            self._get_parquet_links()
 
-        if preload_csv_links:
-            self._get_csv_links()
-
-    def _get_csv_links(self, force: bool = False) -> None:
+    def _get_parquet_links(self, force: bool = False) -> None:
         """
-        Request all relevant CSV links from the server.
+        Request all relevant Parquet links from the server.
 
         This can take some time (several minutes for the entire set).
         This action will only be performed once, unless `force` is set
         to True.
 
-        :param force: Re-download all of the links, even if they
+        :param force: Re-download all the links, even if they
             are already known
         """
-        if self._csv_links and not force:
+        if self._parquet_links and not force:
             return
 
         if self.verbose:
             print("Generating CSV download links...", file=sys.stderr)
 
         # set of links (no duplicates)
-        csv_links = fetch_unique_lines(
-            self._download_links,
-            progress=self.verbose,
-            encoding="utf-8-sig",
-        )
+        async def fetch_links() -> list[str]:
+            async with aiohttp.ClientSession() as session:
+                async with session.post(
+                    url="https://eeadmz1-downloads-api-appservice.azurewebsites.net/ParquetFile/urls",
+                    json=self._link_request_body,
+                ) as response:
+                    text = await response.text(encoding="utf-8-sig")
+                return text.replace("\r","").split("\n")[1:]  # drop header
 
+        parquet_links = asyncio.run(fetch_links())
         # list of links (no duplicates)
-        self._csv_links = list(csv_links)
+        self._parquet_links = list(set(parquet_links))
 
         if self.verbose:
             print(
-                f"Generated {len(self._csv_links):,} CSV links ready for downloading",
+                f"Generated {len(self._parquet_links):,} parquet links ready for downloading",
                 file=sys.stderr,
             )
 
@@ -358,13 +376,13 @@ class AirbaseRequest:
         if not dir.is_dir():
             raise NotADirectoryError(f"{dir.resolve()} is not a directory.")
 
-        self._get_csv_links()
+        self._get_parquet_links()
 
         if self.verbose:
-            print(f"Downloading CSVs to {dir}...", file=sys.stderr)
+            print(f"Downloading Parquets to {dir}...", file=sys.stderr)
 
         fetch_to_directory(
-            self._csv_links,
+            self._parquet_links,
             dir,
             skip_existing=skip_existing,
             progress=self.verbose,
@@ -377,7 +395,7 @@ class AirbaseRequest:
         self, filepath: str | Path, raise_for_status: bool = True
     ) -> AirbaseRequest:
         """
-        Download data into one large CSV.
+        Download data into one large Parquet.
 
         Directory where the new CSV will be created must exist.
 
@@ -388,7 +406,7 @@ class AirbaseRequest:
 
         :return: self
         """
-        self._get_csv_links()
+        self._get_parquet_links()
 
         # ensure the path is valid
         filepath = Path(filepath)
@@ -398,9 +416,9 @@ class AirbaseRequest:
             )
 
         if self.verbose:
-            print(f"Writing data to {filepath}...", file=sys.stderr)
-        fetch_to_file(
-            self._csv_links,
+            print(f"Will write data to {filepath}...", file=sys.stderr)
+        fetch_to_single_parquet(
+            self._parquet_links,
             filepath,
             progress=self.verbose,
             raise_for_status=raise_for_status,
