@@ -8,11 +8,10 @@
 
 # 🌬 AirBase
 
-An easy downloader for the AirBase air quality data.
+An easy downloader for air quality data provided by the European Environment Agency (EEA).
 
-AirBase is an air quality database provided by the European Environment Agency
-(EEA). The data is available for download at
-[the portal](http://discomap.eea.europa.eu/map/fme/AirQualityExport.htm), but
+The data is available for download at
+[the portal](https://eeadmz1-downloads-webapp.azurewebsites.net/), but
 the interface makes it a bit time consuming to do bulk downloads. Hence, an easy
 Python-based interface.
 
