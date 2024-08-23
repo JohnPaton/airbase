@@ -3,7 +3,7 @@ from __future__ import annotations
 import asyncio
 from collections import defaultdict
 from enum import IntEnum
-from typing import Literal
+from typing import Literal, NamedTuple
 from warnings import warn
 
 import aiohttp
@@ -36,6 +36,46 @@ class Dataset(IntEnum):
 
     def __str__(self) -> str:
         return self.name
+
+
+class DownloadInfo(NamedTuple):
+    """
+    info needed for requesting the URLs for one pollutant from one country and dataset
+    the request can be further restricted with the `cities` param
+    """
+
+    pollutant: str
+    country: str
+    dataset: Dataset
+    cities: tuple[str, ...] | None = None
+    source: str = "API"  # for EEA internal use
+
+    def request_info(self) -> dict[str, list[str] | list[Dataset] | str]:
+        return dict(
+            countries=[self.country],
+            cities=[] if self.cities is None else list(self.cities),
+            properties=[self.pollutant],
+            datasets=[self.dataset],
+            source=self.source,
+        )
+
+    @classmethod
+    def historical(
+        cls, pollutant: str, country: str, *cities: str
+    ) -> DownloadInfo:
+        return cls(pollutant, country, Dataset.Historical, cities)
+
+    @classmethod
+    def verified(
+        cls, pollutant: str, country: str, *cities: str
+    ) -> DownloadInfo:
+        return cls(pollutant, country, Dataset.Verified, cities)
+
+    @classmethod
+    def unverified(
+        cls, pollutant: str, country: str, *cities: str
+    ) -> DownloadInfo:
+        return cls(pollutant, country, Dataset.Unverified, cities)
 
 
 async def json_from_get_api(

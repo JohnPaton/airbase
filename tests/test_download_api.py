@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 from itertools import chain
 
@@ -6,6 +8,7 @@ import pytest
 from airbase.download_api import (
     COUNTRY_CODES,
     Dataset,
+    DownloadInfo,
     cities,
     countries,
     pollutants,
@@ -19,6 +22,57 @@ def test_Dataset():
     assert (
         json.dumps(list(Dataset)) == json.dumps(tuple(Dataset)) == "[3, 2, 1]"
     )
+
+
+@pytest.mark.parametrize(
+    "pollutant,country,cities,historical,verified,unverified",
+    (
+        pytest.param(
+            "PM10",
+            "NO",
+            tuple(),
+            '{"countries": ["NO"], "cities": [], "properties": ["PM10"], "datasets": [3], "source": "API"}',
+            '{"countries": ["NO"], "cities": [], "properties": ["PM10"], "datasets": [2], "source": "API"}',
+            '{"countries": ["NO"], "cities": [], "properties": ["PM10"], "datasets": [1], "source": "API"}',
+            id="PM10-NO",
+        ),
+        pytest.param(
+            "O3",
+            "IS",
+            ("Reykjavik",),
+            '{"countries": ["IS"], "cities": ["Reykjavik"], "properties": ["O3"], "datasets": [3], "source": "API"}',
+            '{"countries": ["IS"], "cities": ["Reykjavik"], "properties": ["O3"], "datasets": [2], "source": "API"}',
+            '{"countries": ["IS"], "cities": ["Reykjavik"], "properties": ["O3"], "datasets": [1], "source": "API"}',
+            id="O3-IS",
+        ),
+    ),
+)
+def test_DownloadInfo(
+    pollutant: str,
+    country: str,
+    cities: tuple[str, ...],
+    historical: str,
+    verified: str,
+    unverified: str,
+):
+    assert (
+        json.dumps(
+            DownloadInfo.historical(pollutant, country, *cities).request_info()
+        )
+        == historical
+    ), "unexpected historical info"
+    assert (
+        json.dumps(
+            DownloadInfo.verified(pollutant, country, *cities).request_info()
+        )
+        == verified
+    ), "unexpected verified info"
+    assert (
+        json.dumps(
+            DownloadInfo.unverified(pollutant, country, *cities).request_info()
+        )
+        == unverified
+    ), "unexpected unverified info"
 
 
 def test_countries():
