@@ -1,8 +1,24 @@
+import json
 from itertools import chain
 
 import pytest
 
-from airbase.download_api import COUNTRY_CODES, cities, countries, pollutants
+from airbase.download_api import (
+    COUNTRY_CODES,
+    Dataset,
+    cities,
+    countries,
+    pollutants,
+)
+
+
+def test_Dataset():
+    assert Dataset.Historical == Dataset.Airbase == 3
+    assert Dataset.Verified == Dataset.E1a == 2
+    assert Dataset.Unverified == Dataset.UDT == Dataset.E2a == 1
+    assert (
+        json.dumps(list(Dataset)) == json.dumps(tuple(Dataset)) == "[3, 2, 1]"
+    )
 
 
 def test_countries():
