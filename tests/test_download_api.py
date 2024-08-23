@@ -12,6 +12,7 @@ from airbase.download_api import (
     cities,
     countries,
     pollutants,
+    url_to_files,
 )
 
 
@@ -137,3 +138,8 @@ def test_cities_invalid_country():
     countries = ("Norway", "Finland", "USA")
     with pytest.warns(UserWarning, match="Unknown country"):
         assert not cities(*countries), "dict is not empty"
+
+
+def test_url_to_files():
+    urls = url_to_files(DownloadInfo.historical("O3", "NO", "Oslo"))
+    assert len(urls) == 56

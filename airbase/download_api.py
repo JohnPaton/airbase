@@ -2,11 +2,14 @@ from __future__ import annotations
 
 import asyncio
 from collections import defaultdict
+from collections.abc import AsyncIterator
 from enum import IntEnum
+from types import SimpleNamespace
 from typing import Literal, NamedTuple
 from warnings import warn
 
 import aiohttp
+from tqdm import tqdm
 
 API_SERVICE_ROOT = "https://eeadmz1-downloads-api-appservice.azurewebsites.net"
 COUNTRY_CODES = set(
@@ -15,6 +18,13 @@ COUNTRY_CODES = set(
     IE IS IT LI LT LU LV ME MK MT NL NO PL PT RO RS SE SI SK TR
     XK
     """.split()
+)
+
+DEFAULT = SimpleNamespace(
+    encoding="UTF-8",
+    progress=False,
+    raise_for_status=True,
+    max_concurrent=10,
 )
 
 
@@ -82,7 +92,7 @@ async def json_from_get_api(
     entry_point: Literal["Country", "Property"],
     *,
     timeout: float | None = None,
-    encoding: str | None = None,
+    encoding: str | None = DEFAULT.encoding,
 ) -> list[dict[str, str]]:
     """
     get request to an specific Download API entry point and return decoded JSON
@@ -109,7 +119,7 @@ async def json_from_post_api(
     data: tuple[str, ...] | list[str],
     *,
     timeout: float | None = None,
-    encoding: str | None = None,
+    encoding: str | None = DEFAULT.encoding,
 ) -> list[dict[str, str]]:
     """
     post request to an specific Download API entry point and return decoded JSON
@@ -130,6 +140,59 @@ async def json_from_post_api(
             r.raise_for_status()
             payload: list[dict[str, str]] = await r.json(encoding=encoding)
             return payload
+
+
+async def fetch_text_from_post_api(
+    entry_point: Literal["ParquetFile/urls"],
+    urls: tuple[DownloadInfo, ...],
+    *,
+    encoding: str | None = DEFAULT.encoding,
+    progress: bool = DEFAULT.progress,
+    raise_for_status: bool = DEFAULT.raise_for_status,
+    max_concurrent: int = DEFAULT.max_concurrent,
+) -> AsyncIterator[str]:
+    """
+    multiple post requests to an specific Download API entry point and return decoded text
+    from each request as they become available
+
+    :param urls: info about requested urls
+    :param encoding: text encoding used for decoding each response's body
+    :param progress: show progress bar
+    :param raise_for_status: Raise exceptions if download links
+        return "bad" HTTP status codes. If False,
+        a :py:func:`warnings.warn` will be issued instead.
+    :param max_concurrent: maximum concurrent requests
+
+    :return: url text or path to downloaded text, one by one as the requests are completed
+    """
+
+    async with aiohttp.ClientSession() as session:
+        semaphore = asyncio.Semaphore(max_concurrent)
+
+        async def fetch(info: DownloadInfo) -> str:
+            """retrieve text, nothing more"""
+            async with semaphore:
+                async with session.post(
+                    f"{API_SERVICE_ROOT}/{entry_point}",
+                    json=info.request_info(),
+                    ssl=False,
+                ) as r:
+                    r.raise_for_status()
+                    text: str = await r.text(encoding=encoding)
+                    return text
+
+        with tqdm(total=len(urls), leave=True, disable=not progress) as p_bar:
+            jobs = tuple(fetch(info) for info in urls)
+            for result in asyncio.as_completed(jobs):
+                p_bar.update(1)
+                try:
+                    yield await result
+                except asyncio.CancelledError:
+                    continue
+                except aiohttp.ClientResponseError as e:
+                    if raise_for_status:
+                        raise
+                    warn(str(e), category=RuntimeWarning)
 
 
 def countries() -> list[str]:
@@ -175,3 +238,41 @@ def cities(*countries: str) -> defaultdict[str, set[str]]:
         key, val = city["countryCode"], city["cityName"]
         cities[key].add(val)
     return cities
+
+
+def url_to_files(
+    *urls: DownloadInfo,
+    progress: bool = DEFAULT.progress,
+    raise_for_status: bool = DEFAULT.raise_for_status,
+    max_concurrent: int = DEFAULT.max_concurrent,
+) -> set[str]:
+    """
+    multiple request for file URLs and return only the unique URLs among all the responses
+
+    :param urls: info about requested urls
+    :param progress: show progress bar
+    :param raise_for_status: Raise exceptions if download links
+        return "bad" HTTP status codes. If False,
+        a :py:func:`warnings.warn` will be issued instead.
+    :param max_concurrent: maximum concurrent requests
+
+    :return: unique file URLs among from all the responses
+    """
+
+    async def fetch() -> set[str]:
+        lines: set[str] = set()
+        async for text in fetch_text_from_post_api(
+            "ParquetFile/urls",
+            urls,
+            progress=progress,
+            raise_for_status=raise_for_status,
+            max_concurrent=max_concurrent,
+        ):
+            lines.update(
+                line.strip()
+                for line in text.splitlines()
+                if line.strip().startswith("http")
+            )
+        return lines
+
+    return asyncio.run(fetch())
