@@ -1,20 +1,16 @@
 from __future__ import annotations
 
 import json
-from itertools import chain
 from pathlib import Path
+from textwrap import dedent
 
 import pytest
+from pytest_httpx import HTTPXMock
 
 from airbase.download_api import (
-    COUNTRY_CODES,
     Dataset,
     DownloadInfo,
-    cities,
-    countries,
     get_client,
-    pollutants,
-    run_sync,
 )
 
 
@@ -78,80 +74,133 @@ def test_DownloadInfo(
     ), "unexpected unverified info"
 
 
-def test_countries():
-    assert set(countries()) == set(COUNTRY_CODES)
+@pytest.mark.asyncio
+class TestClient:
+    async def test_num_files_processing(self, httpx_mock: HTTPXMock):
+        num_files = 10
+        num_urls = 3
 
+        httpx_mock.add_response(json={"numberFiles": num_files, "size": 123456})
 
-def test_pollutants():
-    pollutants_ = pollutants()
-
-    names = tuple(pollutants_)
-    assert len(names) >= 469, "too few pollutants"
-
-    ids = tuple(chain.from_iterable(pollutants_.values()))
-    assert len(ids) == len(set(ids)) >= 648, "too few IDs"
-
-    for poll, id in {"PM10": 5, "O3": 7, "NO2": 8, "SO2": 1}.items():
-        assert pollutants_.get(poll) == {id}, f"unknown {poll} {id=}"
-
-
-def test_cities():
-    known_cities = dict(
-        IS={"Reykjavik"},
-        NO={
-            "Bergen",
-            "Kristiansand",
-            "Oslo",
-            "Stavanger",
-            "Tromsø",
-            "Trondheim",
-        },
-        SE={
-            "Borås",
-            "Göteborg",
-            "Helsingborg",
-            "Jönköping",
-            "Linköping",
-            "Lund",
-            "Malmö",
-            "Norrköping",
-            "Örebro",
-            "Sodertalje",
-            "Stockholm (greater city)",
-            "Umeå",
-            "Uppsala",
-            "Västerås",
-        },
-        FI={
-            "Helsinki / Helsingfors (greater city)",
-            "Jyväskylä",
-            "Kuopio",
-            "Lahti / Lahtis",
-            "Oulu",
-            "Tampere / Tammerfors",
-            "Turku / Åbo",
-        },
-    )
-    for country, cities_ in cities(*known_cities).items():
-        assert cities_ <= known_cities[country], f"missing cities on {country}"
-
-
-def test_cities_invalid_country():
-    countries = ("Norway", "Finland", "USA")
-    with pytest.warns(UserWarning, match="Unknown country"):
-        assert not cities(*countries), "dict is not empty"
-
-
-def test_parquet_file_urls(tmp_path):
-    client = get_client()
-    run_sync(
-        client.download(
-            DownloadInfo.historical("O3", "NL", "Greater Amsterdam"),
-            destination=tmp_path,
+        client = get_client()
+        result = await client.total_num_parquet_files(
+            *[DownloadInfo.historical("O3", "NL") for _ in range(num_urls)]
         )
-    )
+        assert result == num_urls * num_files
 
-    files = list(Path(tmp_path).glob("*"))
-    assert len(files) > 0
-    for file in files:
-        assert file.suffix == ".parquet"
+    async def test_parquet_file_url_processing(self, httpx_mock: HTTPXMock):
+        num_urls = 3
+
+        httpx_mock.add_response(
+            text=dedent("""\
+                ParquetFileUrl
+                https://example.com/1.parquet\r
+                https://example.com/2.parquet\r
+                https://example.com/3.parquet\r
+            """)
+        )
+
+        client = get_client()
+        result_urls = []
+        async for result in client.parquet_file_urls(
+            *[DownloadInfo.historical("O3", "NL") for _ in range(num_urls)]
+        ):
+            result_urls.append(result)
+
+        assert len(result_urls) == num_urls * 3
+
+    async def test_pollutants(self, httpx_mock: HTTPXMock):
+        httpx_mock.add_response(
+            json=[
+                dict(
+                    notation="O3",
+                    id="http://dd.eionet.europa.eu/vocabulary/aq/pollutant/1",
+                ),
+                dict(
+                    notation="O3",
+                    id="http://dd.eionet.europa.eu/vocabulary/aq/pollutant/2",
+                ),
+                dict(
+                    notation="NO2",
+                    id="http://dd.eionet.europa.eu/vocabularyconcept/aq/pollutant/44/view",
+                ),
+            ]
+        )
+
+        client = get_client()
+        result = await client.pollutants()
+        assert result == {"O3": {1, 2}, "NO2": {44}}
+
+    async def test_country(self, httpx_mock: HTTPXMock):
+        countries = ["A", "B", "C"]
+        httpx_mock.add_response(
+            json=[{"countryCode": country} for country in countries]
+        )
+
+        client = get_client()
+        result = await client.countries()
+        assert result == countries
+
+    async def test_cities(self, httpx_mock: HTTPXMock):
+        httpx_mock.add_response(
+            json=[
+                {"countryCode": "NL", "cityName": "Amsterdam"},
+                {"countryCode": "NL", "cityName": "Rotterdam"},
+                {"countryCode": "DE", "cityName": "Berlin"},
+            ],
+        )
+
+        client = get_client()
+        result = await client.cities("NL", "DE")
+        assert result == {
+            "NL": {"Amsterdam", "Rotterdam"},
+            "DE": {"Berlin"},
+        }
+
+    async def test_download_url_to_directory(
+        self, httpx_mock: HTTPXMock, tmp_path
+    ):
+        destination = Path(tmp_path)
+        content = b"testing"
+        filename = "testing.txt"
+        output_file = destination / filename
+
+        httpx_mock.add_response(content=content)
+
+        client = get_client()
+        await client._download_url_to_directory(
+            f"https://example.com/{filename}", destination=destination
+        )
+        assert output_file.exists()
+        assert output_file.read_bytes() == content
+
+    async def test_download(self, httpx_mock: HTTPXMock, tmp_path):
+        destination = Path(tmp_path)
+        content = b"testing"
+        num_files = 3
+
+        client = get_client()
+
+        url_list = "\r\n".join(
+            ["ParquetFileUrl"]
+            + [f"https://example.com/{i}.parquet" for i in range(num_files)]
+        )
+
+        httpx_mock.add_response(
+            url=f"{client.base_url}/ParquetFile/urls",
+            text=url_list,
+        )
+
+        for i in range(num_files):
+            httpx_mock.add_response(
+                url=f"https://example.com/{i}.parquet", content=content
+            )
+
+        await client.download(
+            DownloadInfo.historical("O3", "NL"), destination=destination
+        )
+
+        for i in range(num_files):
+            file = destination / f"{i}.parquet"
+            assert file.exists()
+            assert file.read_bytes() == content
