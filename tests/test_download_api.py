@@ -144,9 +144,9 @@ def test_cities_invalid_country():
 
 def test_parquet_file_urls(tmp_path):
     client = get_client()
-    asyncio.get_event_loop().run_until_complete(
+    asyncio.run(
         client.download(
-            DownloadInfo.historical("O3", "NL"), destination=tmp_path
+            DownloadInfo.historical("O3", "AD"), destination=tmp_path
         )
     )
 

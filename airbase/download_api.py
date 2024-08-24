@@ -242,7 +242,7 @@ def get_client() -> DownloadAPIClient:
 def countries() -> list[str]:
     """request country codes from API"""
     client = get_client()
-    return asyncio.get_event_loop().run_until_complete(client.countries())
+    return asyncio.run(client.countries())
 
 
 def pollutant_id_from_url(url: str) -> int:
@@ -259,12 +259,10 @@ def pollutant_id_from_url(url: str) -> int:
 def pollutants() -> defaultdict[str, set[int]]:
     """requests pollutants id and notation from API"""
     client = get_client()
-    return asyncio.get_event_loop().run_until_complete(client.pollutants())
+    return asyncio.run(client.pollutants())
 
 
 def cities(*countries: str) -> defaultdict[str, set[str]]:
     """city names id and notation from API"""
     client = get_client()
-    return asyncio.get_event_loop().run_until_complete(
-        client.cities(*countries)
-    )
+    return asyncio.run(client.cities(*countries))
