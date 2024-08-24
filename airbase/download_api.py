@@ -142,6 +142,21 @@ class DownloadAPIClient(httpx.AsyncClient):
         response = await self.post("/City", json=countries)
         return response.json()
 
+    async def raw_download_summary_json(self, url: DownloadInfo):
+        response = await self.post("/DownloadSummary", json=url.request_info())
+        return response.json()
+
+    async def total_num_parquet_files(self, *urls: DownloadInfo):
+        """
+        The total number of parquet files that will be downloaded for a set of URLs
+        """
+        total_files = 0
+        summary_jobs = [self.raw_download_summary_json(url) for url in urls]
+        for future in asyncio.as_completed(summary_jobs):
+            result: dict[str, int] = await future
+            total_files += result["numberFiles"]
+        return total_files
+
     async def parquet_file_urls(self, *urls: DownloadInfo):
         """
         Get the Parquet file URLs matching all the provided DownloadInfo
@@ -155,7 +170,8 @@ class DownloadAPIClient(httpx.AsyncClient):
             asyncio.as_completed(jobs),
             total=len(jobs),
             leave=True,
-            disable=not self.progress,
+            disable=not self.progress and len(jobs) > 1,
+            desc="Fetching Parquet file URLs",
         ):
             response = await response
             lines = [line.strip() for line in response.text.split("\n")]
@@ -215,14 +231,25 @@ class DownloadAPIClient(httpx.AsyncClient):
             await f.write(response.content)
 
     async def download(self, *urls: DownloadInfo, destination: str | Path):
-        # TODO: Progress Bar
-        jobs = []
+        total_files = 0
+
+        if self.progress:
+            total_files = await self.total_num_parquet_files(*urls)
+
+        download_jobs = []
         async for parquet_url in self.parquet_file_urls(*urls):
-            jobs.append(
-                self._download_url_to_directory(await parquet_url, destination)
+            download_jobs.append(
+                self._download_url_to_directory(parquet_url, destination)
             )
 
-        await asyncio.gather(*jobs)
+        for result in tqdm(
+            asyncio.as_completed(download_jobs),
+            total=total_files,
+            leave=True,
+            disable=not self.progress,
+            desc="Downloading parquets",
+        ):
+            await result
 
 
 _CLIENT: DownloadAPIClient | None = None

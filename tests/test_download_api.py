@@ -146,7 +146,8 @@ def test_parquet_file_urls(tmp_path):
     client = get_client()
     run_sync(
         client.download(
-            DownloadInfo.historical("O3", "AD"), destination=tmp_path
+            DownloadInfo.historical("O3", "NL", "Greater Amsterdam"),
+            destination=tmp_path,
         )
     )
 
