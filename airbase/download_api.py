@@ -219,7 +219,7 @@ class DownloadAPIClient(httpx.AsyncClient):
         jobs = []
         async for parquet_url in self.parquet_file_urls(*urls):
             jobs.append(
-                self._download_url_to_directory(parquet_url, destination)
+                self._download_url_to_directory(await parquet_url, destination)
             )
 
         await asyncio.gather(*jobs)
@@ -239,10 +239,26 @@ def get_client() -> DownloadAPIClient:
     return _CLIENT
 
 
+# Global variable to store a single event loop
+_EVENT_LOOP = None
+
+
+def get_event_loop():
+    global _EVENT_LOOP
+    if _EVENT_LOOP is None or _EVENT_LOOP.is_closed():
+        _EVENT_LOOP = asyncio.new_event_loop()
+        asyncio.set_event_loop(_EVENT_LOOP)
+    return _EVENT_LOOP
+
+
+def run_sync(coro):
+    return get_event_loop().run_until_complete(coro)
+
+
 def countries() -> list[str]:
     """request country codes from API"""
     client = get_client()
-    return asyncio.run(client.countries())
+    return run_sync(client.countries())  # type: ignore
 
 
 def pollutant_id_from_url(url: str) -> int:
@@ -259,10 +275,10 @@ def pollutant_id_from_url(url: str) -> int:
 def pollutants() -> defaultdict[str, set[int]]:
     """requests pollutants id and notation from API"""
     client = get_client()
-    return asyncio.run(client.pollutants())
+    return run_sync(client.pollutants())  # type: ignore
 
 
 def cities(*countries: str) -> defaultdict[str, set[str]]:
     """city names id and notation from API"""
     client = get_client()
-    return asyncio.run(client.cities(*countries))
+    return run_sync(client.cities(*countries))  # type: ignore

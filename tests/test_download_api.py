@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import asyncio
 import json
 from itertools import chain
 from pathlib import Path
@@ -15,6 +14,7 @@ from airbase.download_api import (
     countries,
     get_client,
     pollutants,
+    run_sync,
 )
 
 
@@ -144,7 +144,7 @@ def test_cities_invalid_country():
 
 def test_parquet_file_urls(tmp_path):
     client = get_client()
-    asyncio.run(
+    run_sync(
         client.download(
             DownloadInfo.historical("O3", "AD"), destination=tmp_path
         )
