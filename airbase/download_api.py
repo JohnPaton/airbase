@@ -2,13 +2,15 @@ from __future__ import annotations
 
 import asyncio
 from collections import defaultdict
-from collections.abc import AsyncIterator
 from enum import IntEnum
+from pathlib import Path
 from types import SimpleNamespace
-from typing import Literal, NamedTuple
+from typing import NamedTuple
+from urllib import parse
 from warnings import warn
 
-import aiohttp
+import aiofiles
+import httpx
 from tqdm import tqdm
 
 API_SERVICE_ROOT = "https://eeadmz1-downloads-api-appservice.azurewebsites.net"
@@ -88,117 +90,159 @@ class DownloadInfo(NamedTuple):
         return cls(pollutant, country, Dataset.Unverified, cities)
 
 
-async def json_from_get_api(
-    entry_point: Literal["Country", "Property"],
-    *,
-    timeout: float | None = None,
-    encoding: str | None = DEFAULT.encoding,
-) -> list[dict[str, str]]:
-    """
-    get request to an specific Download API entry point and return decoded JSON
-
-    :param entry_point: Download API entry point
-    :param timeout: maximum time to complete request (seconds)
-    :param encoding: text encoding used for decoding the response's body
-
-    :return: decoded JSON from response's body
-    """
-
-    timeout_ = aiohttp.ClientTimeout(total=timeout)
-    async with aiohttp.ClientSession(timeout=timeout_) as session:
-        async with session.get(
-            f"{API_SERVICE_ROOT}/{entry_point}", ssl=False
-        ) as r:
-            r.raise_for_status()
-            payload: list[dict[str, str]] = await r.json(encoding=encoding)
-            return payload
+async def _raise_for_status(response: httpx.Response):
+    response.raise_for_status()
 
 
-async def json_from_post_api(
-    entry_point: Literal["City"],
-    data: tuple[str, ...] | list[str],
-    *,
-    timeout: float | None = None,
-    encoding: str | None = DEFAULT.encoding,
-) -> list[dict[str, str]]:
-    """
-    post request to an specific Download API entry point and return decoded JSON
-
-    :param entry_point: Download API entry point
-    :param data:
-    :param timeout: maximum time to complete request (seconds)
-    :param encoding: text encoding used for decoding the response's body
-
-    :return: decoded JSON from response's body
-    """
-
-    timeout_ = aiohttp.ClientTimeout(total=timeout)
-    async with aiohttp.ClientSession(timeout=timeout_) as session:
-        async with session.post(
-            f"{API_SERVICE_ROOT}/{entry_point}", json=data, ssl=False
-        ) as r:
-            r.raise_for_status()
-            payload: list[dict[str, str]] = await r.json(encoding=encoding)
-            return payload
+async def _warn_for_status(response: httpx.Response):
+    if response.status_code >= 400:
+        warn(
+            f"HTTP Error {response.status_code} for URL {response.url}",
+            category=RuntimeWarning,
+        )
 
 
-async def fetch_text_from_post_api(
-    entry_point: Literal["ParquetFile/urls"],
-    urls: tuple[DownloadInfo, ...],
-    *,
-    encoding: str | None = DEFAULT.encoding,
-    progress: bool = DEFAULT.progress,
-    raise_for_status: bool = DEFAULT.raise_for_status,
-    max_concurrent: int = DEFAULT.max_concurrent,
-) -> AsyncIterator[str]:
-    """
-    multiple post requests to an specific Download API entry point and return decoded text
-    from each request as they become available
+class DownloadAPIClient(httpx.AsyncClient):
+    def __init__(
+        self,
+        progress=DEFAULT.progress,
+        raise_for_status=DEFAULT.raise_for_status,
+        **kwargs,
+    ):
+        defaults = dict(
+            base_url=API_SERVICE_ROOT,
+            event_hooks=dict(request=[], response=[]),
+            timeout=60,
+        )
 
-    :param urls: info about requested urls
-    :param encoding: text encoding used for decoding each response's body
-    :param progress: show progress bar
-    :param raise_for_status: Raise exceptions if download links
-        return "bad" HTTP status codes. If False,
-        a :py:func:`warnings.warn` will be issued instead.
-    :param max_concurrent: maximum concurrent requests
+        if raise_for_status:
+            defaults["event_hooks"]["response"].append(_raise_for_status)
+        else:
+            defaults["event_hooks"]["response"].append(_warn_for_status)
 
-    :return: url text or path to downloaded text, one by one as the requests are completed
-    """
+        defaults.update(kwargs)
+        super().__init__(**defaults)
+        self.progress = progress
 
-    async with aiohttp.ClientSession() as session:
-        semaphore = asyncio.Semaphore(max_concurrent)
+    async def raw_country_json(self):
+        """
+        Get list of country codes
+        """
+        response = await self.get("/Country")
+        return response.json()
 
-        async def fetch(info: DownloadInfo) -> str:
-            """retrieve text, nothing more"""
-            async with semaphore:
-                async with session.post(
-                    f"{API_SERVICE_ROOT}/{entry_point}",
-                    json=info.request_info(),
-                    ssl=False,
-                ) as r:
-                    r.raise_for_status()
-                    text: str = await r.text(encoding=encoding)
-                    return text
+    async def raw_property_json(self):
+        """
+        Get list of pollutants and notation
+        """
+        response = await self.get("/Property")
+        return response.json()
 
-        with tqdm(total=len(urls), leave=True, disable=not progress) as p_bar:
-            jobs = tuple(fetch(info) for info in urls)
-            for result in asyncio.as_completed(jobs):
-                p_bar.update(1)
-                try:
-                    yield await result
-                except asyncio.CancelledError:
-                    continue
-                except aiohttp.ClientResponseError as e:
-                    if raise_for_status:
-                        raise
-                    warn(str(e), category=RuntimeWarning)
+    async def raw_city_json(self, *countries: str):
+        response = await self.post("/City", json=countries)
+        return response.json()
+
+    async def parquet_file_urls(self, *urls: DownloadInfo):
+        """
+        Get the Parquet file URLs matching all the provided DownloadInfo
+        """
+        jobs = [
+            self.post("/ParquetFile/urls", json=info.request_info())
+            for info in urls
+        ]
+
+        for response in tqdm(
+            asyncio.as_completed(jobs),
+            total=len(jobs),
+            leave=True,
+            disable=not self.progress,
+        ):
+            response = await response
+            lines = [line.strip() for line in response.text.split("\n")]
+            for line in lines:
+                if line.startswith("http"):
+                    yield line
+
+    async def pollutants(self) -> defaultdict[str, set[int]]:
+        """
+        Get pollutant notation and ids
+        """
+        payload = await self.raw_property_json()
+        ids: defaultdict[str, set[int]] = defaultdict(set)
+        for poll in payload:
+            key, val = poll["notation"], pollutant_id_from_url(poll["id"])
+            ids[key].add(val)
+        return ids
+
+    async def countries(self) -> list[str]:
+        """
+        Get list of all countries
+        """
+        payload = await self.raw_country_json()
+        return [country["countryCode"] for country in payload]
+
+    async def cities(self, *countries) -> defaultdict[str, set[str]]:
+        """
+        Get list of cities in each country
+        """
+        if not COUNTRY_CODES.issuperset(countries):
+            unknown = sorted(set(countries) - COUNTRY_CODES)
+            warn(
+                f"Unknown country code(s) {', '.join(unknown)}",
+                UserWarning,
+                stacklevel=2,
+            )
+
+        payload = await self.raw_city_json(*countries)
+        cities: defaultdict[str, set[str]] = defaultdict(set)
+        for city in payload:
+            key, val = city["countryCode"], city["cityName"]
+            cities[key].add(val)
+
+        return cities
+
+    async def _download_url_to_directory(
+        self, url: str, destination: str | Path
+    ):
+        """
+        Download the content of a list of URLs ot files in a directory
+        """
+        destination = Path(destination)
+        response = await self.get(url)
+        url_path = parse.urlparse(url).path
+        filename = Path(url_path).name
+        async with aiofiles.open(destination / filename, "wb") as f:
+            await f.write(response.content)
+
+    async def download(self, *urls: DownloadInfo, destination: str | Path):
+        # TODO: Progress Bar
+        jobs = []
+        async for parquet_url in self.parquet_file_urls(*urls):
+            jobs.append(
+                self._download_url_to_directory(parquet_url, destination)
+            )
+
+        await asyncio.gather(*jobs)
+
+
+_CLIENT: DownloadAPIClient | None = None
+
+
+def get_client() -> DownloadAPIClient:
+    global _CLIENT
+    if not _CLIENT:
+        _CLIENT = DownloadAPIClient(
+            verify=False,
+            limits=httpx.Limits(max_connections=DEFAULT.max_concurrent),
+            base_url=API_SERVICE_ROOT,
+        )
+    return _CLIENT
 
 
 def countries() -> list[str]:
     """request country codes from API"""
-    payload = asyncio.run(json_from_get_api("Country"))
-    return [country["countryCode"] for country in payload]
+    client = get_client()
+    return asyncio.get_event_loop().run_until_complete(client.countries())
 
 
 def pollutant_id_from_url(url: str) -> int:
@@ -214,65 +258,13 @@ def pollutant_id_from_url(url: str) -> int:
 
 def pollutants() -> defaultdict[str, set[int]]:
     """requests pollutants id and notation from API"""
-    payload = asyncio.run(json_from_get_api("Property"))
-    ids: defaultdict[str, set[int]] = defaultdict(set)
-    for poll in payload:
-        key, val = poll["notation"], pollutant_id_from_url(poll["id"])
-        ids[key].add(val)
-    return ids
+    client = get_client()
+    return asyncio.get_event_loop().run_until_complete(client.pollutants())
 
 
 def cities(*countries: str) -> defaultdict[str, set[str]]:
     """city names id and notation from API"""
-    if not COUNTRY_CODES.issuperset(countries):
-        unknown = sorted(set(countries) - COUNTRY_CODES)
-        warn(
-            f"Unknown country code(s) {', '.join(unknown)}",
-            UserWarning,
-            stacklevel=2,
-        )
-
-    payload = asyncio.run(json_from_post_api("City", countries))
-    cities: defaultdict[str, set[str]] = defaultdict(set)
-    for city in payload:
-        key, val = city["countryCode"], city["cityName"]
-        cities[key].add(val)
-    return cities
-
-
-def url_to_files(
-    *urls: DownloadInfo,
-    progress: bool = DEFAULT.progress,
-    raise_for_status: bool = DEFAULT.raise_for_status,
-    max_concurrent: int = DEFAULT.max_concurrent,
-) -> set[str]:
-    """
-    multiple request for file URLs and return only the unique URLs among all the responses
-
-    :param urls: info about requested urls
-    :param progress: show progress bar
-    :param raise_for_status: Raise exceptions if download links
-        return "bad" HTTP status codes. If False,
-        a :py:func:`warnings.warn` will be issued instead.
-    :param max_concurrent: maximum concurrent requests
-
-    :return: unique file URLs among from all the responses
-    """
-
-    async def fetch() -> set[str]:
-        lines: set[str] = set()
-        async for text in fetch_text_from_post_api(
-            "ParquetFile/urls",
-            urls,
-            progress=progress,
-            raise_for_status=raise_for_status,
-            max_concurrent=max_concurrent,
-        ):
-            lines.update(
-                line.strip()
-                for line in text.splitlines()
-                if line.strip().startswith("http")
-            )
-        return lines
-
-    return asyncio.run(fetch())
+    client = get_client()
+    return asyncio.get_event_loop().run_until_complete(
+        client.cities(*countries)
+    )
