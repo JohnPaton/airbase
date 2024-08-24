@@ -8,9 +8,8 @@ from airbase.download_api import (
     DownloadInfo,
     cities,
     countries,
-    get_client,
+    download,
     pollutants,
-    run_sync,
 )
 
 
@@ -79,12 +78,9 @@ def test_cities_invalid_country():
 
 
 def test_download(tmp_path):
-    client = get_client()
-    run_sync(
-        client.download(
-            DownloadInfo.historical("O3", "NL", "Greater Amsterdam"),
-            destination=tmp_path,
-        )
+    download(
+        DownloadInfo.historical("O3", "NL", "Greater Amsterdam"),
+        destination=tmp_path,
     )
 
     files = list(Path(tmp_path).glob("*"))

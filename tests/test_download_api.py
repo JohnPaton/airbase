@@ -4,11 +4,13 @@ import json
 from pathlib import Path
 from textwrap import dedent
 
+import httpx
 import pytest
 from pytest_httpx import HTTPXMock
 
 from airbase.download_api import (
     Dataset,
+    DownloadAPIClient,
     DownloadInfo,
     get_client,
 )
@@ -204,3 +206,17 @@ class TestClient:
             file = destination / f"{i}.parquet"
             assert file.exists()
             assert file.read_bytes() == content
+
+    async def test_raise_for_status(self, httpx_mock: HTTPXMock):
+        httpx_mock.add_response(status_code=429)
+        client = DownloadAPIClient(raise_for_status=True)
+
+        with pytest.raises(httpx.HTTPStatusError):
+            await client.get("https://example.com")
+
+    async def test_warn_for_status(self, httpx_mock: HTTPXMock):
+        httpx_mock.add_response(status_code=429)
+        client = DownloadAPIClient(raise_for_status=False)
+
+        with pytest.warns(RuntimeWarning):
+            await client.get("https://example.com")

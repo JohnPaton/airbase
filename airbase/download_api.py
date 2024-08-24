@@ -309,3 +309,11 @@ def cities(*countries: str) -> defaultdict[str, set[str]]:
     """city names id and notation from API"""
     client = get_client()
     return run_sync(client.cities(*countries))  # type: ignore
+
+
+async def download(*urls: DownloadInfo, destination: str | Path):
+    """
+    Download the parquet files matching the given set of DownloadInfo
+    """
+    client = get_client()
+    return run_sync(client.download(*urls, destination=destination))
