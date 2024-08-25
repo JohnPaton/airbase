@@ -170,7 +170,7 @@ class DownloadAPIClient(httpx.AsyncClient):
             asyncio.as_completed(jobs),
             total=len(jobs),
             leave=True,
-            disable=not self.progress and len(jobs) > 1,
+            disable=not self.progress or len(jobs) <= 1,
             desc="Fetching Parquet file URLs",
         ):
             response = await response

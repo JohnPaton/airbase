@@ -207,6 +207,49 @@ class TestClient:
             assert file.exists()
             assert file.read_bytes() == content
 
+    @pytest.mark.parametrize("progress", [True, False])
+    async def test_download_progress(
+        self, httpx_mock: HTTPXMock, tmp_path, progress, capsys
+    ):
+        destination = Path(tmp_path)
+        content = b"testing"
+        num_files = 3
+
+        client = get_client()
+        client.progress = progress
+
+        url_list = "\r\n".join(
+            ["ParquetFileUrl"]
+            + [f"https://example.com/{i}.parquet" for i in range(num_files)]
+        )
+
+        httpx_mock.add_response(
+            url=f"{client.base_url}/ParquetFile/urls",
+            text=url_list,
+        )
+
+        if progress:
+            httpx_mock.add_response(
+                url=f"{client.base_url}/DownloadSummary",
+                json={"numberFiles": num_files, "size": 123456},
+            )
+
+        for i in range(num_files):
+            httpx_mock.add_response(
+                url=f"https://example.com/{i}.parquet", content=content
+            )
+
+        await client.download(
+            DownloadInfo.historical("O3", "NL"), destination=destination
+        )
+
+        captured = capsys.readouterr()
+        if progress:
+            assert "Downloading parquets" in captured.err
+        else:
+            assert captured.out == ""
+            assert captured.err == ""
+
     async def test_raise_for_status(self, httpx_mock: HTTPXMock):
         httpx_mock.add_response(status_code=429)
         client = DownloadAPIClient(raise_for_status=True)
