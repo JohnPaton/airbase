@@ -198,7 +198,7 @@ class TestClient:
                 url=f"https://example.com/{i}.parquet", content=content
             )
 
-        await client.download(
+        await client.download_downloadinfo(
             DownloadInfo.historical("O3", "NL"), destination=destination
         )
 
@@ -239,7 +239,7 @@ class TestClient:
                 url=f"https://example.com/{i}.parquet", content=content
             )
 
-        await client.download(
+        await client.download_downloadinfo(
             DownloadInfo.historical("O3", "NL"), destination=destination
         )
 

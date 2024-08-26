@@ -5,7 +5,6 @@ import pytest
 
 from airbase.download_api import (
     COUNTRY_CODES,
-    DownloadInfo,
     cities,
     countries,
     download,
@@ -79,8 +78,10 @@ def test_cities_invalid_country():
 
 def test_download(tmp_path):
     download(
-        DownloadInfo.historical("O3", "NL", "Greater Amsterdam"),
         destination=tmp_path,
+        pollutants="O3",
+        countries="NL",
+        cities="Greater Amsterdam",
     )
 
     files = list(Path(tmp_path).glob("*"))

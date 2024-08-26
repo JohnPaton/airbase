@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Iterable, overload
+from typing import Iterable, TypeVar
 
 from .resources import (
     ALL_SOURCES,
@@ -12,18 +12,10 @@ from .resources import (
     LINK_LIST_URL_TEMPLATE,
 )
 
-
-@overload
-def string_safe_list(obj: None) -> list[None]:  # pragma: no cover
-    ...
+T = TypeVar("T")
 
 
-@overload
-def string_safe_list(obj: str | Iterable[str]) -> list[str]:  # pragma: no cover
-    ...
-
-
-def string_safe_list(obj: str | Iterable[str] | None) -> list[str] | list[None]:
+def string_safe_list(obj: T | Iterable[T]) -> list[T]:
     """
     Turn an (iterable) object into a list. If it is a string or not
     iterable, put the whole object into a list of length 1.
@@ -32,10 +24,10 @@ def string_safe_list(obj: str | Iterable[str] | None) -> list[str] | list[None]:
     :return list:
     """
     if isinstance(obj, str):
-        return [obj]
-    if obj is None:
-        return [obj]
-    return list(obj)
+        return [obj]  # type: ignore[list-item]
+    if isinstance(obj, Iterable):
+        return list(obj)
+    return [obj]
 
 
 def link_list_url(
