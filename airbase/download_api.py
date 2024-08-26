@@ -297,7 +297,7 @@ class DownloadAPIClient(httpx.AsyncClient):
             unit="files",
             position=1,
         )
-        pbar.set_postfix_str("Checking total number of files..")
+        pbar.set_postfix_str("Counting total files..")
 
         async for parquet_url in self.parquet_file_urls(*urls):
             task = asyncio.create_task(
