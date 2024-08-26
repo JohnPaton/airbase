@@ -92,14 +92,16 @@ class DownloadClient(AbstractAsyncContextManager):
         timeout: float | None = None,
         max_concurrent: int = 10,
     ) -> None:
-        self.timeout = aiohttp.ClientTimeout(timeout)
+        self.timeout = timeout
+        self.max_concurrent = max_concurrent
         self.session: aiohttp.ClientSession | None = None
-        self.semaphore = asyncio.Semaphore(max_concurrent)
+        self.semaphore: asyncio.Semaphore | None = None
 
     async def __aenter__(self) -> DownloadClient:
         self.session = aiohttp.ClientSession(
-            timeout=self.timeout,
+            timeout=aiohttp.ClientTimeout(self.timeout),
         )
+        self.semaphore = asyncio.Semaphore(self.max_concurrent)
         return self
 
     async def __aexit__(
@@ -110,7 +112,7 @@ class DownloadClient(AbstractAsyncContextManager):
     ) -> None:
         assert self.session is not None, "outside context manager"
         await self.session.close()
-        self.session = None
+        self.semaphore = self.session = None
 
     async def _get_json(
         self,
@@ -197,6 +199,7 @@ class DownloadClient(AbstractAsyncContextManager):
 
         async def fetch(info: DownloadInfo) -> str:
             """retrieve text, nothing more"""
+            assert self.semaphore is not None, "outside context manager"
             assert self.session is not None, "outside context manager"
             async with self.semaphore:
                 async with self.session.post(
@@ -274,6 +277,7 @@ class DownloadClient(AbstractAsyncContextManager):
 
         async def download(url: str, path: Path) -> Path:
             """retrieve binary and write into path"""
+            assert self.semaphore is not None, "outside context manager"
             assert self.session is not None, "outside context manager"
             async with self.semaphore:
                 async with self.session.get(url, ssl=False) as r:
@@ -340,6 +344,7 @@ class DownloadClient(AbstractAsyncContextManager):
 
         async for path in tqdm(
             self._binary_files(url_paths, raise_for_status=raise_for_status),
+            initial=len(urls) - len(url_paths),
             total=len(urls),
             leave=True,
             disable=not progress,
