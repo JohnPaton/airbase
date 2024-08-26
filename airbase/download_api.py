@@ -6,7 +6,7 @@ from collections.abc import AsyncIterator
 from contextlib import AbstractAsyncContextManager
 from enum import IntEnum
 from pathlib import Path
-from types import SimpleNamespace, TracebackType
+from types import TracebackType
 from typing import Literal, NamedTuple
 from warnings import warn
 
@@ -15,20 +15,12 @@ import aiofiles
 import aiohttp
 from tqdm.asyncio import tqdm
 
-API_SERVICE_ROOT = "https://eeadmz1-downloads-api-appservice.azurewebsites.net"
 COUNTRY_CODES = set(
     """
     AD AL AT BA BE BG CH CY CZ DE DK EE ES FI FR GB GI GR HR HU
     IE IS IT LI LT LU LV ME MK MT NL NO PL PT RO RS SE SI SK TR
     XK
     """.split()
-)
-
-DEFAULT = SimpleNamespace(
-    encoding="UTF-8",
-    progress=False,
-    raise_for_status=True,
-    max_concurrent=10,
 )
 
 
@@ -98,7 +90,7 @@ class DownloadClient(AbstractAsyncContextManager):
     def __init__(
         self,
         timeout: float | None = None,
-        max_concurrent: int = DEFAULT.max_concurrent,
+        max_concurrent: int = 10,
     ) -> None:
         self.timeout = aiohttp.ClientTimeout(timeout)
         self.session: aiohttp.ClientSession | None = None
@@ -229,8 +221,8 @@ class DownloadClient(AbstractAsyncContextManager):
     async def url_to_files(
         self,
         *urls: DownloadInfo,
-        progress: bool = DEFAULT.progress,
-        raise_for_status: bool = DEFAULT.raise_for_status,
+        progress: bool = False,
+        raise_for_status: bool = True,
     ) -> set[str]:
         """
         multiple request for file URLs and return only the unique URLs among all the responses
@@ -309,8 +301,8 @@ class DownloadClient(AbstractAsyncContextManager):
         root_path: Path,
         *urls: str,
         skip_existing: bool = True,
-        progress: bool = DEFAULT.progress,
-        raise_for_status: bool = DEFAULT.raise_for_status,
+        progress: bool = False,
+        raise_for_status: bool = True,
     ) -> None:
         """
         download into a directory, files for different counties are kept on different sub directories
