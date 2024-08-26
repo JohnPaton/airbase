@@ -4,10 +4,12 @@ import asyncio
 from collections import defaultdict
 from collections.abc import AsyncIterator
 from enum import IntEnum
+from pathlib import Path
 from types import SimpleNamespace
 from typing import Literal, NamedTuple
 from warnings import warn
 
+import aiofiles
 import aiohttp
 from tqdm import tqdm
 
@@ -195,6 +197,56 @@ async def fetch_text_from_post_api(
                     warn(str(e), category=RuntimeWarning)
 
 
+async def fetch_binary_files(
+    urls: dict[str, Path],
+    *,
+    progress: bool = DEFAULT.progress,
+    raise_for_status: bool = DEFAULT.raise_for_status,
+    max_concurrent: int = DEFAULT.max_concurrent,
+) -> AsyncIterator[Path]:
+    """
+    download multiple files in parallel
+
+    :param urls: mapping between url and download path
+    :param encoding: text encoding used for decoding each response's body
+    :param progress: show progress bar
+    :param raise_for_status: Raise exceptions if download links
+        return "bad" HTTP status codes. If False,
+        a :py:func:`warnings.warn` will be issued instead.
+    :param max_concurrent: maximum concurrent requests
+
+    :return: url text or path to downloaded text, one by one as the requests are completed
+    """
+
+    async with aiohttp.ClientSession() as session:
+        semaphore = asyncio.Semaphore(max_concurrent)
+
+        async def download(url: str, path: Path) -> Path:
+            """retrieve text and write into path"""
+            async with semaphore:
+                async with session.get(url, ssl=False) as r:
+                    r.raise_for_status()
+                    payload = await r.read()
+
+                async with aiofiles.open(path, mode="wb") as f:
+                    await f.write(payload)
+
+                return path
+
+        with tqdm(total=len(urls), leave=True, disable=not progress) as p_bar:
+            jobs = tuple(download(url, path) for url, path in urls.items())
+            for result in asyncio.as_completed(jobs):
+                p_bar.update(1)
+                try:
+                    yield await result
+                except asyncio.CancelledError:
+                    continue
+                except aiohttp.ClientResponseError as e:
+                    if raise_for_status:
+                        raise
+                    warn(str(e), category=RuntimeWarning)
+
+
 def countries() -> list[str]:
     """request country codes from API"""
     payload = asyncio.run(json_from_get_api("Country"))
@@ -276,3 +328,56 @@ def url_to_files(
         return lines
 
     return asyncio.run(fetch())
+
+
+def download_to_directory(
+    root_path: Path,
+    *urls: str,
+    skip_existing: bool = True,
+    progress: bool = DEFAULT.progress,
+    raise_for_status: bool = DEFAULT.raise_for_status,
+    max_concurrent: int = DEFAULT.max_concurrent,
+) -> None:
+    """
+    download into a directory, files for different counties are kept on different sub directories
+
+    :param root_path: The directory to save files in (must exist)
+    :param urls: urls to files to download
+    :param skip_existing: (optional) Don't re-download files if they exist in `root_path`.
+        If False, existing files in `root_path` may be overwritten.
+        Empty files will be re-downloaded regardless of this option. Default True.
+    :param progress: show progress bar
+    :param raise_for_status: (optional) Raise exceptions if
+        download links return "bad" HTTP status codes. If False,
+        a :py:func:`warnings.warn` will be issued instead. Default True.
+    :param max_concurrent: maximum concurrent requests
+    """
+
+    if not root_path.is_dir():
+        raise NotADirectoryError(f"{root_path.resolve()} is not a directory.")
+
+    url_paths: dict[str, Path] = {
+        url: root_path / "/".join(url.split("/")[-2:]) for url in urls
+    }
+    if skip_existing:
+        url_paths = {
+            url: path
+            for url, path in url_paths.items()
+            # re-download empty files
+            if not path.is_file() or path.stat().st_size == 0
+        }
+
+    # create missing country sum-directories before downloading
+    for parent in {path.parent for path in url_paths.values()}:
+        parent.mkdir(exist_ok=True)
+
+    async def fetch() -> None:
+        async for path in fetch_binary_files(
+            url_paths,
+            progress=progress,
+            raise_for_status=raise_for_status,
+            max_concurrent=max_concurrent,
+        ):
+            assert path.is_file(), f"missing {path.name}"
+
+    asyncio.run(fetch())

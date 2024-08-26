@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from itertools import chain
+from pathlib import Path
 
 import pytest
 
@@ -11,6 +12,7 @@ from airbase.download_api import (
     DownloadInfo,
     cities,
     countries,
+    download_to_directory,
     pollutants,
     url_to_files,
 )
@@ -143,3 +145,17 @@ def test_cities_invalid_country():
 def test_url_to_files():
     urls = url_to_files(DownloadInfo.historical("O3", "NO", "Oslo"))
     assert len(urls) == 56
+
+
+def test_download_to_directory(tmp_path: Path):
+    assert not tuple(tmp_path.glob("NO/*.parquet"))
+    urls = (
+        "https://eeadmz1batchservice02.blob.core.windows.net/airquality-p-airbase/NO/SPO-NO0010A_00005_501.parquet",
+        "https://eeadmz1batchservice02.blob.core.windows.net/airquality-p-airbase/NO/SPO-NO0010A_00005_503.parquet",
+        "https://eeadmz1batchservice02.blob.core.windows.net/airquality-p-airbase/NO/SPO-NO0010A_00005_504.parquet",
+        "https://eeadmz1batchservice02.blob.core.windows.net/airquality-p-airbase/NO/SPO-NO0010A_00008_500.parquet",
+        "https://eeadmz1batchservice02.blob.core.windows.net/airquality-p-airbase/NO/SPO-NO0010A_00009_500.parquet",
+        "https://eeadmz1batchservice02.blob.core.windows.net/airquality-p-airbase/NO/SPO-NO0011A_00020_100.parquet",
+    )
+    download_to_directory(tmp_path, *urls, raise_for_status=True)
+    assert len(tuple(tmp_path.glob("NO/*.parquet"))) == len(urls)
