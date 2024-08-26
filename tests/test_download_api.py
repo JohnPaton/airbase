@@ -9,13 +9,14 @@ import pytest
 from airbase.download_api import (
     COUNTRY_CODES,
     Dataset,
+    DownloadClient,
     DownloadInfo,
-    cities,
-    countries,
-    download_to_directory,
-    pollutants,
-    url_to_files,
 )
+
+
+@pytest.fixture(scope="module")
+def client():
+    return DownloadClient()
 
 
 def test_Dataset():
@@ -78,24 +79,31 @@ def test_DownloadInfo(
     ), "unexpected unverified info"
 
 
-def test_countries():
-    assert set(countries()) == set(COUNTRY_CODES)
+@pytest.mark.asyncio
+async def test_countries(client: DownloadClient):
+    async with client:
+        countries = await client.countries()
+
+    assert set(countries) == set(COUNTRY_CODES)
 
 
-def test_pollutants():
-    pollutants_ = pollutants()
+@pytest.mark.asyncio
+async def test_pollutants(client: DownloadClient):
+    async with client:
+        pollutants = await client.pollutants()
 
-    names = tuple(pollutants_)
+    names = tuple(pollutants)
     assert len(names) >= 469, "too few pollutants"
 
-    ids = tuple(chain.from_iterable(pollutants_.values()))
+    ids = tuple(chain.from_iterable(pollutants.values()))
     assert len(ids) == len(set(ids)) >= 648, "too few IDs"
 
     for poll, id in {"PM10": 5, "O3": 7, "NO2": 8, "SO2": 1}.items():
-        assert pollutants_.get(poll) == {id}, f"unknown {poll} {id=}"
+        assert pollutants.get(poll) == {id}, f"unknown {poll} {id=}"
 
 
-def test_cities():
+@pytest.mark.asyncio
+async def test_cities(client: DownloadClient):
     known_cities = dict(
         IS={"Reykjavik"},
         NO={
@@ -132,22 +140,33 @@ def test_cities():
             "Turku / Åbo",
         },
     )
-    for country, cities_ in cities(*known_cities).items():
-        assert cities_ <= known_cities[country], f"missing cities on {country}"
+    async with client:
+        country_cities = await client.cities(*known_cities)
+
+    for country, cities in country_cities.items():
+        assert cities <= known_cities[country], f"missing cities on {country}"
 
 
-def test_cities_invalid_country():
-    countries = ("Norway", "Finland", "USA")
-    with pytest.warns(UserWarning, match="Unknown country"):
-        assert not cities(*countries), "dict is not empty"
+@pytest.mark.asyncio
+async def test_cities_invalid_country(client: DownloadClient):
+    async with client:
+        with pytest.warns(UserWarning, match="Unknown country"):
+            cities = await client.cities("Norway", "Finland", "USA")
+
+    assert not cities, "dict is not empty"
 
 
-def test_url_to_files():
-    urls = url_to_files(DownloadInfo.historical("O3", "NO", "Oslo"))
+@pytest.mark.asyncio
+async def test_url_to_files(client: DownloadClient):
+    async with client:
+        urls = await client.url_to_files(
+            DownloadInfo.historical("O3", "NO", "Oslo")
+        )
     assert len(urls) == 56
 
 
-def test_download_to_directory(tmp_path: Path):
+@pytest.mark.asyncio
+async def test_download_to_directory(client: DownloadClient, tmp_path: Path):
     assert not tuple(tmp_path.glob("NO/*.parquet"))
     urls = (
         "https://eeadmz1batchservice02.blob.core.windows.net/airquality-p-airbase/NO/SPO-NO0010A_00005_501.parquet",
@@ -157,5 +176,8 @@ def test_download_to_directory(tmp_path: Path):
         "https://eeadmz1batchservice02.blob.core.windows.net/airquality-p-airbase/NO/SPO-NO0010A_00009_500.parquet",
         "https://eeadmz1batchservice02.blob.core.windows.net/airquality-p-airbase/NO/SPO-NO0011A_00020_100.parquet",
     )
-    download_to_directory(tmp_path, *urls, raise_for_status=True)
+    async with client:
+        await client.download_to_directory(
+            tmp_path, *urls, raise_for_status=True
+        )
     assert len(tuple(tmp_path.glob("NO/*.parquet"))) == len(urls)

@@ -7,6 +7,7 @@ build-backend = "setuptools.build_meta"
 [tool.pytest.ini_options]
 minversion = "6.0"
 addopts = "--showlocals"
+required_plugins = ["pytest-asyncio"]
 testpaths = ["tests"]
 filterwarnings = [
     # DeprecationWarning are errors
@@ -51,7 +52,7 @@ sqlite_cache = true
 exclude = "docs|scripts|build"
 
 [[tool.mypy.overrides]]
-module = ["tqdm"]
+module = ["tqdm.*", "aiocache"]
 ignore_missing_imports = true
 
 [tool.tox]
