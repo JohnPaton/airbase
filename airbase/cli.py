@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+import asyncio
+from collections.abc import Iterator
 from datetime import date
 from enum import Enum
+from itertools import product
 from pathlib import Path
 from typing import List, Optional
 
@@ -9,8 +12,10 @@ import typer
 
 from . import __version__
 from .airbase import AirbaseClient
+from .download_api import DownloadClient, DownloadInfo
 
 client = AirbaseClient()
+new_client = DownloadClient()
 main = typer.Typer(add_completion=False, no_args_is_help=True)
 
 
@@ -55,6 +60,7 @@ def callback(
 
 COUNTRIES = typer.Option([], "-c", "--country")
 POLLUTANTS = typer.Option([], "-p", "--pollutant")
+CITIES = typer.Option([], "-C", "--city", help="only from selected <cities>")
 PATH = typer.Option("data", "--path", exists=True, dir_okay=True, writable=True)
 YEAR = typer.Option(date.today().year, "--year")
 OVERWRITE = typer.Option(
@@ -90,7 +96,7 @@ def download(
     overwrite: bool = OVERWRITE,
     quiet: bool = QUIET,
 ):
-    """Download all pollutants for all countries
+    """Download all pollutants for all countries (discontinued, EOL end of 2024)
 
     \b
     The -c/--country and -p/--pollutant allow to specify which data to download, e.g.
@@ -99,54 +105,98 @@ def download(
     - download only SO2, PM10 and PM2.5 observations
       airbase download -p SO2 -p PM10 -p PM2.5
     """
+    eol_message("download", "historical", "verified", "unverified")
     _download(countries, pollutants, path, year, overwrite, quiet)
 
 
-def deprecation_message(old: str, new: str):  # pragma: no cover
+def eol_message(old: str, *new: str):  # pragma: no cover
     old = typer.style(f"{__package__} {old}", fg="red", bold=True)
-    new = typer.style(f"{__package__} {new}", fg="green", bold=True)
+    new = tuple(
+        typer.style(f"{__package__} {n}", fg="green", bold=True) for n in new
+    )
     typer.echo(
-        f"{old} has been deprecated and will be removed on v1. Use {new} all instead.",
+        f"The service behind {old} has been discontinued and will stop working by the end of 2024. Use {', '.join(new)} all instead.",
     )
 
 
-@main.command(name="all", no_args_is_help=True)
-def download_all(
+async def _new_download(
+    info: Iterator[DownloadInfo],
+    *,
+    path: Path,
+    overwrite: bool,
+    quiet: bool,
+):
+    async with new_client as session:
+        urls = await session.url_to_files(*info, progress=not quiet)
+        await session.download_to_directory(
+            path, *urls, skip_existing=not overwrite, progress=not quiet
+        )
+
+
+@main.command(no_args_is_help=True)
+def historical(
     countries: List[Country] = COUNTRIES,
     pollutants: List[Pollutant] = POLLUTANTS,
-    path: Path = PATH,
-    year: int = YEAR,
+    cities: List[str] = CITIES,
+    path: Path = typer.Option(
+        "data/historical", "--path", exists=True, dir_okay=True, writable=True
+    ),
     overwrite: bool = OVERWRITE,
     quiet: bool = QUIET,
-):  # pragma: no cover
-    """Download all pollutants for all countries (deprecated)"""
-    deprecation_message("all", "download")
-    _download(countries, pollutants, path, year, overwrite, quiet)
+):
+    """
+    Historical Airbase data delivered between 2002 and 2012 before Air Quality Directive 2008/50/EC entered into force.
+    """
+    info = (
+        DownloadInfo.historical(pollutant, country, *cities)
+        for pollutant, country in product(pollutants, countries)
+    )
+    asyncio.run(
+        _new_download(info, path=path, overwrite=overwrite, quiet=quiet)
+    )
 
 
-@main.command(name="country", no_args_is_help=True)
-def download_country(
-    country: Country = typer.Argument(),
-    pollutants: List[Pollutant] = POLLUTANTS,
-    path: Path = PATH,
-    year: int = YEAR,
-    overwrite: bool = OVERWRITE,
-    quiet: bool = QUIET,
-):  # pragma: no cover
-    """Download specific pollutants for one country (deprecated)"""
-    deprecation_message("country", "download")
-    _download([country], pollutants, path, year, overwrite, quiet)
-
-
-@main.command(name="pollutant", no_args_is_help=True)
-def download_pollutant(
-    pollutant: Pollutant = typer.Argument(),
+@main.command(no_args_is_help=True)
+def verified(
     countries: List[Country] = COUNTRIES,
-    path: Path = PATH,
-    year: int = YEAR,
+    pollutants: List[Pollutant] = POLLUTANTS,
+    cities: List[str] = CITIES,
+    path: Path = typer.Option(
+        "data/verified", "--path", exists=True, dir_okay=True, writable=True
+    ),
     overwrite: bool = OVERWRITE,
     quiet: bool = QUIET,
-):  # pragma: no cover
-    """Download specific countries for one pollutant (deprecated)"""
-    deprecation_message("pollutant", "download")
-    _download(countries, [pollutant], path, year, overwrite, quiet)
+):
+    """
+    Verified data (E1a) from 2013 to 2022 reported by countries by 30 September each year for the previous year.
+    """
+    info = (
+        DownloadInfo.verified(pollutant, country, *cities)
+        for pollutant, country in product(pollutants, countries)
+    )
+    asyncio.run(
+        _new_download(info, path=path, overwrite=overwrite, quiet=quiet)
+    )
+
+
+@main.command(no_args_is_help=True)
+def unverified(
+    countries: List[Country] = COUNTRIES,
+    pollutants: List[Pollutant] = POLLUTANTS,
+    cities: List[str] = CITIES,
+    path: Path = typer.Option(
+        "data/unverified", "--path", exists=True, dir_okay=True, writable=True
+    ),
+    overwrite: bool = OVERWRITE,
+    quiet: bool = QUIET,
+):
+    """
+    Unverified data transmitted continuously (Up-To-Date/UTD/E2a) data from the beginning of 2023.
+    """
+    info = (
+        DownloadInfo.unverified(pollutant, country, *cities)
+        for pollutant, country in product(pollutants, countries)
+    )
+    asyncio.run(
+        _new_download(info, path=path, overwrite=overwrite, quiet=quiet)
+    )
