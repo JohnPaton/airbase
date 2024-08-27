@@ -29,12 +29,12 @@ def test_Dataset():
 
 
 @pytest.mark.parametrize(
-    "pollutant,country,cities,historical,verified,unverified",
+    "pollutant,country,city,historical,verified,unverified",
     (
         pytest.param(
             "PM10",
             "NO",
-            tuple(),
+            None,
             '{"countries": ["NO"], "cities": [], "properties": ["PM10"], "datasets": [3], "source": "API"}',
             '{"countries": ["NO"], "cities": [], "properties": ["PM10"], "datasets": [2], "source": "API"}',
             '{"countries": ["NO"], "cities": [], "properties": ["PM10"], "datasets": [1], "source": "API"}',
@@ -43,7 +43,7 @@ def test_Dataset():
         pytest.param(
             "O3",
             "IS",
-            ("Reykjavik",),
+            "Reykjavik",
             '{"countries": ["IS"], "cities": ["Reykjavik"], "properties": ["O3"], "datasets": [3], "source": "API"}',
             '{"countries": ["IS"], "cities": ["Reykjavik"], "properties": ["O3"], "datasets": [2], "source": "API"}',
             '{"countries": ["IS"], "cities": ["Reykjavik"], "properties": ["O3"], "datasets": [1], "source": "API"}',
@@ -54,26 +54,32 @@ def test_Dataset():
 def test_DownloadInfo(
     pollutant: str,
     country: str,
-    cities: tuple[str, ...],
+    city: str | None,
     historical: str,
     verified: str,
     unverified: str,
 ):
     assert (
         json.dumps(
-            DownloadInfo.historical(pollutant, country, *cities).request_info()
+            DownloadInfo(
+                pollutant, country, Dataset.Historical, city
+            ).request_info()
         )
         == historical
     ), "unexpected historical info"
     assert (
         json.dumps(
-            DownloadInfo.verified(pollutant, country, *cities).request_info()
+            DownloadInfo(
+                pollutant, country, Dataset.Verified, city
+            ).request_info()
         )
         == verified
     ), "unexpected verified info"
     assert (
         json.dumps(
-            DownloadInfo.unverified(pollutant, country, *cities).request_info()
+            DownloadInfo(
+                pollutant, country, Dataset.Unverified, city
+            ).request_info()
         )
         == unverified
     ), "unexpected unverified info"
@@ -160,7 +166,7 @@ async def test_cities_invalid_country(session: DownloadSession):
 async def test_url_to_files(session: DownloadSession):
     async with session:
         urls = await session.url_to_files(
-            DownloadInfo.historical("O3", "NO", "Oslo")
+            DownloadInfo("O3", "NO", Dataset.Historical, "Oslo")
         )
     for url in urls:
         assert url.startswith("https://"), f"wrong {url=}"

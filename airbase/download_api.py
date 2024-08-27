@@ -62,35 +62,17 @@ class DownloadInfo(NamedTuple):
     pollutant: str | None
     country: str | None
     dataset: Dataset
-    cities: tuple[str, ...] | None = None
+    cities: str | None = None
     source: str = "API"  # for EEA internal use
 
     def request_info(self) -> dict[str, list[str] | list[Dataset] | str]:
         return dict(
             countries=[] if self.country is None else [self.country],
-            cities=[] if self.cities is None else list(self.cities),
+            cities=[] if self.cities is None else [self.cities],
             properties=[] if self.pollutant is None else [self.pollutant],
             datasets=[self.dataset],
             source=self.source,
         )
-
-    @classmethod
-    def historical(
-        cls, pollutant: str, country: str, *cities: str
-    ) -> DownloadInfo:
-        return cls(pollutant, country, Dataset.Historical, cities)
-
-    @classmethod
-    def verified(
-        cls, pollutant: str, country: str, *cities: str
-    ) -> DownloadInfo:
-        return cls(pollutant, country, Dataset.Verified, cities)
-
-    @classmethod
-    def unverified(
-        cls, pollutant: str, country: str, *cities: str
-    ) -> DownloadInfo:
-        return cls(pollutant, country, Dataset.Unverified, cities)
 
 
 class CityDict(TypedDict):
@@ -482,7 +464,7 @@ async def download(
                 pollutants = [None]  # type:ignore[list-item]
 
             info = (
-                DownloadInfo(pollutant, country, dataset, (city,))
+                DownloadInfo(pollutant, country, dataset, city)
                 for pollutant, country, city in product(
                     pollutants, countries, cities
                 )
@@ -496,7 +478,7 @@ async def download(
                 pollutants = list(await session.pollutants())
 
             info = (
-                DownloadInfo(pollutant, country, dataset, tuple(cities))
+                DownloadInfo(pollutant, country, dataset)
                 for pollutant, country in product(pollutants, countries)
             )
 
