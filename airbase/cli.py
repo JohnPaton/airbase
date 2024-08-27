@@ -12,10 +12,10 @@ import typer
 
 from . import __version__
 from .airbase import AirbaseClient
-from .download_api import DownloadClient, DownloadInfo
+from .download_api import DownloadInfo, DownloadSession
 
 client = AirbaseClient()
-new_client = DownloadClient()
+session = DownloadSession()
 main = typer.Typer(add_completion=False, no_args_is_help=True)
 
 
@@ -126,7 +126,7 @@ async def _new_download(
     overwrite: bool,
     quiet: bool,
 ):
-    async with new_client as session:
+    async with session:
         urls = await session.url_to_files(*info, progress=not quiet)
         await session.download_to_directory(
             path, *urls, skip_existing=not overwrite, progress=not quiet

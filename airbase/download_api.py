@@ -1,14 +1,22 @@
 from __future__ import annotations
 
 import asyncio
+import json
+import sys
 from collections import defaultdict
 from collections.abc import AsyncIterator
 from contextlib import AbstractAsyncContextManager
 from enum import IntEnum
 from pathlib import Path
 from types import TracebackType
-from typing import Literal, NamedTuple
+from typing import Literal, NamedTuple, TypedDict, overload
 from warnings import warn
+
+if sys.version_info >= (3, 11):
+    from typing import Self
+else:
+    from typing_extensions import Self
+
 
 import aiocache
 import aiofiles
@@ -84,20 +92,44 @@ class DownloadInfo(NamedTuple):
         return cls(pollutant, country, Dataset.Unverified, cities)
 
 
-class DownloadClient(AbstractAsyncContextManager):
+class CityDict(TypedDict):
+    countryCode: str
+    cityName: str
+
+
+class CountryDict(TypedDict):
+    countryCode: str
+
+
+class DownloadSummaryDict(TypedDict):
+    numberFiles: int
+    size: int
+
+
+class PropertyDict(TypedDict):
+    notation: str
+    id: str
+
+
+class DownloadAPI(AbstractAsyncContextManager):
     base_url = "https://eeadmz1-downloads-api-appservice.azurewebsites.net"
 
     def __init__(
         self,
+        *,
+        custom_base_url: str | None = None,
         timeout: float | None = None,
         max_concurrent: int = 10,
     ) -> None:
+        if custom_base_url is not None:
+            self.base_url = custom_base_url
+
         self.timeout = timeout
         self.max_concurrent = max_concurrent
         self.session: aiohttp.ClientSession | None = None
         self.semaphore: asyncio.Semaphore | None = None
 
-    async def __aenter__(self) -> DownloadClient:
+    async def __aenter__(self) -> Self:
         self.session = aiohttp.ClientSession(
             timeout=aiohttp.ClientTimeout(self.timeout),
         )
@@ -114,43 +146,41 @@ class DownloadClient(AbstractAsyncContextManager):
         await self.session.close()
         self.semaphore = self.session = None
 
-    async def _get_json(
-        self,
-        entry_point: Literal["/Country", "/Property"],
-        *,
-        encoding: str | None,
-    ) -> list[dict[str, str]]:
+    @overload
+    async def __get(
+        self, entry_point: Literal["/Country"], *, encoding: str | None
+    ) -> list[CountryDict]: ...
+
+    @overload
+    async def __get(
+        self, entry_point: Literal["/Property"], *, encoding: str | None
+    ) -> list[PropertyDict]: ...
+
+    async def __get(self, entry_point, *, encoding):
+        """single get request"""
         assert self.session is not None, "outside context manager"
         async with self.session.get(
             self.base_url + entry_point, ssl=False
         ) as r:
             r.raise_for_status()
-            return await r.json(encoding=encoding)  # type:ignore[no-any-return]
+            return await r.json(encoding=encoding)
 
-    @aiocache.cached()
-    async def countries(self) -> list[str]:
-        """request country codes from API"""
-        payload = await self._get_json("/Country", encoding="UTF-8")
-        return [country["countryCode"] for country in payload]
+    async def country(self) -> list[CountryDict]:
+        """get request to /Country end point"""
+        return await self.__get("/Country", encoding="UTF-8")
 
-    @aiocache.cached()
-    async def pollutants(self) -> defaultdict[str, set[int]]:
-        """requests pollutants id and notation from API"""
+    async def property(self) -> list[PropertyDict]:
+        """get request to /Property end point"""
+        return await self.__get("/Property", encoding="UTF-8")
 
-        payload = await self._get_json("/Property", encoding="UTF-8")
-        ids: defaultdict[str, set[int]] = defaultdict(set)
-        for poll in payload:
-            key, val = poll["notation"], pollutant_id_from_url(poll["id"])
-            ids[key].add(val)
-        return ids
-
-    async def _post_json(
+    async def __post(
         self,
         entry_point: Literal["/City"],
-        data: tuple[str, ...] | list[str],
+        data: tuple[str, ...],
         *,
         encoding: str | None,
-    ) -> list[dict[str, str]]:
+    ) -> list[CityDict]:
+        """single post request"""
         assert self.session is not None, "outside context manager"
         async with self.session.post(
             self.base_url + entry_point, json=data, ssl=False
@@ -158,44 +188,19 @@ class DownloadClient(AbstractAsyncContextManager):
             r.raise_for_status()
             return await r.json(encoding=encoding)  # type:ignore[no-any-return]
 
-    @aiocache.cached()
-    async def cities(self, *countries: str) -> defaultdict[str, set[str]]:
-        """city names id and notation from API"""
-        if not COUNTRY_CODES.issuperset(countries):
-            unknown = sorted(set(countries) - COUNTRY_CODES)
-            warn(
-                f"Unknown country code(s) {', '.join(unknown)}",
-                UserWarning,
-                stacklevel=2,
-            )
+    async def city(self, data: tuple[str, ...]) -> list[CityDict]:
+        """post request to /City end point"""
+        return await self.__post("/City", data, encoding="UTF-8")
 
-        payload = await self._post_json("/City", countries, encoding="UTF-8")
-        cities: defaultdict[str, set[str]] = defaultdict(set)
-        for city in payload:
-            key, val = city["countryCode"], city["cityName"]
-            cities[key].add(val)
-        return cities
-
-    async def _text_post(
+    async def __post_multi(
         self,
-        entry_point: Literal["/ParquetFile/urls"],
-        urls: tuple[DownloadInfo, ...],
+        entry_point: Literal["/DownloadSummary", "/ParquetFile/urls"],
+        urls: set[DownloadInfo],
         *,
         encoding: str | None,
         raise_for_status: bool,
     ) -> AsyncIterator[str]:
-        """
-        multiple post requests to an specific Download API entry point and return decoded text
-        from each request as they become available
-
-        :param urls: info about requested urls
-        :param encoding: text encoding used for decoding each response's body
-        :param raise_for_status: Raise exceptions if download links
-            return "bad" HTTP status codes. If False,
-            a :py:func:`warnings.warn` will be issued instead.
-
-        :return: url text or path to downloaded text, one by one as the requests are completed
-        """
+        """multiple post requests in parallel"""
 
         async def fetch(info: DownloadInfo) -> str:
             """retrieve text, nothing more"""
@@ -221,44 +226,44 @@ class DownloadClient(AbstractAsyncContextManager):
                     raise
                 warn(str(e), category=RuntimeWarning)
 
-    async def url_to_files(
-        self,
-        *urls: DownloadInfo,
-        progress: bool = False,
-        raise_for_status: bool = True,
-    ) -> set[str]:
+    async def download_summary(
+        self, data: set[DownloadInfo], raise_for_status: bool
+    ) -> AsyncIterator[DownloadSummaryDict]:
         """
-        multiple request for file URLs and return only the unique URLs among all the responses
-
-        :param urls: info about requested urls, should be unique
-        :param progress: show progress bar
-        :param raise_for_status: Raise exceptions if download links
-            return "bad" HTTP status codes. If False,
-            a :py:func:`warnings.warn` will be issued instead.
-        :param max_concurrent: maximum concurrent requests
-
-        :return: unique file URLs among from all the responses
+        multiple post request to /DownloadSummary end point in parallel
+        yields one decoded result at the time
         """
-        lines: set[str] = set()
-        async for text in tqdm(
-            self._text_post(
-                "/ParquetFile/urls",
-                urls,
-                encoding="UTF-8",
-                raise_for_status=raise_for_status,
-            ),
-            total=len(urls),
-            leave=True,
-            disable=not progress,
+        async for text in self.__post_multi(
+            "/DownloadSummary",
+            data,
+            encoding="UTF-8",
+            raise_for_status=raise_for_status,
         ):
-            lines.update(
-                line.strip()
-                for line in text.splitlines()
-                if line.strip().startswith("http")
-            )
-        return lines
+            yield json.loads(text)
 
-    async def _binary_files(
+    async def download_urls(
+        self,
+        data: set[DownloadInfo],
+        raise_for_status: bool,
+    ) -> AsyncIterator[set[str]]:
+        """
+        multiple post request to /ParquetFile/urls end point in parallel
+        yields unique download url from each requests as they are completed
+        """
+        async for text in self.__post_multi(
+            "/ParquetFile/urls",
+            data,
+            encoding="UTF-8",
+            raise_for_status=raise_for_status,
+        ):
+            lines = (line.strip() for line in text.splitlines())
+            yield set(
+                line
+                for line in lines
+                if line.startswith(("http://", "https://"))
+            )
+
+    async def download_binary_files(
         self,
         urls: dict[str, Path],
         *,
@@ -272,7 +277,7 @@ class DownloadClient(AbstractAsyncContextManager):
             return "bad" HTTP status codes. If False,
             a :py:func:`warnings.warn` will be issued instead.
 
-        :return: url text or path to downloaded text, one by one as the requests are completed
+        :return: path to downloaded text, one by one as the requests are completed
         """
 
         async def download(url: str, path: Path) -> Path:
@@ -299,6 +304,93 @@ class DownloadClient(AbstractAsyncContextManager):
                 if raise_for_status:
                     raise
                 warn(str(e), category=RuntimeWarning)
+
+
+class DownloadSession(AbstractAsyncContextManager):
+    client = DownloadAPI()
+
+    def __init__(self, *, custom_client: DownloadAPI | None = None) -> None:
+        if custom_client is not None:
+            self.client = custom_client
+
+    async def __aenter__(self) -> Self:
+        await self.client.__aenter__()
+        return self
+
+    async def __aexit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
+        await self.client.__aexit__(exc_type, exc_val, exc_tb)
+
+    async def countries(self) -> list[str]:
+        """request country codes from API"""
+        payload = await self.client.country()
+        return [country["countryCode"] for country in payload]
+
+    @aiocache.cached()
+    async def pollutants(self) -> defaultdict[str, set[int]]:
+        """requests pollutants id and notation from API"""
+
+        payload = await self.client.property()
+        ids: defaultdict[str, set[int]] = defaultdict(set)
+        for poll in payload:
+            key, val = poll["notation"], pollutant_id_from_url(poll["id"])
+            ids[key].add(val)
+        return ids
+
+    @aiocache.cached()
+    async def cities(self, *countries: str) -> defaultdict[str, set[str]]:
+        """city names id and notation from API"""
+        if not COUNTRY_CODES.issuperset(countries):
+            unknown = sorted(set(countries) - COUNTRY_CODES)
+            warn(
+                f"Unknown country code(s) {', '.join(unknown)}",
+                UserWarning,
+                stacklevel=2,
+            )
+
+        payload = await self.client.city(countries)
+        cities: defaultdict[str, set[str]] = defaultdict(set)
+        for city in payload:
+            key, val = city["countryCode"], city["cityName"]
+            cities[key].add(val)
+        return cities
+
+    async def url_to_files(
+        self,
+        *info: DownloadInfo,
+        progress: bool = False,
+        raise_for_status: bool = True,
+    ) -> set[str]:
+        """
+        multiple request for file URLs and return only the unique URLs among all the responses
+
+        :param urls: info about requested urls
+        :param progress: show progress bar
+        :param raise_for_status: Raise exceptions if download links
+            return "bad" HTTP status codes. If False,
+            a :py:func:`warnings.warn` will be issued instead.
+        :param max_concurrent: maximum concurrent requests
+
+        :return: unique file URLs among from all the responses
+        """
+        unique_info = set(info)
+        unique_urls: set[str] = set()
+        async for urls in tqdm(
+            self.client.download_urls(
+                unique_info,
+                raise_for_status=raise_for_status,
+            ),
+            initial=len(info) - len(unique_info),
+            total=len(info),
+            leave=True,
+            disable=not progress,
+        ):
+            unique_urls.update(urls)
+        return unique_urls
 
     async def download_to_directory(
         self,
@@ -343,7 +435,9 @@ class DownloadClient(AbstractAsyncContextManager):
             parent.mkdir(exist_ok=True)
 
         async for path in tqdm(
-            self._binary_files(url_paths, raise_for_status=raise_for_status),
+            self.client.download_binary_files(
+                url_paths, raise_for_status=raise_for_status
+            ),
             initial=len(urls) - len(url_paths),
             total=len(urls),
             leave=True,
