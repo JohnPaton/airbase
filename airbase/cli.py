@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import asyncio
-from datetime import date
 from enum import Enum
 from pathlib import Path
 from typing import List, Optional
@@ -10,8 +9,7 @@ import typer
 
 from . import __version__
 from .airbase import AirbaseClient
-from .download_api import Dataset
-from .download_api import download as download_api
+from .download_api import Dataset, download
 
 client = AirbaseClient()
 main = typer.Typer(add_completion=False, no_args_is_help=True)
@@ -60,61 +58,10 @@ COUNTRIES = typer.Option([], "-c", "--country")
 POLLUTANTS = typer.Option([], "-p", "--pollutant")
 CITIES = typer.Option([], "-C", "--city", help="only from selected <cities>")
 PATH = typer.Option("data", "--path", exists=True, dir_okay=True, writable=True)
-YEAR = typer.Option(date.today().year, "--year")
 OVERWRITE = typer.Option(
     False, "-O", "--overwrite", help="Re-download existing files."
 )
 QUIET = typer.Option(False, "-q", "--quiet", help="No progress-bar.")
-
-
-def _download(
-    countries: list[Country],
-    pollutants: list[Pollutant],
-    path: Path,
-    year: int,
-    overwrite: bool,
-    quiet: bool,
-):
-    request = client.request(
-        countries or None,  # type:ignore[arg-type]
-        pollutants or None,  # type:ignore[arg-type]
-        year_from=str(year),
-        year_to=str(year),
-        verbose=not quiet,
-    )
-    request.download_to_directory(path, skip_existing=not overwrite)
-
-
-@main.command(no_args_is_help=True)
-def download(
-    countries: List[Country] = COUNTRIES,
-    pollutants: List[Pollutant] = POLLUTANTS,
-    path: Path = PATH,
-    year: int = YEAR,
-    overwrite: bool = OVERWRITE,
-    quiet: bool = QUIET,
-):
-    """Download all pollutants for all countries (discontinued, EOL end of 2024)
-
-    \b
-    The -c/--country and -p/--pollutant allow to specify which data to download, e.g.
-    - download only Norwegian, Danish and Finish sites
-      airbase download -c NO -c DK -c FI
-    - download only SO2, PM10 and PM2.5 observations
-      airbase download -p SO2 -p PM10 -p PM2.5
-    """
-    eol_message("download", "historical", "verified", "unverified")
-    _download(countries, pollutants, path, year, overwrite, quiet)
-
-
-def eol_message(old: str, *new: str):  # pragma: no cover
-    old = typer.style(f"{__package__} {old}", fg="red", bold=True)
-    new = tuple(
-        typer.style(f"{__package__} {n}", fg="green", bold=True) for n in new
-    )
-    typer.echo(
-        f"The service behind {old} has been discontinued and will stop working by the end of 2024. Use {', '.join(new)} all instead.",
-    )
 
 
 @main.command(no_args_is_help=True)
@@ -132,7 +79,7 @@ def historical(
     Historical Airbase data delivered between 2002 and 2012 before Air Quality Directive 2008/50/EC entered into force.
     """
     asyncio.run(
-        download_api(
+        download(
             Dataset.Historical,
             path,
             countries=list(map(str, countries)),
@@ -159,7 +106,7 @@ def verified(
     Verified data (E1a) from 2013 to 2022 reported by countries by 30 September each year for the previous year.
     """
     asyncio.run(
-        download_api(
+        download(
             Dataset.Verified,
             path,
             countries=list(map(str, countries)),
@@ -186,7 +133,7 @@ def unverified(
     Unverified data transmitted continuously (Up-To-Date/UTD/E2a) data from the beginning of 2023.
     """
     asyncio.run(
-        download_api(
+        download(
             Dataset.Verified,
             path,
             countries=list(map(str, countries)),
