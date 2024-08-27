@@ -1,10 +1,8 @@
 from __future__ import annotations
 
 import asyncio
-from collections.abc import Iterator
 from datetime import date
 from enum import Enum
-from itertools import product
 from pathlib import Path
 from typing import List, Optional
 
@@ -12,10 +10,10 @@ import typer
 
 from . import __version__
 from .airbase import AirbaseClient
-from .download_api import DownloadInfo, DownloadSession
+from .download_api import Dataset
+from .download_api import download as download_api
 
 client = AirbaseClient()
-session = DownloadSession()
 main = typer.Typer(add_completion=False, no_args_is_help=True)
 
 
@@ -119,20 +117,6 @@ def eol_message(old: str, *new: str):  # pragma: no cover
     )
 
 
-async def _new_download(
-    info: Iterator[DownloadInfo],
-    *,
-    path: Path,
-    overwrite: bool,
-    quiet: bool,
-):
-    async with session:
-        urls = await session.url_to_files(*info, progress=not quiet)
-        await session.download_to_directory(
-            path, *urls, skip_existing=not overwrite, progress=not quiet
-        )
-
-
 @main.command(no_args_is_help=True)
 def historical(
     countries: List[Country] = COUNTRIES,
@@ -147,12 +131,16 @@ def historical(
     """
     Historical Airbase data delivered between 2002 and 2012 before Air Quality Directive 2008/50/EC entered into force.
     """
-    info = (
-        DownloadInfo.historical(pollutant, country, *cities)
-        for pollutant, country in product(pollutants, countries)
-    )
     asyncio.run(
-        _new_download(info, path=path, overwrite=overwrite, quiet=quiet)
+        download_api(
+            Dataset.Historical,
+            path,
+            countries=list(map(str, countries)),
+            pollutants=list(map(str, pollutants)),
+            cities=cities,
+            overwrite=overwrite,
+            quiet=quiet,
+        )
     )
 
 
@@ -170,12 +158,16 @@ def verified(
     """
     Verified data (E1a) from 2013 to 2022 reported by countries by 30 September each year for the previous year.
     """
-    info = (
-        DownloadInfo.verified(pollutant, country, *cities)
-        for pollutant, country in product(pollutants, countries)
-    )
     asyncio.run(
-        _new_download(info, path=path, overwrite=overwrite, quiet=quiet)
+        download_api(
+            Dataset.Verified,
+            path,
+            countries=list(map(str, countries)),
+            pollutants=list(map(str, pollutants)),
+            cities=cities,
+            overwrite=overwrite,
+            quiet=quiet,
+        )
     )
 
 
@@ -193,10 +185,14 @@ def unverified(
     """
     Unverified data transmitted continuously (Up-To-Date/UTD/E2a) data from the beginning of 2023.
     """
-    info = (
-        DownloadInfo.unverified(pollutant, country, *cities)
-        for pollutant, country in product(pollutants, countries)
-    )
     asyncio.run(
-        _new_download(info, path=path, overwrite=overwrite, quiet=quiet)
+        download_api(
+            Dataset.Verified,
+            path,
+            countries=list(map(str, countries)),
+            pollutants=list(map(str, pollutants)),
+            cities=cities,
+            overwrite=overwrite,
+            quiet=quiet,
+        )
     )

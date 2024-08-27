@@ -7,6 +7,7 @@ from collections import defaultdict
 from collections.abc import AsyncIterator
 from contextlib import AbstractAsyncContextManager
 from enum import IntEnum
+from itertools import product
 from pathlib import Path
 from types import TracebackType
 from typing import Literal, NamedTuple, TypedDict, overload
@@ -58,17 +59,17 @@ class DownloadInfo(NamedTuple):
     the request can be further restricted with the `cities` param
     """
 
-    pollutant: str
-    country: str
+    pollutant: str | None
+    country: str | None
     dataset: Dataset
     cities: tuple[str, ...] | None = None
     source: str = "API"  # for EEA internal use
 
     def request_info(self) -> dict[str, list[str] | list[Dataset] | str]:
         return dict(
-            countries=[self.country],
+            countries=[] if self.country is None else [self.country],
             cities=[] if self.cities is None else list(self.cities),
-            properties=[self.pollutant],
+            properties=[] if self.pollutant is None else [self.pollutant],
             datasets=[self.dataset],
             source=self.source,
         )
@@ -455,3 +456,51 @@ def pollutant_id_from_url(url: str) -> int:
     if url.endswith("view"):
         return int(url.split("/")[-2])
     return int(url.split("/")[-1])
+
+
+async def download(
+    dataset: Dataset,
+    root_path: Path,
+    *,
+    countries: list[str],
+    pollutants: list[str],
+    cities: list[str],
+    overwrite: bool,
+    quiet: bool,
+    session: DownloadSession = DownloadSession(),
+):
+    """
+    request file urls by pollutant/country[/city] and download unique files
+    """
+    async with session:
+        if cities:
+            # one request for each country/pollutant/city
+            country_cities = await session.cities(*countries)
+            if not countries:
+                countries = list(country_cities)
+            if not pollutants:
+                pollutants = [None]  # type:ignore[list-item]
+
+            info = (
+                DownloadInfo(pollutant, country, dataset, (city,))
+                for pollutant, country, city in product(
+                    pollutants, countries, cities
+                )
+                if city in country_cities[country]
+            )
+        else:
+            # one request for each country/pollutant
+            if not countries:
+                countries = list(await session.countries())
+            if not pollutants:
+                pollutants = list(await session.pollutants())
+
+            info = (
+                DownloadInfo(pollutant, country, dataset, tuple(cities))
+                for pollutant, country in product(pollutants, countries)
+            )
+
+        urls = await session.url_to_files(*info, progress=not quiet)
+        await session.download_to_directory(
+            root_path, *urls, skip_existing=not overwrite, progress=not quiet
+        )

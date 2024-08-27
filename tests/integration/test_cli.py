@@ -28,17 +28,22 @@ def test_download(
 
 
 @pytest.mark.parametrize(
-    "country,pollutant,city",
+    "cmd,country,city,num",
     (
-        pytest.param("NO", "NO2", "Bergen", id="NO2"),
-        pytest.param("NO", "CO", "Bergen", id="CO"),
+        pytest.param("historical", "MT", "Valletta", 22, id="historical"),
+        pytest.param("verified", "MT", "Valletta", 48, id="verified"),
+        pytest.param("unverified", "MT", "Valletta", 48, id="unverified"),
     ),
 )
-def test_historical(country: str, pollutant: str, city: str, tmp_path: Path):
-    options = f"historical --quiet --country {country} --pollutant {pollutant} --city {city} --path {tmp_path}"
+def test_download_api(
+    cmd: str, country: str, city: str, num: int, tmp_path: Path
+):
+    options = (
+        f"{cmd} --quiet --country {country} --city {city} --path {tmp_path}"
+    )
     with runner.isolated_filesystem(temp_dir=tmp_path):
         result = runner.invoke(main, options.split())
         assert result.exit_code == 0
 
-    files = tmp_path.glob(f"{country}/*.parquet")
-    assert list(files)
+    files = sorted(tmp_path.glob(f"{country}/*.parquet"))
+    assert len(files) >= num
