@@ -8,10 +8,8 @@ from typing import List, Optional
 import typer
 
 from . import __version__
-from .airbase import AirbaseClient
-from .download_api import Dataset, download
+from .download_api import COUNTRY_CODES, POLLUTANT_NOTATIONS, Dataset, download
 
-client = AirbaseClient()
 main = typer.Typer(add_completion=False, no_args_is_help=True)
 
 
@@ -19,7 +17,7 @@ class Country(str, Enum):
     _ignore_ = "country Country"  # type:ignore[misc]
 
     Country = vars()
-    for country in client.countries:
+    for country in COUNTRY_CODES:
         Country[country] = country
 
     def __str__(self) -> str:
@@ -30,7 +28,7 @@ class Pollutant(str, Enum):
     _ignore_ = "poll Pollutant"  # type:ignore[misc]
 
     Pollutant = vars()
-    for poll in client._pollutants_ids:
+    for poll in POLLUTANT_NOTATIONS:
         Pollutant[poll] = poll
 
     def __str__(self) -> str:

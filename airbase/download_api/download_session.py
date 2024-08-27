@@ -18,14 +18,7 @@ import aiocache
 from tqdm.asyncio import tqdm
 
 from .api_client import Dataset, DownloadAPI, DownloadInfo
-
-COUNTRY_CODES = set(
-    """
-    AD AL AT BA BE BG CH CY CZ DE DK EE ES FI FR GB GI GR HR HU
-    IE IS IT LI LT LU LV ME MK MT NL NO PL PT RO RS SE SI SK TR
-    XK
-    """.split()
-)
+from .api_info import COUNTRY_CODES
 
 
 class DownloadSession(AbstractAsyncContextManager):

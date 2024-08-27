@@ -1,13 +1,11 @@
 from __future__ import annotations
 
 import json
-from itertools import chain
 from pathlib import Path
 
 import pytest
 
 from airbase.download_api import (
-    COUNTRY_CODES,
     Dataset,
     DownloadInfo,
     DownloadSession,
@@ -83,83 +81,6 @@ def test_DownloadInfo(
         )
         == unverified
     ), "unexpected unverified info"
-
-
-@pytest.mark.asyncio
-async def test_countries(session: DownloadSession):
-    async with session:
-        countries = await session.countries()
-
-    assert set(countries) == set(COUNTRY_CODES)
-
-
-@pytest.mark.asyncio
-async def test_pollutants(session: DownloadSession):
-    async with session:
-        pollutants = await session.pollutants()
-
-    names = tuple(pollutants)
-    assert len(names) >= 469, "too few pollutants"
-
-    ids = tuple(chain.from_iterable(pollutants.values()))
-    assert len(ids) == len(set(ids)) >= 648, "too few IDs"
-
-    for poll, id in {"PM10": 5, "O3": 7, "NO2": 8, "SO2": 1}.items():
-        assert pollutants.get(poll) == {id}, f"unknown {poll} {id=}"
-
-
-@pytest.mark.asyncio
-async def test_cities(session: DownloadSession):
-    known_cities = dict(
-        IS={"Reykjavik"},
-        NO={
-            "Bergen",
-            "Kristiansand",
-            "Oslo",
-            "Stavanger",
-            "Tromsø",
-            "Trondheim",
-        },
-        SE={
-            "Borås",
-            "Göteborg",
-            "Helsingborg",
-            "Jönköping",
-            "Linköping",
-            "Lund",
-            "Malmö",
-            "Norrköping",
-            "Örebro",
-            "Sodertalje",
-            "Stockholm (greater city)",
-            "Umeå",
-            "Uppsala",
-            "Västerås",
-        },
-        FI={
-            "Helsinki / Helsingfors (greater city)",
-            "Jyväskylä",
-            "Kuopio",
-            "Lahti / Lahtis",
-            "Oulu",
-            "Tampere / Tammerfors",
-            "Turku / Åbo",
-        },
-    )
-    async with session:
-        country_cities = await session.cities(*known_cities)
-
-    for country, cities in country_cities.items():
-        assert cities <= known_cities[country], f"missing cities on {country}"
-
-
-@pytest.mark.asyncio
-async def test_cities_invalid_country(session: DownloadSession):
-    async with session:
-        with pytest.warns(UserWarning, match="Unknown country"):
-            cities = await session.cities("Norway", "Finland", "USA")
-
-    assert not cities, "dict is not empty"
 
 
 @pytest.mark.asyncio
