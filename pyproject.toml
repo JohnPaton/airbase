@@ -34,6 +34,9 @@ ignore = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
+"__init__.py" =[ # re-export from sub modules
+    "F401", # https://docs.astral.sh/ruff/rules/unused-import/
+]
 "cli.py" = [ # typer needs typing.Optional and typing.List
     "UP006", # https://docs.astral.sh/ruff/rules/non-pep585-annotation/
     "UP007", # https://docs.astral.sh/ruff/rules/non-pep604-annotation/
