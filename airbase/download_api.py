@@ -110,13 +110,12 @@ class DownloadAPI(AbstractAsyncContextManager):
         self.timeout = timeout
         self.max_concurrent = max_concurrent
         self.session: aiohttp.ClientSession | None = None
-        self.semaphore: asyncio.Semaphore | None = None
 
     async def __aenter__(self) -> Self:
         self.session = aiohttp.ClientSession(
+            connector=aiohttp.TCPConnector(limit=self.max_concurrent),
             timeout=aiohttp.ClientTimeout(self.timeout),
         )
-        self.semaphore = asyncio.Semaphore(self.max_concurrent)
         return self
 
     async def __aexit__(
@@ -127,7 +126,6 @@ class DownloadAPI(AbstractAsyncContextManager):
     ) -> None:
         assert self.session is not None, "outside context manager"
         await self.session.close()
-        self.semaphore = self.session = None
 
     @overload
     async def __get(
@@ -187,16 +185,14 @@ class DownloadAPI(AbstractAsyncContextManager):
 
         async def fetch(info: DownloadInfo) -> str:
             """retrieve text, nothing more"""
-            assert self.semaphore is not None, "outside context manager"
             assert self.session is not None, "outside context manager"
-            async with self.semaphore:
-                async with self.session.post(
-                    self.base_url + entry_point,
-                    json=info.request_info(),
-                    ssl=False,
-                ) as r:
-                    r.raise_for_status()
-                    return await r.text(encoding=encoding)  # type:ignore[no-any-return]
+            async with self.session.post(
+                self.base_url + entry_point,
+                json=info.request_info(),
+                ssl=False,
+            ) as r:
+                r.raise_for_status()
+                return await r.text(encoding=encoding)  # type:ignore[no-any-return]
 
         jobs = tuple(fetch(info) for info in urls)
         for result in asyncio.as_completed(jobs):
@@ -265,17 +261,14 @@ class DownloadAPI(AbstractAsyncContextManager):
 
         async def download(url: str, path: Path) -> Path:
             """retrieve binary and write into path"""
-            assert self.semaphore is not None, "outside context manager"
             assert self.session is not None, "outside context manager"
-            async with self.semaphore:
-                async with self.session.get(url, ssl=False) as r:
-                    r.raise_for_status()
-                    payload = await r.read()
-
+            async with self.session.get(url, ssl=False) as r:
+                r.raise_for_status()
+                payload = await r.read()
                 async with aiofiles.open(path, mode="wb") as f:
                     await f.write(payload)
 
-                return path
+            return path
 
         jobs = tuple(download(url, path) for url, path in urls.items())
         for result in asyncio.as_completed(jobs):
