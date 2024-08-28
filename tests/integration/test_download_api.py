@@ -93,6 +93,15 @@ async def test_cities(
 
 
 @pytest.mark.asyncio
+async def test_cities_invalid_country(session: DownloadSession):
+    async with session:
+        with pytest.warns(UserWarning, match="Unknown country"):
+            cities = await session.cities("Norway", "Finland", "USA")
+
+    assert not cities, "dict is not empty"
+
+
+@pytest.mark.asyncio
 async def test_url_to_files(session: DownloadSession):
     async with session:
         urls = await session.url_to_files(

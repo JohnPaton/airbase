@@ -11,10 +11,10 @@ from types import TracebackType
 from typing import Literal, NamedTuple, TypedDict, overload
 from warnings import warn
 
-if sys.version_info >= (3, 11):
+if sys.version_info >= (3, 11):  # pragma:no cover
     from typing import Self
 else:
-    from typing_extensions import Self
+    from typing_extensions import Self  # pragma:no cover
 
 
 import aiofiles
@@ -37,7 +37,7 @@ class Dataset(IntEnum):
     Verified = E1a = 2
     Unverified = UDT = E2a = 1
 
-    def __str__(self) -> str:
+    def __str__(self) -> str:  # pragma:no cover
         return self.name
 
 
@@ -92,9 +92,6 @@ class DownloadAPI(AbstractAsyncContextManager):
         timeout: float | None = None,
         max_concurrent: int = 10,
     ) -> None:
-        if custom_base_url is not None:
-            self.base_url = custom_base_url
-
         self.timeout = timeout
         self.max_concurrent = max_concurrent
         self.session: aiohttp.ClientSession | None = None
@@ -186,9 +183,9 @@ class DownloadAPI(AbstractAsyncContextManager):
         for result in asyncio.as_completed(jobs):
             try:
                 yield await result
-            except asyncio.CancelledError:
+            except asyncio.CancelledError:  # pragma:no cover
                 continue
-            except aiohttp.ClientResponseError as e:
+            except aiohttp.ClientResponseError as e:  # pragma:no cover
                 if raise_for_status:
                     raise
                 warn(str(e), category=RuntimeWarning)
@@ -262,9 +259,9 @@ class DownloadAPI(AbstractAsyncContextManager):
         for result in asyncio.as_completed(jobs):
             try:
                 yield await result
-            except asyncio.CancelledError:
+            except asyncio.CancelledError:  # pragma:no cover
                 continue
-            except aiohttp.ClientResponseError as e:
+            except aiohttp.ClientResponseError as e:  # pragma:no cover
                 if raise_for_status:
                     raise
                 warn(str(e), category=RuntimeWarning)

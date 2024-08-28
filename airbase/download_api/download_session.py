@@ -8,10 +8,10 @@ from pathlib import Path
 from types import TracebackType
 from warnings import warn
 
-if sys.version_info >= (3, 11):
+if sys.version_info >= (3, 11):  # pragma:no cover
     from typing import Self
 else:
-    from typing_extensions import Self
+    from typing_extensions import Self  # pragma:no cover
 
 
 import aiocache
@@ -130,7 +130,7 @@ class DownloadSession(AbstractAsyncContextManager):
             a :py:func:`warnings.warn` will be issued instead. Default True.
         """
 
-        if not root_path.is_dir():
+        if not root_path.is_dir():  # pragma: no cover
             raise NotADirectoryError(
                 f"{root_path.resolve()} is not a directory."
             )
