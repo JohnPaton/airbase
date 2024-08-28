@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import sqlite3
 import sys
-from collections import defaultdict
 from contextlib import closing, contextmanager
 from pathlib import Path
 from typing import Iterator
@@ -51,8 +50,6 @@ class DB:
         """
         Get the list of unique pollutants from the summary.
 
-        :param summary: The E1a summary.
-
         :return: The available pollutants, as a dictionary with
         with name as keys with name as values, e.g. {"NO": "38", ...}
         """
@@ -84,22 +81,3 @@ class DB:
                 """
             )
             return dict(cur.fetchall())
-
-    @classmethod
-    def pollutants_per_country(cls) -> dict[str, dict[str, int]]:
-        """
-        Get the available pollutants per country from the summary.
-
-        :return: All available pollutants per country, as a dictionary with
-        with country code as keys and a dictionary of pollutant/ids
-        (e.g. {"NO": 38, ...}) as values.
-        """
-
-        with cls.cursor() as cur:
-            cur.execute(
-                "SELECT country_code, pollutant, pollutant_id FROM summary"
-            )
-            output: dict[str, dict[str, int]] = defaultdict(dict)
-            for country_code, pollutant, pollutant_id in cur:
-                output[country_code][pollutant] = pollutant_id
-            return dict(output)

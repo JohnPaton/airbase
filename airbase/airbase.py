@@ -46,14 +46,6 @@ class AirbaseClient:
         """All pollutants available from AirBase"""
         self._pollutants_ids = DB.pollutants()
 
-        """The pollutants available in each country from AirBase."""
-        self.pollutants_per_country: dict[str, list[PollutantDict]] = dict()
-
-        for country, pollutants in DB.pollutants_per_country().items():
-            self.pollutants_per_country[country] = [
-                dict(pl=pl, shortpl=id) for pl, id in pollutants.items()
-            ]
-
     @property
     def all_countries(self) -> list[str]:  # pragma: no cover
         warnings.warn(

@@ -25,7 +25,6 @@ class TestAirbaseClient:
         client = airbase.AirbaseClient()
         assert isinstance(client.countries, list)
         assert isinstance(client._pollutants_ids, dict)
-        assert isinstance(client.pollutants_per_country, dict)
 
     def test_download_metadata(
         self, tmp_path: Path, capsys, client: airbase.AirbaseClient
