@@ -44,19 +44,19 @@ class Dataset(IntEnum):
 class DownloadInfo(NamedTuple):
     """
     info needed for requesting the URLs for one pollutant from one country and dataset
-    the request can be further restricted with the `cities` param
+    the request can be further restricted with the `city` param
     """
 
     pollutant: str | None
     country: str | None
     dataset: Dataset
-    cities: str | None = None
+    city: str | None = None
     source: str = "API"  # for EEA internal use
 
     def request_info(self) -> dict[str, list[str] | list[Dataset] | str]:
         return dict(
             countries=[] if self.country is None else [self.country],
-            cities=[] if self.cities is None else [self.cities],
+            cities=[] if self.city is None else [self.city],
             properties=[] if self.pollutant is None else [self.pollutant],
             datasets=[self.dataset],
             source=self.source,
