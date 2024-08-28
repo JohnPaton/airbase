@@ -14,6 +14,36 @@ def response():
         yield mocker
 
 
+@pytest.fixture
+def mock_api(response: aioresponses):
+    """mock responses from Download API entry points"""
+    response.get(
+        "https://eeadmz1-downloads-api-appservice.azurewebsites.net/Country",
+        body=resources.JSON_COUNTRY_RESPONSE,
+        repeat=False,
+    )
+    response.get(
+        "https://eeadmz1-downloads-api-appservice.azurewebsites.net/Property",
+        body=resources.JSON_PROPERTY_RESPONSE,
+        repeat=False,
+    )
+    response.post(
+        "https://eeadmz1-downloads-api-appservice.azurewebsites.net/City",
+        body=resources.JSON_CITY_RESPONSE,
+        repeat=False,
+    )
+    response.post(
+        "https://eeadmz1-downloads-api-appservice.azurewebsites.net/ParquetFile/urls",
+        body=resources.CSV_PARQUET_URLS_RESPONSE,
+        repeat=False,
+    )
+    response.get(
+        re.compile(r"https://.*/../.*\.parquet"),  # any parquet file
+        body=b"",
+        repeat=True,
+    )
+
+
 @pytest.fixture()
 def csv_links_response(response: aioresponses):
     """mock response from station data links url"""

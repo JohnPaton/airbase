@@ -180,8 +180,8 @@ async def download(
     countries: list[str],
     pollutants: list[str],
     cities: list[str],
-    overwrite: bool,
-    quiet: bool,
+    overwrite: bool = False,
+    quiet: bool = True,
     session: DownloadSession = DownloadSession(),
 ):
     """

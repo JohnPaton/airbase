@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import re
 from itertools import chain
+from pathlib import Path
 
 import pytest
 import pytest_asyncio
@@ -8,8 +10,11 @@ import pytest_asyncio
 from airbase.download_api import (
     COUNTRY_CODES,
     POLLUTANT_NOTATIONS,
+    Dataset,
+    DownloadInfo,
     DownloadSession,
 )
+from tests import resources
 
 
 @pytest.fixture(scope="module")
@@ -65,39 +70,46 @@ async def test_pollutants(pollutants: dict[str, set[str]]):
         pytest.param(
             "NO",
             {
-                "Bergen",
-                "Kristiansand",
-                "Oslo",
-                "Stavanger",
-                "Tromsø",
-                "Trondheim",
+                "Bergen", "Kristiansand", "Oslo", "Stavanger", "Tromsø", "Trondheim",
             },
             id="NO",
         ),
         pytest.param(
             "SE",
             {
-                "Borås",
-                "Göteborg",
-                "Helsingborg",
-                "Jönköping",
-                "Linköping",
-                "Lund",
-                "Malmö",
-                "Norrköping",
-                "Örebro",
-                "Sodertalje",
-                "Stockholm (greater city)",
-                "Umeå",
-                "Uppsala",
-                "Västerås",
+                "Borås", "Göteborg", "Helsingborg", "Jönköping", "Linköping", "Lund",
+                "Malmö", "Norrköping", "Örebro", "Sodertalje", "Stockholm (greater city)",
+                "Umeå", "Uppsala", "Västerås",
             },
             id="SE",
         ),
     ),
-)
+)  # fmt: skip
 @pytest.mark.asyncio
 async def test_cities(
     country_cities: dict[str, set[str]], country: str, cities: set[str]
 ):
     assert country_cities == {country: cities}
+
+
+@pytest.mark.asyncio
+async def test_url_to_files(session: DownloadSession):
+    async with session:
+        urls = await session.url_to_files(
+            DownloadInfo(None, "MT", Dataset.Historical, "Valletta")
+        )
+    regex = re.compile(r"https://.*/MT/.*\.parquet")
+    for url in urls:
+        assert regex.match(url) is not None, f"wrong {url=} start"
+    assert len(urls) == 22
+
+
+@pytest.mark.asyncio
+async def test_download_to_directory(session: DownloadSession, tmp_path: Path):
+    assert not tuple(tmp_path.glob("??/*.parquet"))
+    urls = tuple(resources.CSV_PARQUET_URLS_RESPONSE.splitlines())[-5:]
+    async with session:
+        await session.download_to_directory(
+            tmp_path, *urls, raise_for_status=True
+        )
+    assert len(tuple(tmp_path.glob("??/*.parquet"))) == len(urls) == 5
