@@ -66,7 +66,7 @@ async def main(root_path: Path):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        usage="Download JSON files for tests",
+        usage=f"Download {BASE_URL} responses for later use on tests",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     parser.add_argument(
