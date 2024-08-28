@@ -10,7 +10,7 @@ from tests import resources
 
 @pytest.fixture
 def client(metadata_response) -> airbase.AirbaseClient:
-    """initialied client with mocked responses"""
+    """initialized client with mocked responses"""
     return airbase.AirbaseClient()
 
 
