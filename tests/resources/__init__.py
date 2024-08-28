@@ -6,14 +6,13 @@ else:
     import importlib_resources as resources
 
 
-CSV_LINKS_RESPONSE_TEXT: str = (
-    resources.files(__package__).joinpath("csv_links_response.txt").read_text()
-)
+def __getattr__(name: str):
+    resource = dict(
+        CSV_LINKS_RESPONSE_TEXT="csv_links_response.txt",
+        CSV_RESPONSE="csv_response.csv",
+        METADATA_RESPONSE="metadata.tsv",
+    )
+    if name not in resource:
+        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
-CSV_RESPONSE: str = (
-    resources.files(__package__).joinpath("csv_response.csv").read_text()
-)
-
-METADATA_RESPONSE: str = (
-    resources.files(__package__).joinpath("metadata.tsv").read_text()
-)
+    return resources.files(__package__).joinpath(resource[name]).read_text()
