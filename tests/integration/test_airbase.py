@@ -12,6 +12,9 @@ def client():
     return airbase.AirbaseClient()
 
 
+@pytest.mark.xfail(
+    reason="old service no longer openly available to the public"
+)
 def test_download_to_directory(client: airbase.AirbaseClient, tmp_path: Path):
     r = client.request(
         country=["AD", "BE"], pl="CO", year_from="2017", year_to="2017"
@@ -21,6 +24,9 @@ def test_download_to_directory(client: airbase.AirbaseClient, tmp_path: Path):
     assert list(tmp_path.iterdir())
 
 
+@pytest.mark.xfail(
+    reason="old service no longer openly available to the public"
+)
 def test_download_to_file(client: airbase.AirbaseClient, tmp_path: Path):
     r = client.request(
         country="CY", pl=["As", "NO2"], year_from="2014", year_to="2014"
