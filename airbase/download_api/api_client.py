@@ -15,9 +15,10 @@ if sys.version_info >= (3, 11):  # pragma:no cover
     from typing import Self
 else:
     from typing_extensions import Self  # pragma:no cover
-
 import aiofiles
 import aiohttp
+
+from ..summary import DB
 
 
 class Dataset(IntEnum):
@@ -56,7 +57,9 @@ class DownloadInfo(NamedTuple):
         return dict(
             countries=[] if self.country is None else [self.country],
             cities=[] if self.city is None else [self.city],
-            properties=[] if self.pollutant is None else [self.pollutant],
+            properties=[]
+            if self.pollutant is None
+            else DB.properties(self.pollutant),
             datasets=[self.dataset],
             source=self.source,
         )

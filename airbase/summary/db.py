@@ -79,6 +79,22 @@ class DB:
             }
 
     @classmethod
+    def properties(cls, *poll: str) -> list[str]:
+        """
+        Pollutant description URLs
+
+        https://dd.eionet.europa.eu/vocabulary/aq/pollutant
+        """
+        with cls.cursor() as cur:
+            cur.execute(
+                f"""
+                SELECT definition_url FROM property
+                WHERE pollutant in ({",".join(map("'{}'".format,poll))});
+                """
+            )
+            return [url for (url,) in cur]
+
+    @classmethod
     def search_pollutant(
         cls, query: str, *, limit: int | None = None
     ) -> Iterator[Pollutant]:

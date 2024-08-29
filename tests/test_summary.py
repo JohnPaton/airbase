@@ -22,3 +22,10 @@ def test_pollutants():
     )
     for poll, id in {"PM10": 5, "O3": 7, "NO2": 8, "PM2.5": 6001}.items():
         assert pollutants.get(poll) == {id}
+
+
+def test_properties():
+    for poll, id in {"PM10": 5, "O3": 7, "NO2": 8, "PM2.5": 6001}.items():
+        assert DB.properties(poll) == [
+            f"http://dd.eionet.europa.eu/vocabulary/aq/pollutant/{id}"
+        ]
