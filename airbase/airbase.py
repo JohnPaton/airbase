@@ -47,26 +47,6 @@ class AirbaseClient:
         """All pollutants available from AirBase"""
         self._pollutants_ids = DB.pollutants()
 
-    @property
-    def all_countries(self) -> list[str]:  # pragma: no cover
-        warnings.warn(
-            f"{type(self).__qualname__}.all_countries has been deprecated and will be removed on v1. "
-            f"Use {type(self).__qualname__}.countries instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return self.countries
-
-    @property
-    def all_pollutants(self) -> dict[str, set[int]]:  # pragma: no cover
-        warnings.warn(
-            f"{type(self).__qualname__}.all_pollutants has been deprecated and will be removed on v1. "
-            f"Use {type(self).__qualname__}._pollutants_ids instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return self._pollutants_ids
-
     def request(
         self,
         country: str | list[str] | None = None,
