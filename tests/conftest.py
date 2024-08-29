@@ -4,6 +4,7 @@ import pytest
 from aioresponses import aioresponses
 
 import airbase
+from airbase.summary import DB
 from tests import resources
 
 
@@ -19,17 +20,17 @@ def mock_api(response: aioresponses):
     """mock responses from Download API entry points"""
     response.get(
         "https://eeadmz1-downloads-api-appservice.azurewebsites.net/Country",
-        body=resources.JSON_COUNTRY_RESPONSE,
+        payload=DB.country_json(),
         repeat=False,
     )
     response.get(
         "https://eeadmz1-downloads-api-appservice.azurewebsites.net/Property",
-        body=resources.JSON_PROPERTY_RESPONSE,
+        payload=DB.property_json(),
         repeat=False,
     )
     response.post(
         "https://eeadmz1-downloads-api-appservice.azurewebsites.net/City",
-        body=resources.JSON_CITY_RESPONSE,
+        payload=DB.city_json(),
         repeat=False,
     )
     response.post(

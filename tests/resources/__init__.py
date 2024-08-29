@@ -11,9 +11,6 @@ def __getattr__(name: str):
         CSV_LINKS_RESPONSE_TEXT="csv_links_response.txt",
         CSV_RESPONSE="csv_response.csv",
         METADATA_RESPONSE="metadata.tsv",
-        JSON_CITY_RESPONSE="city.json",
-        JSON_COUNTRY_RESPONSE="country.json",
-        JSON_PROPERTY_RESPONSE="property.json",
         CSV_PARQUET_URLS_RESPONSE="MT_Historical_Valletta.csv",
     )
     if name not in resource:
