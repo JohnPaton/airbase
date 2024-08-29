@@ -3,6 +3,7 @@ from __future__ import annotations
 import sys
 import warnings
 from datetime import datetime
+from itertools import chain
 from pathlib import Path
 from typing import TypedDict
 
@@ -57,7 +58,7 @@ class AirbaseClient:
         return self.countries
 
     @property
-    def all_pollutants(self) -> dict[str, str]:  # pragma: no cover
+    def all_pollutants(self) -> dict[str, set[int]]:  # pragma: no cover
         warnings.warn(
             f"{type(self).__qualname__}.all_pollutants has been deprecated and will be removed on v1. "
             f"Use {type(self).__qualname__}._pollutants_ids instead.",
@@ -159,7 +160,14 @@ class AirbaseClient:
         if pl is not None:
             pl_list = string_safe_list(pl)
             try:
-                shortpl = [self._pollutants_ids[p] for p in pl_list]
+                shortpl = list(
+                    map(
+                        str,
+                        chain.from_iterable(
+                            self._pollutants_ids[p] for p in pl_list
+                        ),
+                    )
+                )
             except KeyError as e:
                 raise ValueError(
                     f"'{e.args[0]}' is not a valid pollutant name"

@@ -49,6 +49,18 @@ FROM
     property
 ORDER BY
     length(pollutant);
+
+
+DROP VIEW IF EXISTS pollutant_ids;
+CREATE VIEW pollutant_ids AS
+SELECT DISTINCT
+    pollutant, GROUP_CONCAT(pollutant_id) AS ids
+FROM
+    property
+GROUP BY
+    pollutant
+ORDER BY
+    length(pollutant), pollutant_id;
 """
 
 INSERT_CITY_JSON = """

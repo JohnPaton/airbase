@@ -22,6 +22,11 @@ def summary() -> Path:
 class DB:
     """
     In DB containing the available country and pollutants
+
+    cached data from
+    https://eeadmz1-downloads-api-appservice.azurewebsites.net/City
+    https://eeadmz1-downloads-api-appservice.azurewebsites.net/Country
+    https://eeadmz1-downloads-api-appservice.azurewebsites.net/Property
     """
 
     db = sqlite3.connect(f"file:{summary()}?mode=ro", uri=True)
@@ -36,7 +41,7 @@ class DB:
     @classmethod
     def countries(cls) -> list[str]:
         """
-        Get the list of unique countries from the summary.
+        Unique country codes.
 
         :return: list of available country codes
         """
@@ -46,17 +51,20 @@ class DB:
             return list(row[0] for row in cur.fetchall())
 
     @classmethod
-    def pollutants(cls) -> dict[str, str]:
+    def pollutants(cls) -> dict[str, set[int]]:
         """
-        Get the list of unique pollutants from the summary.
+        Pollutant notations and unique ids.
 
         :return: The available pollutants, as a dictionary with
-        with name as keys with name as values, e.g. {"NO": "38", ...}
+        with notation as key and ID as value, e.g. {"NO": {38}, ...}
         """
 
         with cls.cursor() as cur:
-            cur.execute("SELECT pollutant, pollutant_id FROM pollutants;")
-            return dict(cur.fetchall())
+            cur.execute("SELECT pollutant, ids FROM pollutant_ids;")
+            return {
+                pollutant: set(map(int, pollutant_id.split(",")))
+                for pollutant, pollutant_id in cur.fetchall()
+            }
 
     @classmethod
     def search_pollutant(
