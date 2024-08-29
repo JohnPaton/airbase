@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import sys
-from collections import defaultdict
+from collections import Counter, defaultdict
 from contextlib import AbstractAsyncContextManager
 from itertools import product
 from pathlib import Path
@@ -18,7 +18,7 @@ import aiocache
 from tqdm.asyncio import tqdm
 
 from ..summary import COUNTRY_CODES
-from .api_client import Dataset, DownloadAPI, DownloadInfo
+from .api_client import Dataset, DownloadAPI, DownloadInfo, DownloadSummaryDict
 
 
 class DownloadSession(AbstractAsyncContextManager):
@@ -75,6 +75,39 @@ class DownloadSession(AbstractAsyncContextManager):
             cities[key].add(val)
         return cities
 
+    async def summary(
+        self,
+        *info: DownloadInfo,
+        progress: bool = False,
+        raise_for_status: bool = True,
+    ) -> DownloadSummaryDict:
+        """
+        aggregated summary from multiple requests
+
+        :param urls: info about requested urls
+        :param progress: show progress bar
+        :param raise_for_status: Raise exceptions if download links
+            return "bad" HTTP status codes. If False,
+            a :py:func:`warnings.warn` will be issued instead.
+
+        :return: total number of files and file size
+        """
+        unique_info = set(info)
+        total: Counter[str] = Counter()
+        async for summary in tqdm(
+            self.client.download_summary(
+                unique_info,
+                raise_for_status=raise_for_status,
+            ),
+            initial=len(info) - len(unique_info),
+            total=len(info),
+            leave=True,
+            disable=not progress,
+        ):
+            total.update(summary)
+
+        return dict(total)  # type:ignore[return-value]
+
     async def url_to_files(
         self,
         *info: DownloadInfo,
@@ -89,7 +122,6 @@ class DownloadSession(AbstractAsyncContextManager):
         :param raise_for_status: Raise exceptions if download links
             return "bad" HTTP status codes. If False,
             a :py:func:`warnings.warn` will be issued instead.
-        :param max_concurrent: maximum concurrent requests
 
         :return: unique file URLs among from all the responses
         """

@@ -95,6 +95,30 @@ async def test_cities_invalid_country(session: DownloadSession):
     assert not cities, "dict is not empty"
 
 
+@pytest.mark.parametrize(
+    "pollutant,country,files,size",
+    (
+        pytest.param("NO2", "DE", 1027, 1042, id="NO2-DE"),
+        pytest.param("O3", "DE", 547, 778, id="O3-DE"),
+        pytest.param("NO2", "NL", 132, 144, id="NO2-NL"),
+        pytest.param("O3", "NL", 93, 129, id="O3-NL"),
+    ),
+)
+@pytest.mark.asyncio
+async def test_summary(
+    session: DownloadSession,
+    pollutant: str,
+    country: str,
+    files: int,
+    size: int,
+):
+    async with session:
+        summary = await session.summary(
+            DownloadInfo(pollutant, country, Dataset.Historical)
+        )
+    assert summary == dict(numberFiles=files, size=size)
+
+
 @pytest.mark.asyncio
 async def test_url_to_files(session: DownloadSession):
     async with session:
