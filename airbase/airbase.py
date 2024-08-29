@@ -1,9 +1,8 @@
 from __future__ import annotations
 
 import sys
-import warnings
 from datetime import datetime
-from itertools import chain
+from itertools import chain, product
 from pathlib import Path
 from typing import TypedDict
 
@@ -19,8 +18,8 @@ from .util import link_list_url, string_safe_list
 
 
 class PollutantDict(TypedDict):
-    pl: str
-    shortpl: int
+    poll: str
+    id: int
 
 
 class AirbaseClient:
@@ -30,7 +29,7 @@ class AirbaseClient:
 
         :example:
             >>> client = AirbaseClient()
-            >>> r = client.request(["NL", "DE"], pl=["O3", "NO2"])
+            >>> r = client.request(["NL", "DE"], poll=["O3", "NO2"])
             >>> r.download_to_directory("data/raw")
             Generating CSV download links...
             100%|██████████| 4/4 [00:09<00:00,  2.64s/it]
@@ -50,8 +49,7 @@ class AirbaseClient:
     def request(
         self,
         country: str | list[str] | None = None,
-        pl: str | list[str] | None = None,
-        shortpl: str | list[str] | None = None,
+        poll: str | list[str] | None = None,
         year_from: str = "2013",
         year_to: str = CURRENT_YEAR,
         source: str = "All",
@@ -62,9 +60,9 @@ class AirbaseClient:
         """
         Initialize an AirbaseRequest for a query.
 
-        Pollutants can be specified either by name (`pl`) or by code
-        (`shortpl`). If no pollutants are specified, data for all
-        available pollutants will be requested. If a pollutant is not
+        Pollutants can be specified by name/notation (`poll`).
+        If no pollutants are specified, data for all
+        available pollutants will be requested. If a poll is not
         available for a country, then we simply do not try to download
         those CSVs.
 
@@ -79,13 +77,8 @@ class AirbaseClient:
             country. Will raise ValueError if a country is not available
             on the server. If None, data for all countries will be
             requested. See `self.all_countries`.
-        :param pl: (optional) The pollutant(s) to request data
+        :param poll: (optional) The pollutant(s) to request data
             for. Must be one of the pollutants in `self.all_pollutants`.
-            Cannot be used in conjunction with `shortpl`.
-        :param shortpl: (optional). The pollutant code(s) to
-            request data for. Will be applied to each country requested.
-            Cannot be used in conjunction with `pl`.
-            Deprecated, will be removed on v1.
         :param year_from: (optional) The first year of data. Can
             not be earlier than 2013. Default 2013.
         :param year_to: (optional) The last year of data. Can not be
@@ -108,7 +101,7 @@ class AirbaseClient:
 
         :example:
             >>> client = AirbaseClient()
-            >>> r = client.request(["NL", "DE"], pl=["O3", "NO2"])
+            >>> r = client.request(["NL", "DE"], poll=["O3", "NO2"])
             >>> r.download_to_directory("data/raw")
             Generating CSV download links...
             100%|██████████| 4/4 [00:09<00:00,  2.64s/it]
@@ -123,35 +116,27 @@ class AirbaseClient:
             country = self.countries
         else:
             country = string_safe_list(country)
-            self._validate_country(country)
-
-        if shortpl is not None:
-            warnings.warn(
-                "the shortpl option has been deprecated and will be removed on v1. "
-                "Use client.request([client._pollutants_ids[p] for p in shortpl], ...) instead.",
-                DeprecationWarning,
-                stacklevel=2,
-            )
-
-        if pl is not None and shortpl is not None:
-            raise ValueError("You cannot specify both 'pl' and 'shortpl'")
-
-        # construct shortpl form pl if applicable
-        if pl is not None:
-            pl_list = string_safe_list(pl)
-            try:
-                shortpl = list(
-                    map(
-                        str,
-                        chain.from_iterable(
-                            self._pollutants_ids[p] for p in pl_list
-                        ),
-                    )
-                )
-            except KeyError as e:
+            unknown = sorted(set(country) - set(self.countries))
+            if unknown:
                 raise ValueError(
-                    f"'{e.args[0]}' is not a valid pollutant name"
-                ) from e
+                    f"Unknown country code(s) {', '.join(unknown)}."
+                )
+
+        # construct shortpl form poll
+        shortpl: list[int] | None
+        try:
+            if poll is None:
+                shortpl = None
+            elif isinstance(poll, str):
+                shortpl = sorted(self._pollutants_ids[poll])
+            else:
+                shortpl = sorted(
+                    chain.from_iterable(self._pollutants_ids[p] for p in poll)
+                )
+        except KeyError as e:
+            raise ValueError(
+                f"'{e.args[0]}' is not a valid pollutant name"
+            ) from e
 
         return AirbaseRequest(
             country,
@@ -168,21 +153,21 @@ class AirbaseClient:
         self, query: str, limit: int | None = None
     ) -> list[PollutantDict]:
         """
-        Search for a pollutant's `shortpl` number based on its name.
+        Search for a pollutant's `id` number based on its name.
 
         :param query: The pollutant to search for.
         :param limit: (optional) Max number of results.
 
         :return: The best pollutant matches. Pollutants
-            are dicts with keys "pl" and "shortpl".
+            are dicts with keys "poll" and "id".
 
         :example:
             >>> AirbaseClient().search_pollutant("o3", limit=2)
-            >>> [{"pl": "O3", "shortpl": 7}, {"pl": "NO3", "shortpl": 46}]
+            >>> [{"poll": "O3", "id": 7}, {"poll": "NO3", "id": 46}]
 
         """
         results = DB.search_pollutant(query, limit=limit)
-        return [dict(pl=poll.notation, shortpl=poll.id) for poll in results]
+        return [dict(poll=poll.notation, id=poll.id) for poll in results]
 
     @staticmethod
     def download_metadata(filepath: str | Path, verbose: bool = True) -> None:
@@ -196,28 +181,12 @@ class AirbaseClient:
         """
         AirbaseRequest(verbose=verbose).download_metadata(filepath)
 
-    def _validate_country(self, country: str | list[str]) -> None:
-        """
-        Ensure that a country or list of countries exists on the server.
-
-        Must first download the country list using `.connect()`. Raises
-        value error if a country does not exist.
-
-        :param country: The 2-letter country code to validate.
-        """
-        country_list = string_safe_list(country)
-        for c in country_list:
-            if c not in self.countries:
-                raise ValueError(
-                    f"'{c}' is not an available 2-letter country code."
-                )
-
 
 class AirbaseRequest:
     def __init__(
         self,
         country: str | list[str] | None = None,
-        shortpl: str | list[str] | None = None,
+        shortpl: int | list[int] | None = None,
         year_from: str = "2013",
         year_to: str = CURRENT_YEAR,
         source: str = "All",
@@ -258,23 +227,20 @@ class AirbaseRequest:
             download links from the Airbase server at object
             initialization. Default False.
         """
-        self.country = country
-        self.shortpl = shortpl
+        self.counties = string_safe_list(country)
+        self.pollutants = string_safe_list(shortpl)
         self.year_from = year_from
         self.year_to = year_to
         self.source = source
         self.update_date = update_date
         self.verbose = verbose
 
-        self._country_list = string_safe_list(country)
-        self._shortpl_list = string_safe_list(shortpl)
         self._download_links = []
 
-        for c in self._country_list:
-            for p in self._shortpl_list:
-                self._download_links.append(
-                    link_list_url(c, p, year_from, year_to, source, update_date)
-                )
+        for c, p in product(self.counties, self.pollutants):
+            self._download_links.append(
+                link_list_url(c, p, year_from, year_to, source, update_date)
+            )
 
         self._csv_links: list[str] = []
 

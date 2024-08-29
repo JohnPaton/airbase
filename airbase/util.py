@@ -23,7 +23,12 @@ def string_safe_list(obj: str | Iterable[str]) -> list[str]:  # pragma: no cover
     ...
 
 
-def string_safe_list(obj: str | Iterable[str] | None) -> list[str] | list[None]:
+@overload
+def string_safe_list(obj: int | Iterable[int]) -> list[int]:  # pragma: no cover
+    ...
+
+
+def string_safe_list(obj):
     """
     Turn an (iterable) object into a list. If it is a string or not
     iterable, put the whole object into a list of length 1.
@@ -31,7 +36,7 @@ def string_safe_list(obj: str | Iterable[str] | None) -> list[str] | list[None]:
     :param obj:
     :return list:
     """
-    if isinstance(obj, str):
+    if isinstance(obj, (str, int)):
         return [obj]
     if obj is None:
         return [obj]
@@ -40,7 +45,7 @@ def string_safe_list(obj: str | Iterable[str] | None) -> list[str] | list[None]:
 
 def link_list_url(
     country: str | None,
-    shortpl: str | None = None,
+    shortpl: int | None = None,
     year_from: str = "2013",
     year_to: str = CURRENT_YEAR,
     source: str = "All",

@@ -51,32 +51,26 @@ class TestAirbaseClient:
             client.request(year_to="9999")
 
     def test_request_pl(self, client: airbase.AirbaseClient):
-        r = client.request(pl="NO")
-        assert r.shortpl is not None
-        assert len(r.shortpl) == 1
+        r = client.request(poll="NO")
+        assert r.pollutants == [38]
 
-        r = client.request(pl=["NO", "NO3"])
-        assert r.shortpl is not None
-        assert len(r.shortpl) == 2
+        r = client.request(poll=["NO", "NO3"])
+        assert r.pollutants == [38, 46]
 
         with pytest.raises(ValueError):
-            r = client.request(pl=["NO", "NO3", "Not a pl"])
+            r = client.request(poll=["NO", "NO3", "Not a pl"])
 
     def test_request_response_generated(self, client: airbase.AirbaseClient):
         r = client.request()
         assert isinstance(r, airbase.AirbaseRequest)
 
-    def test_request_not_pl_and_shortpl(self, client: airbase.AirbaseClient):
-        with pytest.raises(ValueError), pytest.warns(DeprecationWarning):
-            client.request(pl="O3", shortpl="123")
-
     def test_search_pl_exact(self, client: airbase.AirbaseClient):
         result = client.search_pollutant("NO3")
-        assert result[0]["pl"] == "NO3"
+        assert result[0]["poll"] == "NO3"
 
     def test_search_pl_shortest_first(self, client: airbase.AirbaseClient):
         result = client.search_pollutant("N")
-        names: list[str] = [r["pl"] for r in result]
+        names: list[str] = [r["poll"] for r in result]
         assert len(names[0]) <= len(names[1])
         assert len(names[0]) <= len(names[-1])
 
@@ -90,7 +84,7 @@ class TestAirbaseClient:
 
     def test_search_pl_case_insensitive(self, client: airbase.AirbaseClient):
         result = client.search_pollutant("no3")
-        assert result[0]["pl"] == "NO3"
+        assert result[0]["poll"] == "NO3"
 
 
 @pytest.mark.usefixtures("all_responses")
