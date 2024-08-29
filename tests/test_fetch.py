@@ -1,16 +1,9 @@
 from __future__ import annotations
 
-import itertools
-from pathlib import Path
-
 import aiohttp
 import pytest
 
-from airbase.fetch import (
-    fetch_json,
-    fetch_text,
-    fetch_to_file,
-)
+from airbase.fetch import fetch_json, fetch_text
 from tests.resources import CSV_LINKS_RESPONSE_TEXT
 
 JSON_PAYLOAD = [{"payload": "test"}]
@@ -81,35 +74,3 @@ def csv_urls(response):
     for url, body in urls.items():
         response.get(url=url, body=body)
     return urls
-
-
-def test_fetch_to_file(tmp_path: Path, csv_urls: dict[str, str]):
-    path = tmp_path / "single_file.test"
-    assert not path.exists()
-
-    fetch_to_file(list(csv_urls), path)
-    assert path.exists()
-
-    # drop the header and compare data rows
-    def rows(text: str) -> list[str]:
-        return text.splitlines()[1:]
-
-    data_on_file = rows(path.read_text())
-    data_rows = list(
-        itertools.chain.from_iterable(rows(text) for text in csv_urls.values())
-    )
-    assert sorted(data_on_file) == sorted(data_rows)
-
-
-def test_fetchtest_fetch_to_file_error(tmp_path: Path, bad_request_url: str):
-    path = tmp_path / "single_file.test"
-    with pytest.raises(aiohttp.ClientResponseError):
-        fetch_to_file([bad_request_url], path)
-    assert not path.exists()
-
-
-def test_fetchtest_fetch_to_file_warning(tmp_path: Path, bad_request_url: str):
-    path = tmp_path / "single_file.test"
-    with pytest.warns(RuntimeWarning):
-        fetch_to_file([bad_request_url], path, raise_for_status=False)
-    assert not path.exists()
