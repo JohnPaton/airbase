@@ -113,16 +113,16 @@ class DownloadAPI(AbstractAsyncContextManager):
         await self.session.close()
 
     @overload
-    async def __get(
+    async def _get(
         self, entry_point: Literal["/Country"], *, encoding: str | None
     ) -> list[CountryDict]: ...
 
     @overload
-    async def __get(
+    async def _get(
         self, entry_point: Literal["/Property"], *, encoding: str | None
     ) -> list[PropertyDict]: ...
 
-    async def __get(self, entry_point, *, encoding):
+    async def _get(self, entry_point, *, encoding):
         """single get request"""
         assert self.session is not None, "outside context manager"
         async with self.session.get(
@@ -133,13 +133,13 @@ class DownloadAPI(AbstractAsyncContextManager):
 
     async def country(self) -> list[CountryDict]:
         """get request to /Country end point"""
-        return await self.__get("/Country", encoding="UTF-8")
+        return await self._get("/Country", encoding="UTF-8")
 
     async def property(self) -> list[PropertyDict]:
         """get request to /Property end point"""
-        return await self.__get("/Property", encoding="UTF-8")
+        return await self._get("/Property", encoding="UTF-8")
 
-    async def __post(
+    async def _post(
         self,
         entry_point: Literal["/City"],
         data: tuple[str, ...],
@@ -156,7 +156,7 @@ class DownloadAPI(AbstractAsyncContextManager):
 
     async def city(self, data: tuple[str, ...]) -> list[CityDict]:
         """post request to /City end point"""
-        return await self.__post("/City", data, encoding="UTF-8")
+        return await self._post("/City", data, encoding="UTF-8")
 
     async def __post_multi(
         self,

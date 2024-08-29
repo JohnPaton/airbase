@@ -4,12 +4,19 @@ import sqlite3
 import sys
 from contextlib import closing, contextmanager
 from pathlib import Path
-from typing import Iterator
+from typing import TYPE_CHECKING, Iterator
 
 if sys.version_info >= (3, 11):  # pragma: no cover
     from importlib import resources
 else:  # pragma: no cover
     import importlib_resources as resources
+
+if TYPE_CHECKING:
+    from airbase.download_api.api_client import (
+        CityDict,
+        CountryDict,
+        PropertyDict,
+    )
 
 
 def summary() -> Path:
@@ -89,3 +96,41 @@ class DB:
                 """
             )
             return dict(cur.fetchall())
+
+    @classmethod
+    def city_json(cls) -> list[CityDict]:
+        """
+        simulate a request to
+        https://eeadmz1-downloads-api-appservice.azurewebsites.net/City
+        """
+        with cls.cursor() as cur:
+            cur.execute(
+                "SELECT country_code, city_name FROM city WHERE city_name IS NOT NULL;"
+            )
+            return [
+                dict(countryCode=country_code, cityName=city_name)
+                for (country_code, city_name) in cur
+            ]
+
+    @classmethod
+    def country_json(cls) -> list[CountryDict]:
+        """
+        simulate a request to
+        https://eeadmz1-downloads-api-appservice.azurewebsites.net/Country
+        """
+        with cls.cursor() as cur:
+            cur.execute("SELECT country_code FROM countries;")
+            return [dict(countryCode=country_code) for (country_code,) in cur]
+
+    @classmethod
+    def property_json(cls) -> list[PropertyDict]:
+        """
+        simulate a request to
+        https://eeadmz1-downloads-api-appservice.azurewebsites.net/Property
+        """
+        with cls.cursor() as cur:
+            cur.execute("SELECT pollutant, definition_url FROM property;")
+            return [
+                dict(notation=pollutant, id=definition_url)
+                for (pollutant, definition_url) in cur
+            ]

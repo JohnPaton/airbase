@@ -1,19 +1,44 @@
 from __future__ import annotations
 
-import json
+from typing import TYPE_CHECKING
 
 import pytest
+import pytest_asyncio
 
-from airbase.download_api.api_client import CityDict, CountryDict, PropertyDict
+from airbase.download_api import COUNTRY_CODES, DownloadAPI
 from airbase.summary import DB
-from tests import resources
+
+if TYPE_CHECKING:
+    from airbase.download_api.api_client import (
+        CityDict,
+        CountryDict,
+        PropertyDict,
+    )
 
 
-@pytest.fixture
-def country_dump() -> list[CountryDict]:
-    with DB.cursor() as cur:
-        cur.execute("SELECT country_code FROM countries;")
-        return [dict(countryCode=country_code) for (country_code,) in cur]
+@pytest.fixture(scope="module")
+def client() -> DownloadAPI:
+    return DownloadAPI()
+
+
+@pytest_asyncio.fixture(scope="module")
+async def country_json(client: DownloadAPI) -> list[CountryDict]:
+    async with client:
+        return await client._get("/Country", encoding="UTF-8")
+
+
+@pytest_asyncio.fixture(scope="module")
+async def city_json(client: DownloadAPI) -> list[CityDict]:
+    async with client:
+        return await client._post(
+            "/City", tuple(COUNTRY_CODES), encoding="UTF-8"
+        )
+
+
+@pytest_asyncio.fixture(scope="module")
+async def property_json(client: DownloadAPI) -> list[PropertyDict]:
+    async with client:
+        return await client._get("/Property", encoding="UTF-8")
 
 
 @pytest.fixture
@@ -28,30 +53,13 @@ def city_dump() -> list[CityDict]:
         ]
 
 
-@pytest.fixture
-def property_dump() -> list[PropertyDict]:
-    with DB.cursor() as cur:
-        cur.execute("SELECT pollutant, definition_url FROM property;")
-        return [
-            dict(notation=pollutant, id=definition_url)
-            for (pollutant, definition_url) in cur
-        ]
+def test_county(country_json: list[CountryDict]):
+    assert DB.country_json() == country_json
 
 
-@pytest.fixture
-def db_country() -> list[dict[str, str]]:
-    with DB.cursor() as cur:
-        cur.execute("SELECT country_code FROM countries;")
-        return [dict(ct=ct, pl=pl, shortpl=shortpl) for ct, pl, shortpl in cur]
+def test_city(city_json: list[CityDict]):
+    assert DB.city_json() == city_json
 
 
-def test_county(country_dump: list[CountryDict]):
-    assert country_dump == json.loads(resources.JSON_COUNTRY_RESPONSE)
-
-
-def test_city(city_dump: list[CityDict]):
-    assert city_dump == json.loads(resources.JSON_CITY_RESPONSE)
-
-
-def test_property(property_dump: list[PropertyDict]):
-    assert property_dump == json.loads(resources.JSON_PROPERTY_RESPONSE)
+def test_property(property_json: list[PropertyDict]):
+    assert DB.property_json() == property_json
