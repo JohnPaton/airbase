@@ -155,42 +155,6 @@ async def fetcher(
                     warnings.warn(str(e), category=RuntimeWarning)
 
 
-def fetch_unique_lines(
-    urls: list[str],
-    *,
-    encoding: str | None = None,
-    progress: bool = DEFAULT.progress,
-    raise_for_status: bool = DEFAULT.raise_for_status,
-    max_concurrent: int = DEFAULT.max_concurrent,
-) -> set[str]:
-    """Request a list of url and return only the unique lines among all the responses
-
-    :param urls: requested urls
-    :param encoding: text encoding used for decoding each response's body
-    :param progress: show progress bar
-    :param raise_for_status: Raise exceptions if download links
-        return "bad" HTTP status codes. If False,
-        a :py:func:`warnings.warn` will be issued instead.
-    :param max_concurrent: maximum concurrent requests
-
-    :return: unique lines among from all the responses
-    """
-
-    async def fetch() -> set[str]:
-        lines = set()
-        async for text in fetcher(
-            urls,
-            encoding=encoding,
-            progress=progress,
-            raise_for_status=raise_for_status,
-            max_concurrent=max_concurrent,
-        ):
-            lines.update(text.splitlines())
-        return lines
-
-    return asyncio.run(fetch())
-
-
 def fetch_to_file(
     urls: list[str],
     path: Path,

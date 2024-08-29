@@ -11,7 +11,6 @@ from airbase.fetch import (
     fetch_text,
     fetch_to_directory,
     fetch_to_file,
-    fetch_unique_lines,
 )
 from tests.resources import CSV_LINKS_RESPONSE_TEXT
 
@@ -71,27 +70,6 @@ def csv_links_url(response):
     for url in urls:
         response.get(url=url, body=CSV_LINKS_RESPONSE_TEXT)
     return urls
-
-
-def test_fetch_unique_lines(csv_links_url: list[str]):
-    lines = fetch_unique_lines(csv_links_url)
-    assert isinstance(lines, (set, list, tuple))
-    assert len(lines) > 0
-    assert len(lines) == len(set(lines))
-    assert all(isinstance(line, str) for line in lines)
-    assert not any(line == "" for line in lines)
-    assert not any("\n" in line for line in lines)
-    assert not any("\r" in line for line in lines)
-
-
-def test_fetch_unique_lines_error(bad_request_url: str):
-    with pytest.raises(aiohttp.ClientResponseError):
-        fetch_unique_lines([bad_request_url])
-
-
-def test_fetch_unique_lines_warning(bad_request_url: str):
-    with pytest.warns(RuntimeWarning):
-        fetch_unique_lines([bad_request_url], raise_for_status=False)
 
 
 def test_fetch_to_directory(tmp_path: Path, csv_urls: dict[str, str]):
