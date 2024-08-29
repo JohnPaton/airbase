@@ -75,14 +75,18 @@ class TestAirbaseClient:
 @pytest.mark.usefixtures("mock_api", "metadata_response")
 class TestAirbaseRequest:
     def test_verbose_produces_output(self, capsys, tmp_path: Path):
-        r = airbase.AirbaseRequest(airbase.Dataset.Historical, verbose=False)
+        r = airbase.AirbaseRequest(
+            airbase.Dataset.Historical, "MT", verbose=False
+        )
         r.download(tmp_path)
 
         output = capsys.readouterr()
         assert len(output.out) == 0
         assert len(output.err) == 0
 
-        r = airbase.AirbaseRequest(airbase.Dataset.Historical, verbose=True)
+        r = airbase.AirbaseRequest(
+            airbase.Dataset.Historical, "MT", verbose=True
+        )
         r.download(tmp_path)
 
         output = capsys.readouterr()
@@ -95,7 +99,7 @@ class TestAirbaseRequest:
             r.download("does/not/exist")
 
     def test_download_to_directory_files_written(self, tmp_path: Path):
-        r = airbase.AirbaseRequest(airbase.Dataset.Historical)
+        r = airbase.AirbaseRequest(airbase.Dataset.Historical, "MT")
         r.download(tmp_path)
         assert list(tmp_path.rglob("*.parquet"))
 
