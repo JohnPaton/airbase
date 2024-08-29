@@ -212,6 +212,7 @@ async def download(
     countries: list[str],
     pollutants: list[str],
     cities: list[str],
+    summary_only: bool = False,
     overwrite: bool = False,
     quiet: bool = True,
     session: DownloadSession = DownloadSession(),
@@ -247,7 +248,18 @@ async def download(
                 for pollutant, country in product(pollutants, countries)
             )
 
-        urls = await session.url_to_files(*info, progress=not quiet)
-        await session.download_to_directory(
-            root_path, *urls, skip_existing=not overwrite, progress=not quiet
-        )
+        if summary_only:
+            summary = await session.summary(*info, progress=not quiet)
+            print(
+                "found {numberFiles} file(s), ~{size} MB in total".format_map(
+                    summary
+                )
+            )
+        else:
+            urls = await session.url_to_files(*info, progress=not quiet)
+            await session.download_to_directory(
+                root_path,
+                *urls,
+                skip_existing=not overwrite,
+                progress=not quiet,
+            )

@@ -45,3 +45,40 @@ def test_download(
 
     files = set(path.name for path in tmp_path.glob(f"{country}/*.parquet"))
     assert files >= expected > set()
+
+
+@pytest.mark.parametrize(
+    "cmd,country,city,pollutant,expected",
+    (
+        pytest.param(
+            "historical", "MT", "Valletta", "PM2.5",
+            "found 1 file(s), ~0 MB in total",
+            id="historical",
+        ),
+        pytest.param(
+            "verified", "MT", "Valletta", "O3",
+            "found 2 file(s), ~1 MB in total",
+            id="verified"),
+        pytest.param(
+            "unverified", "MT", "Valletta", "PM10",
+            "found 4 file(s), ~0 MB in total",
+            id="unverified"
+        ),
+    ),
+)  # fmt:skip
+def test_summary(
+    cmd: str,
+    country: str,
+    city: str,
+    pollutant: str,
+    expected: str,
+    tmp_path: Path,
+):
+    options = f"{cmd} --quiet --country {country} --city {city} --pollutant {pollutant} --path {tmp_path} --summary"
+    with runner.isolated_filesystem(temp_dir=tmp_path):
+        result = runner.invoke(main, options.split())
+        assert result.exit_code == 0
+        assert expected in result.stdout
+
+    files = tuple(tmp_path.rglob("*.parquet"))
+    assert not files

@@ -57,6 +57,13 @@ COUNTRIES = typer.Option([], "-c", "--country")
 POLLUTANTS = typer.Option([], "-p", "--pollutant")
 CITIES = typer.Option([], "-C", "--city", help="only from selected <cities>")
 PATH = typer.Option("data", "--path", exists=True, dir_okay=True, writable=True)
+SUMMARY = typer.Option(
+    False,
+    "-n",
+    "--dry-run",
+    "--summary",
+    help="Total download files/size, nothing will be downloaded.",
+)
 OVERWRITE = typer.Option(
     False, "-O", "--overwrite", help="Re-download existing files."
 )
@@ -71,6 +78,7 @@ def historical(
     path: Path = typer.Option(
         "data/historical", "--path", exists=True, dir_okay=True, writable=True
     ),
+    summary_only: bool = SUMMARY,
     overwrite: bool = OVERWRITE,
     quiet: bool = QUIET,
 ):
@@ -84,6 +92,7 @@ def historical(
             countries=list(map(str, countries)),
             pollutants=list(map(str, pollutants)),
             cities=cities,
+            summary_only=summary_only,
             overwrite=overwrite,
             quiet=quiet,
         )
@@ -98,6 +107,7 @@ def verified(
     path: Path = typer.Option(
         "data/verified", "--path", exists=True, dir_okay=True, writable=True
     ),
+    summary_only: bool = SUMMARY,
     overwrite: bool = OVERWRITE,
     quiet: bool = QUIET,
 ):
@@ -111,6 +121,7 @@ def verified(
             countries=list(map(str, countries)),
             pollutants=list(map(str, pollutants)),
             cities=cities,
+            summary_only=summary_only,
             overwrite=overwrite,
             quiet=quiet,
         )
@@ -125,6 +136,7 @@ def unverified(
     path: Path = typer.Option(
         "data/unverified", "--path", exists=True, dir_okay=True, writable=True
     ),
+    summary_only: bool = SUMMARY,
     overwrite: bool = OVERWRITE,
     quiet: bool = QUIET,
 ):
@@ -138,6 +150,7 @@ def unverified(
             countries=list(map(str, countries)),
             pollutants=list(map(str, pollutants)),
             cities=cities,
+            summary_only=summary_only,
             overwrite=overwrite,
             quiet=quiet,
         )
