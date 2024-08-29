@@ -8,14 +8,13 @@ from pathlib import Path
 import pytest
 
 from airbase.download_api import (
-    COUNTRY_CODES,
-    POLLUTANT_NOTATIONS,
     Dataset,
     DownloadAPI,
     DownloadInfo,
     DownloadSession,
     download,
 )
+from airbase.summary import COUNTRY_CODES, POLLUTANT_NAMES
 from tests import resources
 
 
@@ -114,10 +113,10 @@ async def test_DownloadAPI_property(client: DownloadAPI):
         payload = await client.property()
 
     # some pollutants have more than one ID
-    assert len(payload) >= len(POLLUTANT_NOTATIONS)
+    assert len(payload) >= len(POLLUTANT_NAMES)
 
     notations = set(pollutant["notation"] for pollutant in payload)
-    assert notations == POLLUTANT_NOTATIONS
+    assert notations == POLLUTANT_NAMES
 
 
 @pytest.mark.asyncio
@@ -181,7 +180,7 @@ async def test_DownloadSession_pollutants(session: DownloadSession):
     async with session:
         pollutants = await session.pollutants()
 
-    assert pollutants.keys() == POLLUTANT_NOTATIONS
+    assert pollutants.keys() == POLLUTANT_NAMES
 
     ids = tuple(chain.from_iterable(pollutants.values()))
     assert len(ids) == len(set(ids)) == 648

@@ -8,12 +8,11 @@ import pytest
 import pytest_asyncio
 
 from airbase.download_api import (
-    COUNTRY_CODES,
-    POLLUTANT_NOTATIONS,
     Dataset,
     DownloadInfo,
     DownloadSession,
 )
+from airbase.summary import COUNTRY_CODES, POLLUTANT_IDS, POLLUTANT_NAMES
 from tests import resources
 
 
@@ -43,21 +42,16 @@ async def country_cities(
 
 
 @pytest.mark.asyncio
-async def test_COUNTRY_CODES(countries: list[str]):
-    assert COUNTRY_CODES == set(countries)
-
-
-@pytest.mark.asyncio
-async def test_POLLUTANT_NOTATIONS(pollutants: dict[str, set[str]]):
-    assert POLLUTANT_NOTATIONS == pollutants.keys()
+async def test_countries(countries: list[str]):
+    assert set(countries) == COUNTRY_CODES
 
 
 @pytest.mark.asyncio
 async def test_pollutants(pollutants: dict[str, set[str]]):
-    assert len(pollutants) >= 469, "too few pollutants"
-
+    assert pollutants.keys() == POLLUTANT_NAMES, "pollutant names changed"
     ids = tuple(chain.from_iterable(pollutants.values()))
-    assert len(ids) == len(set(ids)) >= 648, "too few IDs"
+    assert set(ids) == POLLUTANT_IDS, "duplicated pollutant IDs"
+    assert len(ids) == len(set(ids)), "duplicated pollutant IDs"
 
     for poll, id in {"PM10": 5, "O3": 7, "NO2": 8, "SO2": 1}.items():
         assert pollutants.get(poll) == {id}, f"unknown {poll} {id=}"

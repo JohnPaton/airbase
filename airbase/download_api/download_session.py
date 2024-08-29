@@ -17,8 +17,8 @@ else:
 import aiocache
 from tqdm.asyncio import tqdm
 
+from ..summary import COUNTRY_CODES
 from .api_client import Dataset, DownloadAPI, DownloadInfo
-from .api_info import COUNTRY_CODES
 
 
 class DownloadSession(AbstractAsyncContextManager):

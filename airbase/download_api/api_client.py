@@ -16,7 +16,6 @@ if sys.version_info >= (3, 11):  # pragma:no cover
 else:
     from typing_extensions import Self  # pragma:no cover
 
-
 import aiofiles
 import aiohttp
 

@@ -4,11 +4,8 @@ import json
 import subprocess
 from pathlib import Path
 
-from airbase.download_api import (
-    COUNTRY_CODES,
-    Dataset,
-    DownloadInfo,
-)
+from airbase.download_api import Dataset, DownloadInfo
+from airbase.summary import COUNTRY_CODES
 
 BASE_URL = "https://eeadmz1-downloads-api-appservice.azurewebsites.net"
 
