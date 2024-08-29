@@ -4,7 +4,7 @@ import sqlite3
 import sys
 from contextlib import closing, contextmanager
 from pathlib import Path
-from typing import TYPE_CHECKING, Iterator
+from typing import TYPE_CHECKING, Iterator, NamedTuple
 
 if sys.version_info >= (3, 11):  # pragma: no cover
     from importlib import resources
@@ -24,6 +24,11 @@ def summary() -> Path:
     path: Path
     with resources.as_file(source) as path:
         return path
+
+
+class Pollutant(NamedTuple):
+    notation: str
+    id: int
 
 
 class DB:
@@ -69,14 +74,14 @@ class DB:
         with cls.cursor() as cur:
             cur.execute("SELECT pollutant, ids FROM pollutant_ids;")
             return {
-                pollutant: set(map(int, pollutant_id.split(",")))
-                for pollutant, pollutant_id in cur.fetchall()
+                pollutant: set(map(int, ids.split(",")))
+                for pollutant, ids in cur.fetchall()
             }
 
     @classmethod
     def search_pollutant(
         cls, query: str, *, limit: int | None = None
-    ) -> dict[str, int]:
+    ) -> Iterator[Pollutant]:
         """
         Search for a pollutant's ID number based on its name.
 
@@ -84,7 +89,7 @@ class DB:
         :param limit: (optional) Max number of results.
 
         :return: The best pollutant matches, as a dictionary with
-        with name as keys with name as values, e.g. {"NO": 38, ...}
+        with name as keys with name as values, e.g. {"NO": {38}, ...}
         """
 
         with cls.cursor() as cur:
@@ -95,7 +100,8 @@ class DB:
                 {f"LIMIT {limit}" if limit else ""};
                 """
             )
-            return dict(cur.fetchall())
+            for pollutant, pollutant_id in cur.fetchall():
+                yield Pollutant(pollutant, pollutant_id)
 
     @classmethod
     def city_json(cls) -> list[CityDict]:

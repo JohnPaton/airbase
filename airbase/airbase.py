@@ -198,11 +198,11 @@ class AirbaseClient:
 
         :example:
             >>> AirbaseClient().search_pollutant("o3", limit=2)
-            >>> [{"pl": "O3", "shortpl": "7"}, {"pl": "NO3", "shortpl": "46"}]
+            >>> [{"pl": "O3", "shortpl": 7}, {"pl": "NO3", "shortpl": 46}]
 
         """
         results = DB.search_pollutant(query, limit=limit)
-        return [dict(pl=pl, shortpl=id) for pl, id in results.items()]
+        return [dict(pl=poll.notation, shortpl=poll.id) for poll in results]
 
     @staticmethod
     def download_metadata(filepath: str | Path, verbose: bool = True) -> None:

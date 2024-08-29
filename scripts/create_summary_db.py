@@ -48,7 +48,7 @@ SELECT DISTINCT
 FROM
     property
 ORDER BY
-    length(pollutant);
+    length(pollutant), pollutant_id;
 
 
 DROP VIEW IF EXISTS pollutant_ids;
