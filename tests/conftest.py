@@ -3,7 +3,7 @@ import re
 import pytest
 from aioresponses import aioresponses
 
-import airbase
+from airbase.resources import METADATA_URL
 from airbase.summary import DB
 from tests import resources
 
@@ -21,17 +21,14 @@ def mock_api(response: aioresponses):
     response.get(
         "https://eeadmz1-downloads-api-appservice.azurewebsites.net/Country",
         payload=DB.country_json(),
-        repeat=False,
     )
     response.get(
         "https://eeadmz1-downloads-api-appservice.azurewebsites.net/Property",
         payload=DB.property_json(),
-        repeat=False,
     )
     response.post(
         "https://eeadmz1-downloads-api-appservice.azurewebsites.net/City",
         payload=DB.city_json(),
-        repeat=False,
     )
     response.post(
         "https://eeadmz1-downloads-api-appservice.azurewebsites.net/ParquetFile/urls",
@@ -49,6 +46,6 @@ def mock_api(response: aioresponses):
 def metadata_response(response: aioresponses):
     """mock response from metadata url"""
     response.get(
-        airbase.resources.METADATA_URL,
+        METADATA_URL,
         body=resources.METADATA_RESPONSE,
     )
