@@ -9,7 +9,6 @@ import pytest
 from airbase.fetch import (
     fetch_json,
     fetch_text,
-    fetch_to_directory,
     fetch_to_file,
 )
 from tests.resources import CSV_LINKS_RESPONSE_TEXT
@@ -70,26 +69,6 @@ def csv_links_url(response):
     for url in urls:
         response.get(url=url, body=CSV_LINKS_RESPONSE_TEXT)
     return urls
-
-
-def test_fetch_to_directory(tmp_path: Path, csv_urls: dict[str, str]):
-    assert not list(tmp_path.glob("*"))
-    fetch_to_directory(list(csv_urls), tmp_path)
-    assert len(list(tmp_path.glob("*"))) == len(csv_urls)
-    paths = (tmp_path / Path(url).name for url in csv_urls)
-    assert all(path.exists() for path in paths)
-
-
-def test_fetch_to_directory_error(tmp_path: Path, bad_request_url: str):
-    with pytest.raises(aiohttp.ClientResponseError):
-        fetch_to_directory([bad_request_url], tmp_path)
-    assert not list(tmp_path.glob("*"))
-
-
-def test_fetch_to_directory_warning(tmp_path: Path, bad_request_url: str):
-    with pytest.warns(RuntimeWarning):
-        fetch_to_directory([bad_request_url], tmp_path, raise_for_status=False)
-    assert not list(tmp_path.glob("*"))
 
 
 @pytest.fixture
