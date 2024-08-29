@@ -3,7 +3,7 @@ from __future__ import annotations
 import aiohttp
 import pytest
 
-from airbase.fetch import fetch_json, fetch_text
+from airbase.fetch import fetch_text
 from tests.resources import CSV_LINKS_RESPONSE_TEXT
 
 JSON_PAYLOAD = [{"payload": "test"}]
@@ -32,15 +32,6 @@ def bad_request_url(response):
     url = "https:/echo.test/bad_request"
     response.get(url=url, status=400)
     yield url
-
-
-def test_fetch_json(json_url: str):
-    assert fetch_json(json_url) == JSON_PAYLOAD
-
-
-def test_fetch_json_error(bad_request_url: str):
-    with pytest.raises(aiohttp.ClientResponseError):
-        fetch_json(bad_request_url)
 
 
 def test_fetch_text(text_url: str):

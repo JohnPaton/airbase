@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import asyncio
-import json
 import warnings
 from pathlib import Path
 from types import SimpleNamespace
@@ -45,28 +44,6 @@ def fetch_text(
 
     text = asyncio.run(fetch())
     return text
-
-
-def fetch_json(
-    url: str,
-    *,
-    timeout: float | None = None,
-    encoding: str | None = None,
-) -> list[dict[str, str]]:
-    """Request url and read response’s body as JSON
-
-    :param url: requested url
-    :param timeout: maximum time to complete request (seconds)
-    :param encoding: text encoding used for decoding the response's body
-
-    :return: decoded text from response's body as JSON
-    """
-    text = fetch_text(url, timeout=timeout, encoding=encoding)
-    payload: dict[str, str] | list[dict[str, str]]
-    payload = json.loads(text)
-    if isinstance(payload, dict):
-        return [payload]
-    return payload
 
 
 @overload
