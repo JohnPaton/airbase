@@ -21,7 +21,7 @@ def main(output_file, retries, ignore_errors=False):
     print(f"Will output bad links to {output_file}")
 
     client = ab.AirbaseClient()
-    req = client.request(preload_csv_links=True)  # get links to all files
+    req = client.request(preload_urls=True)  # get links to all files
     session = requests.Session()  # reuse HTTP connections
 
     # Define inside main to re-use Session

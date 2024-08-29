@@ -6,17 +6,17 @@ from airbase import util
 class TestStringSafeList:
     def test_string(self):
         input = "a string"
-        output = [input]
+        output = (input,)
         assert util.string_safe_list(input) == output
 
     def test_list(self):
         input = [1, 2, 3]
-        output = input
+        output = tuple(input)
         assert util.string_safe_list(input) == output
 
     def test_none(self):
         input = None
-        output = [input]
+        output = tuple()
         assert util.string_safe_list(input) == output
 
 

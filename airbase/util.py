@@ -14,17 +14,21 @@ from .resources import (
 
 
 @overload
-def string_safe_list(obj: None) -> list[None]:  # pragma: no cover
+def string_safe_list(obj: None) -> tuple[()]:  # pragma: no cover
     ...
 
 
 @overload
-def string_safe_list(obj: str | Iterable[str]) -> list[str]:  # pragma: no cover
+def string_safe_list(
+    obj: str | Iterable[str],
+) -> tuple[str, ...]:  # pragma: no cover
     ...
 
 
 @overload
-def string_safe_list(obj: int | Iterable[int]) -> list[int]:  # pragma: no cover
+def string_safe_list(
+    obj: int | Iterable[int],
+) -> tuple[int, ...]:  # pragma: no cover
     ...
 
 
@@ -36,11 +40,11 @@ def string_safe_list(obj):
     :param obj:
     :return list:
     """
-    if isinstance(obj, (str, int)):
-        return [obj]
     if obj is None:
-        return [obj]
-    return list(obj)
+        return tuple()
+    if isinstance(obj, (str, int)):
+        return (obj,)
+    return tuple(obj)
 
 
 def link_list_url(

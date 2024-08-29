@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import sys
 from collections import Counter, defaultdict
+from collections.abc import Iterable
 from contextlib import AbstractAsyncContextManager
 from itertools import product
 from pathlib import Path
@@ -209,12 +210,13 @@ async def download(
     dataset: Dataset,
     root_path: Path,
     *,
-    countries: list[str],
-    pollutants: list[str],
-    cities: list[str],
+    countries: Iterable[str],
+    pollutants: Iterable[str],
+    cities: Iterable[str],
     summary_only: bool = False,
     overwrite: bool = False,
     quiet: bool = True,
+    raise_for_status: bool = False,
     session: DownloadSession = DownloadSession(),
 ):
     """
@@ -249,17 +251,33 @@ async def download(
             )
 
         if summary_only:
-            summary = await session.summary(*info, progress=not quiet)
+            if not quiet:
+                print("Collecting download info...", file=sys.stderr)
+            summary = await session.summary(
+                *info, progress=not quiet, raise_for_status=raise_for_status
+            )
             print(
                 "found {numberFiles} file(s), ~{size} MB in total".format_map(
                     summary
                 )
             )
         else:
-            urls = await session.url_to_files(*info, progress=not quiet)
+            if not quiet:
+                print("Collecting download URLs...", file=sys.stderr)
+            urls = await session.url_to_files(
+                *info, progress=not quiet, raise_for_status=raise_for_status
+            )
+            if not quiet:
+                print(
+                    f"Collected {len(urls)} URLs ready for download",
+                    file=sys.stderr,
+                )
             await session.download_to_directory(
                 root_path,
                 *urls,
                 skip_existing=not overwrite,
                 progress=not quiet,
+                raise_for_status=raise_for_status,
             )
+            if not quiet:
+                print(f"Downloading to {root_path}...", file=sys.stderr)

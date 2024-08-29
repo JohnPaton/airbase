@@ -1,20 +1,15 @@
 from __future__ import annotations
 
+import asyncio
 import sys
-from datetime import datetime
-from itertools import chain, product
 from pathlib import Path
-from typing import TypedDict
+from typing import Iterable, Literal, TypedDict
 
-from .fetch import (
-    fetch_text,
-    fetch_to_directory,
-    fetch_to_file,
-    fetch_unique_lines,
-)
-from .resources import CURRENT_YEAR, METADATA_URL
+from .download_api import Dataset, DownloadSession, download
+from .fetch import fetch_text
+from .resources import METADATA_URL
 from .summary import DB
-from .util import link_list_url, string_safe_list
+from .util import string_safe_list
 
 
 class PollutantDict(TypedDict):
@@ -29,33 +24,29 @@ class AirbaseClient:
 
         :example:
             >>> client = AirbaseClient()
-            >>> r = client.request(["NL", "DE"], poll=["O3", "NO2"])
+            >>> r = client.request("Historical", "NL", "DE", poll=["O3", "NO2"])
             >>> r.download_to_directory("data/raw")
-            Generating CSV download links...
+            Collecting download URLs...
             100%|██████████| 4/4 [00:09<00:00,  2.64s/it]
-            Generated 5164 CSV links ready for downloading
-            Downloading CSVs to data/raw...
+            Collected 5164 URLs ready for download
+            Downloading to data/raw...
             100%|██████████| 5164/5164 [43:39<00:00,  1.95it/s]
             >>> r.download_metadata("data/metadata.tsv")
             Writing metadata to data/metadata.tsv...
         """
 
         """All countries available from AirBase"""
-        self.countries = DB.countries()
+        self.countries = set(DB.countries())
 
         """All pollutants available from AirBase"""
-        self._pollutants_ids = DB.pollutants()
+        self.pollutants = set(DB.pollutants())
 
     def request(
         self,
-        country: str | list[str] | None = None,
-        poll: str | list[str] | None = None,
-        year_from: str = "2013",
-        year_to: str = CURRENT_YEAR,
-        source: str = "All",
-        update_date: str | datetime | None = None,
+        source: Literal["Historical", "Verified", "Unverified"] | Dataset,
+        *countries: str,
+        poll: str | Iterable[str] | None = None,
         verbose: bool = True,
-        preload_csv_links: bool = False,
     ) -> AirbaseRequest:
         """
         Initialize an AirbaseRequest for a query.
@@ -64,90 +55,78 @@ class AirbaseClient:
         If no pollutants are specified, data for all
         available pollutants will be requested. If a poll is not
         available for a country, then we simply do not try to download
-        those CSVs.
+        those parquet files.
 
-        Requests proceed in two steps: First, links to individual CSVs
-        are requested from the Airbase server. Then these links are
-        used to download the individual CSVs.
+        Requests proceed in two steps: First, URLs to individual parquet files
+        are requested from the EEA server. Then these links are
+        used to download the individual parquet files.
 
-        See http://discomap.eea.europa.eu/map/fme/AirQualityExport.htm.
+        See https://eeadmz1-downloads-webapp.azurewebsites.net/
 
-        :param country: (optional), 2-letter country code or a
-            list of them. If a list, data will be requested for each
-            country. Will raise ValueError if a country is not available
-            on the server. If None, data for all countries will be
-            requested. See `self.all_countries`.
-        :param poll: (optional) The pollutant(s) to request data
-            for. Must be one of the pollutants in `self.all_pollutants`.
-        :param year_from: (optional) The first year of data. Can
-            not be earlier than 2013. Default 2013.
-        :param year_to: (optional) The last year of data. Can not be
-            later than the current year. Default <current year>.
-        :param source: (optional) One of "E1a", "E2a" or "All". E2a
-            (UTD) data are only available for years where E1a data have
-            not yet been delivered (this will normally be the most
-            recent year). Default "All".
-        :param update_date: (optional). Format
-            "yyyy-mm-dd hh:mm:ss". To be used when only files created or
-            updated after a certain date is of interest.
+        :param source: One of 3 options. `"Historical"` data delivered
+            between 2002 and 2012, before Air Quality Directive 2008/50/EC entered into force.
+            `"Verified"` data (E1a) from 2013 to 2022 reported by countries
+            by 30 September each year for the previous year.
+            `"Unverified"` data transmitted continuously (Up-To-Date/UTD/E2a),
+            from the beginning of 2023.
+        :param countries: (optional), 2-letter country codes.
+            Data will be requested for each country.
+            Will raise ValueError if a country is not in `self.countries`.
+            If no countries are provided, data for all countries will be
+            requested.
+        :param poll: (optional) pollutant(s) to request data
+            for. Must be one of the pollutants in `self.pollutants`.
         :param verbose: (optional) print status messages to stderr.
             Default True.
-        :param preload_csv_links: (optional) Request all the csv
-            download links from the Airbase server at object
-            initialization. Default False.
+        :param preload_urls: (optional) Request all the file URLs
+            from the EEA server at object initialization. Default False.
 
         :return AirbaseRequest:
             The initialized AirbaseRequest.
 
         :example:
             >>> client = AirbaseClient()
-            >>> r = client.request(["NL", "DE"], poll=["O3", "NO2"])
+            >>> r = client.request("Historical", "NL", "DE", poll=["O3", "NO2"])
             >>> r.download_to_directory("data/raw")
-            Generating CSV download links...
+            Collecting download URLs...
             100%|██████████| 4/4 [00:09<00:00,  2.64s/it]
-            Generated 5164 CSV links ready for downloading
-            Downloading CSVs to data/raw...
+            Collected 5164 URLs ready for download
+            Downloading to data/raw...
             100%|██████████| 5164/5164 [43:39<00:00,  1.95it/s]
             >>> r.download_metadata("data/metadata.tsv")
             Writing metadata to data/metadata.tsv...
         """
-        # validation
-        if country is None:
-            country = self.countries
+        # country validation
+        if not countries:
+            countries = tuple(self.countries)
         else:
-            country = string_safe_list(country)
-            unknown = sorted(set(country) - set(self.countries))
+            countries = string_safe_list(countries)
+            unknown = sorted(set(countries) - set(self.countries))
             if unknown:
                 raise ValueError(
                     f"Unknown country code(s) {', '.join(unknown)}."
                 )
 
-        # construct shortpl form poll
-        shortpl: list[int] | None
-        try:
-            if poll is None:
-                shortpl = None
-            elif isinstance(poll, str):
-                shortpl = sorted(self._pollutants_ids[poll])
-            else:
-                shortpl = sorted(
-                    chain.from_iterable(self._pollutants_ids[p] for p in poll)
+        # poll validation
+        if isinstance(poll, str) and poll not in self.pollutants:
+            raise ValueError(f"'{poll}' is not a valid pollutant name")
+        if isinstance(poll, list):
+            unknown = sorted(set(poll) - set(self.pollutants))
+            if unknown:
+                raise ValueError(
+                    f"Unknown pollutant name(s) {', '.join(unknown)}."
                 )
-        except KeyError as e:
-            raise ValueError(
-                f"'{e.args[0]}' is not a valid pollutant name"
-            ) from e
 
-        return AirbaseRequest(
-            country,
-            shortpl,
-            year_from,
-            year_to,
-            source,
-            update_date,
-            verbose,
-            preload_csv_links,
-        )
+        # source validation
+        if isinstance(source, str):
+            try:
+                source = Dataset[source]
+            except KeyError as e:  # pragma: no cover
+                raise ValueError(
+                    f"'{e.args[0]}' is not a valid source name"
+                ) from e
+
+        return AirbaseRequest(source, *countries, poll=poll, verbose=verbose)
 
     def search_pollutant(
         self, query: str, limit: int | None = None
@@ -179,108 +158,54 @@ class AirbaseClient:
         :param filepath:
         :param verbose:
         """
-        AirbaseRequest(verbose=verbose).download_metadata(filepath)
+        AirbaseRequest(
+            Dataset.Historical,
+            verbose=verbose,
+        ).download_metadata(filepath)
 
 
 class AirbaseRequest:
+    session = DownloadSession()
+
     def __init__(
         self,
-        country: str | list[str] | None = None,
-        shortpl: int | list[int] | None = None,
-        year_from: str = "2013",
-        year_to: str = CURRENT_YEAR,
-        source: str = "All",
-        update_date: str | datetime | None = None,
+        source: Dataset,
+        *country: str,
+        poll: str | Iterable[str] | None = None,
         verbose: bool = True,
-        preload_csv_links: bool = False,
     ) -> None:
         """
         Handler for Airbase data requests.
 
-        Requests proceed in two steps: First, links to individual CSVs
-        are requested from the Airbase server. Then these links are
-        used to download the individual CSVs.
+        Requests proceed in two steps: First, URLs to individual parquet files
+        are requested from the EEA server. Then these links are
+        used to download the individual parquet files.
 
-        See http://discomap.eea.europa.eu/map/fme/AirQualityExport.htm.
+        See https://eeadmz1-downloads-webapp.azurewebsites.net/
 
+        :param source: One of 3 options. `airbase.Dataset.Historical` data delivered
+            between 2002 and 2012, before Air Quality Directive 2008/50/EC entered into force.
+            `airbase.Dataset.Verified` data (E1a) from 2013 to 2022 reported by countries
+            by 30 September each year for the previous year.
+            `airbase.Dataset.Unverified` data transmitted continuously (Up-To-Date/UTD/E2a),
+            from the beginning of 2023.
         :param country: 2-letter country code or a list of
             them. If a list, data will be requested for each country.
-        :param shortpl: (optional). The pollutant code to
-            request data for. Will be applied to each country requested.
-            If None, all available pollutants will be requested. If a
-            pollutant is not available for a country, then we simply
-            do not try to download those CSVs.
-        :param year_from: (optional) The first year of data. Can
-            not be earlier than 2013. Default 2013.
-        :param year_to: (optional) The last year of data. Can not be
-            later than the current year. Default <current year>.
-        :param source: (optional) One of "E1a", "E2a" or "All". E2a
-            (UTD) data are only available for years where E1a data have
-            not yet been delivered (this will normally be the most
-            recent year). Default "All".
-        :param update_date: (optional). Format
-            "yyyy-mm-dd hh:mm:ss". To be used when only files created or
-            updated after a certain date is of interest.
+        :param poll: (optional) pollutant(s) to request data
+            for. Will be applied to each country requested.
+            If None, all available pollutants will be requested.
         :param bool verbose: (optional) print status messages to stderr.
             Default True.
-        :param bool preload_csv_links: (optional) Request all the csv
+        :param bool preload_urls: (optional) Request all the csv
             download links from the Airbase server at object
             initialization. Default False.
         """
-        self.counties = string_safe_list(country)
-        self.pollutants = string_safe_list(shortpl)
-        self.year_from = year_from
-        self.year_to = year_to
         self.source = source
-        self.update_date = update_date
+        self.counties = country
+        self.pollutants = string_safe_list(poll)
         self.verbose = verbose
 
-        self._download_links = []
-
-        for c, p in product(self.counties, self.pollutants):
-            self._download_links.append(
-                link_list_url(c, p, year_from, year_to, source, update_date)
-            )
-
-        self._csv_links: list[str] = []
-
-        if preload_csv_links:
-            self._get_csv_links()
-
-    def _get_csv_links(self, force: bool = False) -> None:
-        """
-        Request all relevant CSV links from the server.
-
-        This can take some time (several minutes for the entire set).
-        This action will only be performed once, unless `force` is set
-        to True.
-
-        :param force: Re-download all of the links, even if they
-            are already known
-        """
-        if self._csv_links and not force:
-            return
-
-        if self.verbose:
-            print("Generating CSV download links...", file=sys.stderr)
-
-        # set of links (no duplicates)
-        csv_links = fetch_unique_lines(
-            self._download_links,
-            progress=self.verbose,
-            encoding="utf-8-sig",
-        )
-
-        # list of links (no duplicates)
-        self._csv_links = list(csv_links)
-
-        if self.verbose:
-            print(
-                f"Generated {len(self._csv_links):,} CSV links ready for downloading",
-                file=sys.stderr,
-            )
-
-    def download_to_directory(
+    def download(
         self,
         dir: str | Path,
         skip_existing: bool = True,
@@ -304,52 +229,17 @@ class AirbaseRequest:
         if not dir.is_dir():
             raise NotADirectoryError(f"{dir.resolve()} is not a directory.")
 
-        self._get_csv_links()
-
-        if self.verbose:
-            print(f"Downloading CSVs to {dir}...", file=sys.stderr)
-
-        fetch_to_directory(
-            self._csv_links,
-            dir,
-            skip_existing=skip_existing,
-            progress=self.verbose,
-            raise_for_status=raise_for_status,
-        )
-
-        return self
-
-    def download_to_file(
-        self, filepath: str | Path, raise_for_status: bool = True
-    ) -> AirbaseRequest:
-        """
-        Download data into one large CSV.
-
-        Directory where the new CSV will be created must exist.
-
-        :param filepath: The path to the new CSV.
-        :param raise_for_status: (optional) Raise exceptions if
-            download links return "bad" HTTP status codes. If False,
-            a :py:func:`warnings.warn` will be issued instead. Default True.
-
-        :return: self
-        """
-        self._get_csv_links()
-
-        # ensure the path is valid
-        filepath = Path(filepath)
-        if not filepath.parent.is_dir():
-            raise NotADirectoryError(
-                f"{filepath.parent.resolve()} does not exist."
+        asyncio.run(
+            download(
+                self.source,
+                dir,
+                countries=self.counties,
+                pollutants=self.pollutants,
+                cities=tuple(),
+                overwrite=not skip_existing,
+                quiet=not self.verbose,
+                raise_for_status=raise_for_status,
             )
-
-        if self.verbose:
-            print(f"Writing data to {filepath}...", file=sys.stderr)
-        fetch_to_file(
-            self._csv_links,
-            filepath,
-            progress=self.verbose,
-            raise_for_status=raise_for_status,
         )
 
         return self

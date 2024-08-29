@@ -36,7 +36,7 @@ def mock_api(response: aioresponses):
     response.post(
         "https://eeadmz1-downloads-api-appservice.azurewebsites.net/ParquetFile/urls",
         body=resources.CSV_PARQUET_URLS_RESPONSE,
-        repeat=False,
+        repeat=True,
     )
     response.get(
         re.compile(r"https://.*/../.*\.parquet"),  # any parquet file
