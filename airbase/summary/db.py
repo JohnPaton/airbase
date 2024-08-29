@@ -79,12 +79,13 @@ class DB:
             }
 
     @classmethod
-    def properties(cls, *poll: str) -> list[str]:
+    def properties(cls, *pollutants: str) -> list[str]:
         """
         Pollutant description URLs
 
         https://dd.eionet.europa.eu/vocabulary/aq/pollutant
         """
+        poll = (name.replace("'", "''") for name in pollutants)
         with cls.cursor() as cur:
             cur.execute(
                 f"""
