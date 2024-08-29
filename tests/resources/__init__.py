@@ -9,7 +9,6 @@ else:
 def __getattr__(name: str):
     resource = dict(
         CSV_LINKS_RESPONSE_TEXT="csv_links_response.txt",
-        CSV_RESPONSE="csv_response.csv",
         METADATA_RESPONSE="metadata.tsv",
         CSV_PARQUET_URLS_RESPONSE="MT_Historical_Valletta.csv",
     )
