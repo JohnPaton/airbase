@@ -1,5 +1,0 @@
-https://ereporting.blob.core.windows.net/downloadservice/BE_5_40550_2013_timeseries.csv
-https://ereporting.blob.core.windows.net/downloadservice/BE_5_40550_2013_timeseries.csv
-https://ereporting.blob.core.windows.net/downloadservice/BE_5_41743_2013_timeseries.csv
-https://ereporting.blob.core.windows.net/downloadservice/BE_5_41743_2013_timeseries.csv
-https://ereporting.blob.core.windows.net/downloadservice/BE_5_41226_2013_timeseries.csv

@@ -46,19 +46,6 @@ def mock_api(response: aioresponses):
 
 
 @pytest.fixture()
-def csv_links_response(response: aioresponses):
-    """mock response from station data links url"""
-    response.get(
-        re.compile(
-            r"http://fme\.discomap\.eea\.europa\.eu/fmedatastreaming/"
-            r"AirQualityDownload/AQData_Extract\.fmw.*"
-        ),
-        body=resources.CSV_LINKS_RESPONSE_TEXT,
-        repeat=True,
-    )
-
-
-@pytest.fixture()
 def metadata_response(response: aioresponses):
     """mock response from metadata url"""
     response.get(
