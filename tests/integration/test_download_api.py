@@ -24,13 +24,13 @@ def session() -> DownloadSession:
 @pytest_asyncio.fixture
 async def countries(session: DownloadSession) -> list[str]:
     async with session:
-        return list(await session.countries())
+        return list(await session.countries)
 
 
 @pytest_asyncio.fixture
 async def pollutants(session: DownloadSession) -> dict[str, set[int]]:
     async with session:
-        return dict(await session.pollutants())
+        return dict(await session.pollutants)
 
 
 @pytest_asyncio.fixture

@@ -169,7 +169,7 @@ async def test_DownloadAPI_download_binary_files(
 @pytest.mark.asyncio
 async def test_DownloadSession_country(session: DownloadSession):
     async with session:
-        country_codes = await session.countries()
+        country_codes = await session.countries
 
     assert len(country_codes) == len(set(country_codes)) == len(COUNTRY_CODES)
     assert set(country_codes) == COUNTRY_CODES
@@ -178,7 +178,7 @@ async def test_DownloadSession_country(session: DownloadSession):
 @pytest.mark.asyncio
 async def test_DownloadSession_pollutants(session: DownloadSession):
     async with session:
-        pollutants = await session.pollutants()
+        pollutants = await session.pollutants
 
     assert pollutants.keys() == POLLUTANT_NAMES
 

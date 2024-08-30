@@ -55,7 +55,7 @@ sqlite_cache = true
 exclude = "docs|scripts|build"
 
 [[tool.mypy.overrides]]
-module = ["tqdm.*", "aiocache"]
+module = ["tqdm.*", "async_property"]
 ignore_missing_imports = true
 
 [tool.tox]

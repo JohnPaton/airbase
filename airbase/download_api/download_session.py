@@ -14,7 +14,7 @@ else:
     from typing_extensions import Self  # pragma:no cover
 
 
-import aiocache
+from async_property import async_cached_property
 from tqdm.asyncio import tqdm
 
 from ..summary import COUNTRY_CODES
@@ -40,13 +40,13 @@ class DownloadSession(AbstractAsyncContextManager):
     ) -> None:
         await self.client.__aexit__(exc_type, exc_val, exc_tb)
 
-    @aiocache.cached()
+    @async_cached_property
     async def countries(self) -> list[str]:
         """request country codes from API"""
         payload = await self.client.country()
         return [country["countryCode"] for country in payload]
 
-    @aiocache.cached()
+    @async_cached_property
     async def pollutants(self) -> defaultdict[str, set[int]]:
         """requests pollutants id and notation from API"""
 
@@ -57,7 +57,6 @@ class DownloadSession(AbstractAsyncContextManager):
             ids[key].add(val)
         return ids
 
-    @aiocache.cached()
     async def cities(self, *countries: str) -> defaultdict[str, set[str]]:
         """city names id and notation from API"""
         if not COUNTRY_CODES.issuperset(countries):
@@ -243,7 +242,7 @@ async def download(
         else:
             # one request for each country/pollutant
             if not countries:
-                countries = set(await session.countries())
+                countries = set(await session.countries)
             if not pollutants:
                 pollutants = {None}  # type:ignore[arg-type]
 
