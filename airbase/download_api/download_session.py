@@ -240,13 +240,20 @@ async def download(
                 )
             )
         else:
-            urls = await session.url_to_files(
-                *info, progress=not quiet, raise_for_status=raise_for_status
-            )
-            await session.download_to_directory(
-                root_path,
-                *urls,
-                skip_existing=not overwrite,
-                progress=not quiet,
-                raise_for_status=raise_for_status,
-            )
+            async for urls in tqdm(
+                session.client.download_urls(
+                    unique := set(info),
+                    raise_for_status=raise_for_status,
+                ),
+                total=len(unique),
+                leave=True,
+                disable=quiet,
+                desc="generate",
+            ):
+                await session.download_to_directory(
+                    root_path,
+                    *urls,
+                    skip_existing=not overwrite,
+                    progress=not quiet,
+                    raise_for_status=raise_for_status,
+                )
