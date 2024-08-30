@@ -90,19 +90,22 @@ class DownloadAPI(AbstractAsyncContextManager):
     def __init__(
         self,
         *,
-        custom_base_url: str | None = None,
         timeout: float | None = None,
         max_concurrent: int = 10,
     ) -> None:
         self.timeout = timeout
         self.max_concurrent = max_concurrent
         self.session: aiohttp.ClientSession | None = None
+        self.semaphore: asyncio.Semaphore | None = None
 
     async def __aenter__(self) -> Self:
         self.session = aiohttp.ClientSession(
-            connector=aiohttp.TCPConnector(limit=self.max_concurrent),
+            connector=aiohttp.TCPConnector(
+                ssl=False, limit=self.max_concurrent
+            ),
             timeout=aiohttp.ClientTimeout(self.timeout),
         )
+        self.semaphore = asyncio.Semaphore(self.max_concurrent)
         return self
 
     async def __aexit__(
@@ -113,6 +116,7 @@ class DownloadAPI(AbstractAsyncContextManager):
     ) -> None:
         assert self.session is not None, "outside context manager"
         await self.session.close()
+        self.session = self.semaphore = None
 
     @overload
     async def _get(
@@ -127,9 +131,7 @@ class DownloadAPI(AbstractAsyncContextManager):
     async def _get(self, entry_point, *, encoding):
         """single get request"""
         assert self.session is not None, "outside context manager"
-        async with self.session.get(
-            self.base_url + entry_point, ssl=False
-        ) as r:
+        async with self.session.get(self.base_url + entry_point) as r:
             r.raise_for_status()
             return await r.json(encoding=encoding)
 
@@ -151,7 +153,7 @@ class DownloadAPI(AbstractAsyncContextManager):
         """single post request"""
         assert self.session is not None, "outside context manager"
         async with self.session.post(
-            self.base_url + entry_point, json=data, ssl=False
+            self.base_url + entry_point, json=data
         ) as r:
             r.raise_for_status()
             return await r.json(encoding=encoding)  # type:ignore[no-any-return]
@@ -169,19 +171,19 @@ class DownloadAPI(AbstractAsyncContextManager):
         raise_for_status: bool,
     ) -> AsyncIterator[str]:
         """multiple post requests in parallel"""
+        assert self.session is not None, "outside context manager"
 
-        async def fetch(info: DownloadInfo) -> str:
+        async def fetch(
+            info: DownloadInfo, *, session=aiohttp.ClientSession
+        ) -> str:
             """retrieve text, nothing more"""
-            assert self.session is not None, "outside context manager"
-            async with self.session.post(
-                self.base_url + entry_point,
-                json=info.request_info(),
-                ssl=False,
+            async with session.post(
+                self.base_url + entry_point, json=info.request_info()
             ) as r:
                 r.raise_for_status()
                 return await r.text(encoding=encoding)  # type:ignore[no-any-return]
 
-        jobs = tuple(fetch(info) for info in urls)
+        jobs = tuple(fetch(info, session=self.session) for info in urls)
         for result in asyncio.as_completed(jobs):
             try:
                 yield await result
@@ -245,19 +247,30 @@ class DownloadAPI(AbstractAsyncContextManager):
 
         :return: path to downloaded text, one by one as the requests are completed
         """
+        assert self.session is not None, "outside context manager"
+        assert self.semaphore is not None, "outside context manager"
 
-        async def download(url: str, path: Path) -> Path:
+        async def download(
+            url: str,
+            path: Path,
+            *,
+            semaphore: asyncio.Semaphore,
+            session: aiohttp.ClientSession,
+        ) -> Path:
             """retrieve binary and write into path"""
-            assert self.session is not None, "outside context manager"
-            async with self.session.get(url, ssl=False) as r:
-                r.raise_for_status()
-                payload = await r.read()
+            async with semaphore:
+                async with session.get(url) as r:
+                    r.raise_for_status()
+                    payload = await r.read()
                 async with aiofiles.open(path, mode="wb") as f:
                     await f.write(payload)
 
             return path
 
-        jobs = tuple(download(url, path) for url, path in urls.items())
+        jobs = tuple(
+            download(url, path, semaphore=self.semaphore, session=self.session)
+            for url, path in urls.items()
+        )
         for result in asyncio.as_completed(jobs):
             try:
                 yield await result
