@@ -85,13 +85,16 @@ class DB:
 
         https://dd.eionet.europa.eu/vocabulary/aq/pollutant
         """
-        poll = (name.replace("'", "''") for name in pollutants)
+        if not pollutants:
+            return []
+
         with cls.cursor() as cur:
             cur.execute(
                 f"""
                 SELECT definition_url FROM property
-                WHERE pollutant in ({",".join(map("'{}'".format,poll))});
-                """
+                WHERE pollutant in ({",".join("?"*len(pollutants))});
+                """,
+                pollutants,
             )
             return [url for (url,) in cur]
 
@@ -113,9 +116,10 @@ class DB:
             cur.execute(
                 f"""
                 SELECT pollutant, pollutant_id FROM pollutants
-                WHERE pollutant LIKE '%{query}%'
+                WHERE pollutant LIKE ?
                 {f"LIMIT {limit}" if limit else ""};
-                """
+                """,
+                (f"%{query}%",),
             )
             for pollutant, pollutant_id in cur.fetchall():
                 yield Pollutant(pollutant, pollutant_id)
