@@ -220,7 +220,7 @@ async def download(
     session: DownloadSession = DownloadSession(),
 ):
     """
-    request file urls by pollutant/country[/city] and download unique files
+    request file urls by [country|city]/pollutant and download unique files
     """
     async with session:
         if cities:
@@ -232,7 +232,7 @@ async def download(
                 pollutants = [None]  # type:ignore[list-item]
 
             info = (
-                DownloadInfo(pollutant, country, dataset, city)
+                DownloadInfo(country, dataset, pollutant, city)
                 for pollutant, country, city in product(
                     pollutants, countries, cities
                 )
@@ -246,7 +246,7 @@ async def download(
                 pollutants = list(await session.pollutants())
 
             info = (
-                DownloadInfo(pollutant, country, dataset)
+                DownloadInfo(country, dataset, pollutant)
                 for pollutant, country in product(pollutants, countries)
             )
 

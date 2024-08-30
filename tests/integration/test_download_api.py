@@ -114,7 +114,7 @@ async def test_summary(
 ):
     async with session:
         summary = await session.summary(
-            DownloadInfo(pollutant, country, Dataset.Historical)
+            DownloadInfo(country, Dataset.Historical, pollutant)
         )
     assert summary == dict(numberFiles=files, size=size)
 
@@ -123,7 +123,7 @@ async def test_summary(
 async def test_url_to_files(session: DownloadSession):
     async with session:
         urls = await session.url_to_files(
-            DownloadInfo(None, "MT", Dataset.Historical, "Valletta")
+            DownloadInfo("MT", Dataset.Historical, None, "Valletta")
         )
     regex = re.compile(r"https://.*/MT/.*\.parquet")
     for url in urls:

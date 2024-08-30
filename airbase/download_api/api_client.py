@@ -47,15 +47,15 @@ class DownloadInfo(NamedTuple):
     the request can be further restricted with the `city` param
     """
 
-    pollutant: str | None
-    country: str | None
+    country: str
     dataset: Dataset
+    pollutant: str | None = None
     city: str | None = None
     source: str = "API"  # for EEA internal use
 
     def request_info(self) -> dict[str, list[str] | list[Dataset] | str]:
         return dict(
-            countries=[] if self.country is None else [self.country],
+            countries=[self.country],
             cities=[] if self.city is None else [self.city],
             properties=[]
             if self.pollutant is None

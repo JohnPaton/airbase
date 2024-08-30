@@ -73,7 +73,7 @@ def test_DownloadInfo(
     assert (
         json.dumps(
             DownloadInfo(
-                pollutant, country, Dataset.Historical, city
+                country, Dataset.Historical, pollutant, city
             ).request_info()
         )
         == historical
@@ -81,7 +81,7 @@ def test_DownloadInfo(
     assert (
         json.dumps(
             DownloadInfo(
-                pollutant, country, Dataset.Verified, city
+                country, Dataset.Verified, pollutant, city
             ).request_info()
         )
         == verified
@@ -89,7 +89,7 @@ def test_DownloadInfo(
     assert (
         json.dumps(
             DownloadInfo(
-                pollutant, country, Dataset.Unverified, city
+                country, Dataset.Unverified, pollutant, city
             ).request_info()
         )
         == unverified
@@ -134,7 +134,7 @@ async def test_DownloadAPI_city(client: DownloadAPI):
 
 @pytest.mark.asyncio
 async def test_DownloadAPI_download_urls(client: DownloadAPI):
-    info = DownloadInfo(None, "MT", Dataset.Historical, "Valletta")
+    info = DownloadInfo("MT", Dataset.Historical, None, "Valletta")
     async with client:
         async for urls in client.download_urls({info}, raise_for_status=True):
             pass
@@ -210,7 +210,7 @@ async def test_DownloadSession_city(session: DownloadSession):
 
 @pytest.mark.asyncio
 async def test_DownloadSession_url_to_files(session: DownloadSession):
-    info = DownloadInfo(None, "MT", Dataset.Historical, "Valletta")
+    info = DownloadInfo("MT", Dataset.Historical, None, "Valletta")
     async with session:
         urls = await session.url_to_files(info)
 
