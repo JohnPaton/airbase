@@ -195,8 +195,8 @@ class AirbaseRequest:
             initialization. Default False.
         """
         self.source = source
-        self.counties = country
-        self.pollutants = string_safe_list(poll)
+        self.counties = set(country)
+        self.pollutants = set(string_safe_list(poll))
         self.verbose = verbose
 
     def download(
@@ -229,7 +229,6 @@ class AirbaseRequest:
                 dir,
                 countries=self.counties,
                 pollutants=self.pollutants,
-                cities=tuple(),
                 overwrite=not skip_existing,
                 quiet=not self.verbose,
                 raise_for_status=raise_for_status,

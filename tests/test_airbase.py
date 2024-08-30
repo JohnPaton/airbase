@@ -37,10 +37,10 @@ class TestAirbaseClient:
 
     def test_request_pl(self, client: airbase.AirbaseClient):
         r = client.request("Historical", poll="NO")
-        assert r.pollutants == ("NO",)
+        assert r.pollutants == {"NO"}
 
         r = client.request("Historical", poll=["NO", "NO3"])
-        assert r.pollutants == ("NO", "NO3")
+        assert r.pollutants == {"NO", "NO3"}
 
         with pytest.raises(ValueError):
             r = client.request("Historical", poll=["NO", "NO3", "Not a pl"])

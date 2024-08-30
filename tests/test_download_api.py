@@ -240,9 +240,8 @@ async def test_download(tmp_path: Path, session: DownloadSession):
     await download(
         Dataset.Historical,
         tmp_path,
-        countries=["MT"],
-        pollutants=[],
-        cities=["Valletta"],
+        countries={"MT"},
+        cities={"Valletta"},
         session=session,
     )
     assert len(tuple(tmp_path.glob("MT/*.parquet"))) == 22

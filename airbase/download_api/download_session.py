@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import sys
 from collections import Counter, defaultdict
-from collections.abc import Iterable
 from contextlib import AbstractAsyncContextManager
 from itertools import product
 from pathlib import Path
@@ -213,9 +212,9 @@ async def download(
     dataset: Dataset,
     root_path: Path,
     *,
-    countries: Iterable[str],
-    pollutants: Iterable[str],
-    cities: Iterable[str],
+    countries: set[str],
+    pollutants: set[str] | None = None,
+    cities: set[str] | None = None,
     summary_only: bool = False,
     overwrite: bool = False,
     quiet: bool = True,
@@ -223,16 +222,16 @@ async def download(
     session: DownloadSession = DownloadSession(),
 ):
     """
-    request file urls by [country|city]/pollutant and download unique files
+    request file urls by country[|city]/pollutant and download unique files
     """
     async with session:
         if cities:
-            # one request for each country/pollutant/city
+            # one request for each city/pollutant
             country_cities = await session.cities(*countries)
             if not countries:
-                countries = list(country_cities)
+                countries = set(country_cities)
             if not pollutants:
-                pollutants = [None]  # type:ignore[list-item]
+                pollutants = {None}  # type:ignore[arg-type]
 
             info = (
                 DownloadInfo(country, dataset, pollutant, city)
@@ -244,9 +243,9 @@ async def download(
         else:
             # one request for each country/pollutant
             if not countries:
-                countries = list(await session.countries())
+                countries = set(await session.countries())
             if not pollutants:
-                pollutants = list(await session.pollutants())
+                pollutants = {None}  # type:ignore[arg-type]
 
             info = (
                 DownloadInfo(country, dataset, pollutant)
