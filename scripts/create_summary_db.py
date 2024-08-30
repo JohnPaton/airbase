@@ -17,7 +17,7 @@ CREATE_DB = """
 DROP TABLE IF EXISTS city;
 CREATE TABLE city (
     country_code TEXT NOT NULL,
-    city_name    INTEGER,
+    city_name    TEXT,
     UNIQUE (country_code, city_name)
 );
 
@@ -63,8 +63,13 @@ ORDER BY
     length(pollutant), pollutant_id;
 """
 
+INSERT_COUNTRY_JSON = """
+INSERT OR IGNORE INTO city (country_code, city_name)
+VALUES (:countryCode, NULL);
+"""
+
 INSERT_CITY_JSON = """
-INSERT OR REPLACE INTO city (country_code, city_name)
+INSERT OR IGNORE INTO city (country_code, city_name)
 VALUES (:countryCode, :cityName);
 """
 
@@ -75,21 +80,19 @@ VALUES (:notation, :id, :url);
 
 
 def main(db_path: Path = Path("airbase/summary/summary.sqlite")):
-    country = country_json()
-    country_codes = set(country["countryCode"] for country in country)
-
-    city = city_json(*country_codes)
-    country_codes -= set(country["countryCode"] for country in city)
-    for country_code in sorted(country_codes):
-        city.append(dict(countryCode=country_code, cityName=None))  # type:ignore[typeddict-item]
-
-    property = property_json()
-    for poll in property:
-        poll.update(url=poll["id"], id=pollutant_id_from_url(poll["id"]))  # type:ignore[call-arg]
-
     with sqlite3.connect(db_path) as db, closing(db.cursor()) as cur:
+        # recreate tables and views
         cur.executescript(CREATE_DB)
-        cur.executemany(INSERT_CITY_JSON, city)
+
+        # populate city table
+        for country in country_json():
+            cur.execute(INSERT_COUNTRY_JSON, country)
+            cur.executemany(INSERT_CITY_JSON, city_json(country["countryCode"]))
+
+        # populate property table
+        property = property_json()
+        for poll in property:
+            poll.update(url=poll["id"], id=pollutant_id_from_url(poll["id"]))  # type:ignore[call-arg]
         cur.executemany(INSERT_PROPERTY_JSON, property)
 
 
