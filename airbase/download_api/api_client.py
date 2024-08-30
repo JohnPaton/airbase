@@ -3,7 +3,7 @@ from __future__ import annotations
 import asyncio
 import json
 import sys
-from collections.abc import AsyncIterator
+from collections.abc import AsyncIterator, Iterator
 from contextlib import AbstractAsyncContextManager
 from enum import IntEnum
 from pathlib import Path
@@ -18,7 +18,7 @@ else:
 import aiofiles
 import aiohttp
 
-from ..summary import DB
+from ..summary import COUNTRY_CODES, DB
 
 
 class Dataset(IntEnum):
@@ -40,11 +40,33 @@ class Dataset(IntEnum):
     def __str__(self) -> str:  # pragma:no cover
         return self.name
 
+    def by_city(
+        self, *cities, pollutant: set[str] | None = None
+    ) -> Iterator[DownloadInfo]:
+        """download info one city at the time"""
+        for city in cities:
+            if (country := DB.search_city(city)) is None:
+                warn(f"Unknown {city=}, skip", UserWarning, stacklevel=-2)
+                continue
+
+            yield DownloadInfo(country, self, pollutant, city)
+
+    def by_country(
+        self, *countries, pollutant: set[str] | None = None
+    ) -> Iterator[DownloadInfo]:
+        """download info one country at the time"""
+        for country in countries:
+            if country not in COUNTRY_CODES:
+                warn(f"Unknown {country=}, skip", UserWarning, stacklevel=-2)
+                continue
+
+            yield DownloadInfo(country, self, pollutant)
+
 
 class DownloadInfo(NamedTuple):
     """
-    info needed for requesting the URLs for one pollutant from one country and dataset
-    the request can be further restricted with the `city` param
+    info needed for requesting the URLs for country and dataset
+    the request can be further restricted with the `pollutant` and `city` param
     """
 
     country: str

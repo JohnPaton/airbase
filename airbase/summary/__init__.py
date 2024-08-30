@@ -7,6 +7,11 @@ from .db import DB
 __all__ = ["DB", "COUNTRY_CODES", "POLLUTANT_NAMES", "POLLUTANT_IDS"]
 
 
+COUNTRY_CODES: set[str]
+POLLUTANT_NAMES: set[str]
+POLLUTANT_IDS: set[int]
+
+
 def __getattr__(name: str):
     if name == "COUNTRY_CODES":
         return set(DB.countries())

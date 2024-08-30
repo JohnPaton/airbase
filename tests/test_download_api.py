@@ -40,6 +40,59 @@ def test_Dataset():
 
 
 @pytest.mark.parametrize(
+    "city,country,pollutant",
+    (
+        pytest.param("Reykjavik", "IS", {"PM10", "NO"}, id="Reykjavik"),
+        pytest.param("Oslo", "NO", set(), id="Oslo"),
+        pytest.param("Göteborg", "SE", None, id="Göteborg"),
+    ),
+)
+def test_Dataset_by_city(
+    city: str,
+    country: str,
+    pollutant: set[str] | None,
+    dataset: Dataset = Dataset.Historical,
+):
+    assert list(dataset.by_city(city, pollutant=pollutant)) == [
+        DownloadInfo(country, dataset, pollutant, city)
+    ]
+
+
+def test_Dataset_by_city_warning(
+    city: str = "Bad City Name",
+    dataset: Dataset = Dataset.Historical,
+):
+    with pytest.warns(UserWarning, match=rf"Unknown city='{city}'"):
+        assert not list(dataset.by_city(city))
+
+
+@pytest.mark.parametrize(
+    "country,pollutant",
+    (
+        pytest.param("IS", {"PM10", "NO"}, id="IS"),
+        pytest.param("NO", set(), id="NO"),
+        pytest.param("SE", None, id="SE"),
+    ),
+)
+def test_Dataset_by_country(
+    country: str,
+    pollutant: set[str] | None,
+    dataset: Dataset = Dataset.Historical,
+):
+    assert list(dataset.by_country(country, pollutant=pollutant)) == [
+        DownloadInfo(country, dataset, pollutant)
+    ]
+
+
+def test_Dataset_by_country_warning(
+    country: str = "Bad City Name",
+    dataset: Dataset = Dataset.Historical,
+):
+    with pytest.warns(UserWarning, match=rf"Unknown country='{country}'"):
+        assert not list(dataset.by_country(country))
+
+
+@pytest.mark.parametrize(
     "pollutant,country,city,historical,verified,unverified",
     (
         pytest.param(
@@ -62,7 +115,7 @@ def test_Dataset():
         ),
     ),
 )
-def test_DownloadInfo(
+def test_DownloadInfo_request_info(
     pollutant: str,
     country: str,
     city: str | None,

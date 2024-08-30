@@ -3,7 +3,6 @@ from __future__ import annotations
 import sys
 from collections import Counter, defaultdict
 from contextlib import AbstractAsyncContextManager
-from itertools import product
 from pathlib import Path
 from types import TracebackType
 from warnings import warn
@@ -221,30 +220,16 @@ async def download(
     session: DownloadSession = DownloadSession(),
 ):
     """
-    request file urls by country[|city]/pollutant and download unique files
+    request file urls by country|[city]/pollutant and download unique files
     """
+    if cities:  # one request for each city/pollutant
+        info = dataset.by_city(*cities, pollutant=pollutants)
+    else:  # one request for each country/pollutant
+        if not countries:
+            countries = COUNTRY_CODES
+        info = dataset.by_country(*countries, pollutant=pollutants)
+
     async with session:
-        if cities:
-            # one request for each city/pollutant
-            country_cities = await session.cities(*countries)
-            if not countries:
-                countries = set(country_cities)
-
-            info = (
-                DownloadInfo(country, dataset, pollutants, city)
-                for country, city in product(countries, cities)
-                if city in country_cities[country]
-            )
-        else:
-            # one request for each country/pollutant
-            if not countries:
-                countries = set(await session.countries)
-
-            info = (
-                DownloadInfo(country, dataset, pollutants)
-                for country in countries
-            )
-
         if summary_only:
             summary = await session.summary(
                 *info, progress=not quiet, raise_for_status=raise_for_status
