@@ -125,6 +125,24 @@ class DB:
                 yield Pollutant(pollutant, pollutant_id)
 
     @classmethod
+    def search_city(cls, city: str) -> str | None:
+        """
+        Search for a country code from city name
+
+        :param city: City name.
+
+        :return: country code, e.g. "NO" for "Oslo"
+        """
+
+        with cls.cursor() as cur:
+            cur.execute(
+                "SELECT country_code FROM city WHERE city_name IS ?;",
+                (city,),
+            )
+            row: tuple[str] | None = cur.fetchone()
+            return None if row is None else row[0]
+
+    @classmethod
     def city_json(cls) -> list[CityDict]:
         """
         simulate a request to

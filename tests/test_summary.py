@@ -48,3 +48,24 @@ def test_properties(poll: str, ids: set[str]):
             sorted(ids),
         )
     )
+
+
+CITY_COUNTRY = {
+    "Tromsø": "NO",
+    "Reykjavik": "IS",
+    "Göteborg": "SE",
+    "Frankfurt am Main": "DE",
+    "": None,
+    "...": None,
+}
+
+
+@pytest.mark.parametrize(
+    "city,country",
+    (
+        pytest.param(city, country, id=city)
+        for city, country in CITY_COUNTRY.items()
+    ),
+)
+def test_search_city(city: str, country: str | None):
+    assert DB.search_city(city) == country
