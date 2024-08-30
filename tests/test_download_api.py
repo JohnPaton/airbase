@@ -15,7 +15,7 @@ from airbase.download_api import (
     download,
 )
 from airbase.summary import COUNTRY_CODES, POLLUTANT_NAMES
-from tests import resources
+from tests.resources import CSV_PARQUET_URLS_RESPONSE
 
 
 @pytest.fixture
@@ -226,7 +226,7 @@ async def test_DownloadSession_download_to_directory(
     tmp_path: Path, session: DownloadSession
 ):
     assert not tuple(tmp_path.glob("??/*.parquet"))
-    urls = tuple(resources.CSV_PARQUET_URLS_RESPONSE.splitlines())[-5:]
+    urls = tuple(CSV_PARQUET_URLS_RESPONSE.splitlines())[-5:]
     async with session:
         await session.download_to_directory(
             tmp_path, *urls, raise_for_status=True

@@ -5,6 +5,9 @@ if sys.version_info >= (3, 11):
 else:
     import importlib_resources as resources
 
+METADATA_RESPONSE: str
+CSV_PARQUET_URLS_RESPONSE: str
+
 
 def __getattr__(name: str):
     resource = dict(
