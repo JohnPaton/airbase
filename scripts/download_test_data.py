@@ -13,7 +13,7 @@ def main(data_path: Path = Path("tests/resources")):
     if data_path.exists() and not data_path.is_dir():
         raise NotADirectoryError(f"{data_path} should be a directory")
 
-    info = DownloadInfo(None, "MT", Dataset.Historical, "Valletta")
+    info = DownloadInfo("MT", Dataset.Historical, city="Valletta")
     path = data_path / f"{info.country}_{info.dataset}_{info.city}.csv"
     print(f"download {path}")
     cmd = (
