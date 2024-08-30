@@ -26,11 +26,8 @@ class AirbaseClient:
             >>> client = AirbaseClient()
             >>> r = client.request("Historical", "NL", "DE", poll=["O3", "NO2"])
             >>> r.download_to_directory("data/raw")
-            Collecting download URLs...
-            100%|██████████| 4/4 [00:09<00:00,  2.64s/it]
-            Collected 5164 URLs ready for download
-            Downloading to data/raw...
-            100%|██████████| 5164/5164 [43:39<00:00,  1.95it/s]
+            generate: 100%|██████████| 4/4 [00:09<00:00,  2.64s/it]
+            download: 100%|██████████| 1799/1799 [43:39<00:00,  1.95it/s]
             >>> r.download_metadata("data/metadata.tsv")
             Writing metadata to data/metadata.tsv...
         """
@@ -88,11 +85,8 @@ class AirbaseClient:
             >>> client = AirbaseClient()
             >>> r = client.request("Historical", "NL", "DE", poll=["O3", "NO2"])
             >>> r.download_to_directory("data/raw")
-            Collecting download URLs...
-            100%|██████████| 4/4 [00:09<00:00,  2.64s/it]
-            Collected 5164 URLs ready for download
-            Downloading to data/raw...
-            100%|██████████| 5164/5164 [43:39<00:00,  1.95it/s]
+            generate: 100%|██████████| 4/4 [00:09<00:00,  2.64s/it]
+            download: 100%|██████████| 1799/1799 [43:39<00:00,  1.95it/s]
             >>> r.download_metadata("data/metadata.tsv")
             Writing metadata to data/metadata.tsv...
         """

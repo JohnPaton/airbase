@@ -104,6 +104,7 @@ class DownloadSession(AbstractAsyncContextManager):
             total=len(info),
             leave=True,
             disable=not progress,
+            desc="totalize",
         ):
             total.update(summary)
 
@@ -137,6 +138,7 @@ class DownloadSession(AbstractAsyncContextManager):
             total=len(info),
             leave=True,
             disable=not progress,
+            desc="generate",
         ):
             unique_urls.update(urls)
         return unique_urls
@@ -191,6 +193,7 @@ class DownloadSession(AbstractAsyncContextManager):
             total=len(urls),
             leave=True,
             disable=not progress,
+            desc="download",
         ):
             assert path.is_file(), f"missing {path.name}"
 
@@ -251,27 +254,18 @@ async def download(
             )
 
         if summary_only:
-            if not quiet:
-                print("Collecting download info...", file=sys.stderr)
             summary = await session.summary(
                 *info, progress=not quiet, raise_for_status=raise_for_status
             )
             print(
-                "found {numberFiles} file(s), ~{size} MB in total".format_map(
+                "found {numberFiles:_} file(s), ~{size:_} MB in total".format_map(
                     summary
                 )
             )
         else:
-            if not quiet:
-                print("Collecting download URLs...", file=sys.stderr)
             urls = await session.url_to_files(
                 *info, progress=not quiet, raise_for_status=raise_for_status
             )
-            if not quiet:
-                print(
-                    f"Collected {len(urls)} URLs ready for download",
-                    file=sys.stderr,
-                )
             await session.download_to_directory(
                 root_path,
                 *urls,
@@ -279,5 +273,3 @@ async def download(
                 progress=not quiet,
                 raise_for_status=raise_for_status,
             )
-            if not quiet:
-                print(f"Downloading to {root_path}...", file=sys.stderr)
