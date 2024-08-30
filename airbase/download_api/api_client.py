@@ -49,9 +49,12 @@ class DownloadInfo(NamedTuple):
 
     country: str
     dataset: Dataset
-    pollutant: str | None = None
+    pollutant: set[str] | None = None
     city: str | None = None
     source: str = "API"  # for EEA internal use
+
+    def __hash__(self) -> int:
+        return hash(str(self))
 
     def request_info(self) -> dict[str, list[str] | list[Dataset] | str]:
         return dict(
@@ -59,7 +62,7 @@ class DownloadInfo(NamedTuple):
             cities=[] if self.city is None else [self.city],
             properties=[]
             if self.pollutant is None
-            else DB.properties(self.pollutant),
+            else DB.properties(*self.pollutant),
             datasets=[self.dataset],
             source=self.source,
         )

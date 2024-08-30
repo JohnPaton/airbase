@@ -229,26 +229,20 @@ async def download(
             country_cities = await session.cities(*countries)
             if not countries:
                 countries = set(country_cities)
-            if not pollutants:
-                pollutants = {None}  # type:ignore[arg-type]
 
             info = (
-                DownloadInfo(country, dataset, pollutant, city)
-                for pollutant, country, city in product(
-                    pollutants, countries, cities
-                )
+                DownloadInfo(country, dataset, pollutants, city)
+                for country, city in product(countries, cities)
                 if city in country_cities[country]
             )
         else:
             # one request for each country/pollutant
             if not countries:
                 countries = set(await session.countries)
-            if not pollutants:
-                pollutants = {None}  # type:ignore[arg-type]
 
             info = (
-                DownloadInfo(country, dataset, pollutant)
-                for pollutant, country in product(pollutants, countries)
+                DownloadInfo(country, dataset, pollutants)
+                for country in countries
             )
 
         if summary_only:

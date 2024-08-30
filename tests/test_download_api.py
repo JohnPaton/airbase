@@ -73,7 +73,7 @@ def test_DownloadInfo(
     assert (
         json.dumps(
             DownloadInfo(
-                country, Dataset.Historical, pollutant, city
+                country, Dataset.Historical, {pollutant}, city
             ).request_info()
         )
         == historical
@@ -81,7 +81,7 @@ def test_DownloadInfo(
     assert (
         json.dumps(
             DownloadInfo(
-                country, Dataset.Verified, pollutant, city
+                country, Dataset.Verified, {pollutant}, city
             ).request_info()
         )
         == verified
@@ -89,7 +89,7 @@ def test_DownloadInfo(
     assert (
         json.dumps(
             DownloadInfo(
-                country, Dataset.Unverified, pollutant, city
+                country, Dataset.Unverified, {pollutant}, city
             ).request_info()
         )
         == unverified
