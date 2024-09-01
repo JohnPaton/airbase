@@ -109,7 +109,7 @@ class DB:
         :param limit: (optional) Max number of results.
 
         :return: The best pollutant matches, as a dictionary with
-        with name as keys with name as values, e.g. {"NO": {38}, ...}
+        with notation as keys with IDs as values, e.g. {"NO": {38}, ...}
         """
 
         with cls.cursor() as cur:
