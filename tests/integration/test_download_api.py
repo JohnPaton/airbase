@@ -121,10 +121,12 @@ async def test_summary(
 
 @pytest.mark.asyncio
 async def test_url_to_files(session: DownloadSession):
+    info = DownloadInfo("MT", Dataset.Historical, city="Valletta")
     async with session:
-        urls = await session.url_to_files(
-            DownloadInfo("MT", Dataset.Historical, city="Valletta")
-        )
+        async for urls in session.url_to_files(info):
+            pass
+
+    assert urls
     regex = re.compile(r"https://.*/MT/.*\.parquet")
     for url in urls:
         assert regex.match(url) is not None, f"wrong {url=} start"
@@ -136,7 +138,5 @@ async def test_download_to_directory(session: DownloadSession, tmp_path: Path):
     assert not tuple(tmp_path.glob("??/*.parquet"))
     urls = tuple(resources.CSV_PARQUET_URLS_RESPONSE.splitlines())[-5:]
     async with session:
-        await session.download_to_directory(
-            tmp_path, *urls, raise_for_status=True
-        )
+        await session.download_to_directory(tmp_path, *urls)
     assert len(tuple(tmp_path.glob("??/*.parquet"))) == len(urls) == 5

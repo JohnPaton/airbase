@@ -25,9 +25,9 @@ def client(mock_api) -> DownloadAPI:
 
 
 @pytest.fixture
-def session(client: DownloadAPI) -> DownloadSession:
+def session(mock_api) -> DownloadSession:
     """DownloadSession with loaded mocks"""
-    return DownloadSession(custom_client=client)
+    return DownloadSession()
 
 
 def test_Dataset():
@@ -265,7 +265,8 @@ async def test_DownloadSession_city(session: DownloadSession):
 async def test_DownloadSession_url_to_files(session: DownloadSession):
     info = DownloadInfo("MT", Dataset.Historical, None, "Valletta")
     async with session:
-        urls = await session.url_to_files(info)
+        async for urls in session.url_to_files(info):
+            pass
 
     assert urls
     regex = re.compile(rf"https://.*/{info.country}/.*\.parquet")
@@ -281,9 +282,7 @@ async def test_DownloadSession_download_to_directory(
     assert not tuple(tmp_path.glob("??/*.parquet"))
     urls = tuple(CSV_PARQUET_URLS_RESPONSE.splitlines())[-5:]
     async with session:
-        await session.download_to_directory(
-            tmp_path, *urls, raise_for_status=True
-        )
+        await session.download_to_directory(tmp_path, *urls)
     assert len(tuple(tmp_path.glob("??/*.parquet"))) == len(urls) == 5
 
 

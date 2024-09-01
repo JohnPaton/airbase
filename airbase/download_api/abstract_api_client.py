@@ -37,12 +37,13 @@ class DownloadSummaryDict(TypedDict):
     size: int
 
 
-DownloadSummaryResponse: TypeAlias = "list[DownloadSummaryDict]"
+DownloadSummaryResponse: TypeAlias = DownloadSummaryDict
 
 
 class ParquetDataDict(TypedDict):
     countries: list[str]
     cities: list[str]
+    properties: list[str]
     datasets: list[int]
     source: str
 
@@ -58,7 +59,7 @@ class PropertyDict(TypedDict):
 PropertyResponse: TypeAlias = "list[PropertyDict]"
 
 
-class AbstractAPIClient(AbstractAsyncContextManager):
+class AbstractClient(AbstractAsyncContextManager):
     """
     ABC for requests to Parquet downloads API v1
     https://eeadmz1-downloads-api-appservice.azurewebsites.net/swagger/index.html

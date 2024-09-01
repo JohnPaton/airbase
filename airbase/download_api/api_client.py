@@ -15,10 +15,12 @@ if sys.version_info >= (3, 11):  # pragma:no cover
     from typing import Self
 else:
     from typing_extensions import Self  # pragma:no cover
+
 import aiofiles
 import aiohttp
 
 from ..summary import COUNTRY_CODES, DB
+from .abstract_api_client import ParquetDataRequest
 
 
 class Dataset(IntEnum):
@@ -78,7 +80,7 @@ class DownloadInfo(NamedTuple):
     def __hash__(self) -> int:
         return hash(str(self))
 
-    def request_info(self) -> dict[str, list[str] | list[Dataset] | str]:
+    def request_info(self) -> ParquetDataRequest:
         return dict(
             countries=[self.country],
             cities=[] if self.city is None else [self.city],

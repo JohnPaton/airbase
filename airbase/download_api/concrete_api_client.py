@@ -19,7 +19,7 @@ else:
     from typing_extensions import Self  # pragma:no cover
 
 from .abstract_api_client import (
-    AbstractAPIClient,
+    AbstractClient,
     CityResponse,
     CountryResponse,
     DownloadSummaryResponse,
@@ -27,8 +27,10 @@ from .abstract_api_client import (
     PropertyResponse,
 )
 
+ClientResponseError = aiohttp.ClientResponseError
 
-class Client(AbstractAPIClient):
+
+class Client(AbstractClient):
     """
     Handle for requests to Parquet downloads API v1
     https://eeadmz1-downloads-api-appservice.azurewebsites.net/swagger/index.html

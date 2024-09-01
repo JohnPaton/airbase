@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import asyncio
 import sys
 from collections import Counter, defaultdict
+from collections.abc import AsyncIterator
 from contextlib import AbstractAsyncContextManager
 from pathlib import Path
 from types import TracebackType
@@ -14,18 +16,26 @@ else:
 
 
 from async_property import async_cached_property
-from tqdm.asyncio import tqdm
+from tqdm import tqdm
 
 from ..summary import COUNTRY_CODES
-from .api_client import Dataset, DownloadAPI, DownloadInfo, DownloadSummaryDict
+from .abstract_api_client import AbstractClient
+from .api_client import Dataset, DownloadInfo, DownloadSummaryDict
+from .concrete_api_client import Client, ClientResponseError
 
 
 class DownloadSession(AbstractAsyncContextManager):
-    client = DownloadAPI()
+    client: AbstractClient = Client()
 
-    def __init__(self, *, custom_client: DownloadAPI | None = None) -> None:
+    def __init__(
+        self,
+        *,
+        raise_for_status: bool = True,
+        custom_client: AbstractClient | None = None,
+    ) -> None:
         if custom_client is not None:
             self.client = custom_client
+        self.raise_for_status = raise_for_status
 
     async def __aenter__(self) -> Self:
         await self.client.__aenter__()
@@ -75,9 +85,8 @@ class DownloadSession(AbstractAsyncContextManager):
 
     async def summary(
         self,
-        *info: DownloadInfo,
+        *download_infos: DownloadInfo,
         progress: bool = False,
-        raise_for_status: bool = True,
     ) -> DownloadSummaryDict:
         """
         aggregated summary from multiple requests
@@ -90,31 +99,43 @@ class DownloadSession(AbstractAsyncContextManager):
 
         :return: total number of files and file size
         """
-        unique_info = set(info)
+        unique_info = set(download_infos)
+        jobs = tuple(
+            self.client.download_summary(info.request_info())
+            for info in unique_info
+        )
+
         total: Counter[str] = Counter()
-        async for summary in tqdm(
-            self.client.download_summary(
-                unique_info,
-                raise_for_status=raise_for_status,
-            ),
-            initial=len(info) - len(unique_info),
-            total=len(info),
+        with tqdm(
+            initial=len(download_infos) - len(unique_info),
+            total=len(download_infos),
             leave=True,
             disable=not progress,
             desc="totalize",
-        ):
-            total.update(summary)
+        ) as progress_bar:
+            for future in asyncio.as_completed(jobs):
+                progress_bar.update()
+                try:
+                    summary = await future
+                except asyncio.CancelledError:  # pragma:no cover
+                    continue
+                except ClientResponseError as e:  # pragma:no cover
+                    if self.raise_for_status:
+                        raise
+                    warn(str(e), category=RuntimeWarning)
+                else:
+                    total.update(summary)
 
         return dict(total)  # type:ignore[return-value]
 
     async def url_to_files(
         self,
-        *info: DownloadInfo,
+        *download_infos: DownloadInfo,
         progress: bool = False,
-        raise_for_status: bool = True,
-    ) -> set[str]:
+    ) -> AsyncIterator[set[str]]:
         """
-        multiple request for file URLs and return only the unique URLs among all the responses
+        multiple request for file URLs and return only unique URLs from each responses
+
 
         :param urls: info about requested urls
         :param progress: show progress bar
@@ -124,21 +145,36 @@ class DownloadSession(AbstractAsyncContextManager):
 
         :return: unique file URLs among from all the responses
         """
-        unique_info = set(info)
-        unique_urls: set[str] = set()
-        async for urls in tqdm(
-            self.client.download_urls(
-                unique_info,
-                raise_for_status=raise_for_status,
-            ),
-            initial=len(info) - len(unique_info),
-            total=len(info),
+        unique_info = set(download_infos)
+        jobs = tuple(
+            self.client.download_urls(info.request_info())
+            for info in unique_info
+        )
+
+        with tqdm(
+            initial=len(download_infos) - len(unique_info),
+            total=len(download_infos),
             leave=True,
             disable=not progress,
             desc="generate",
-        ):
-            unique_urls.update(urls)
-        return unique_urls
+        ) as progress_bar:
+            for future in asyncio.as_completed(jobs):
+                progress_bar.update()
+                try:
+                    text = await future
+                except asyncio.CancelledError:  # pragma:no cover
+                    continue
+                except ClientResponseError as e:  # pragma:no cover
+                    if self.raise_for_status:
+                        raise
+                    warn(str(e), category=RuntimeWarning)
+                else:
+                    lines = (line.strip() for line in text.splitlines())
+                    yield set(
+                        line
+                        for line in lines
+                        if line.startswith(("http://", "https://"))
+                    )
 
     async def download_to_directory(
         self,
@@ -146,7 +182,6 @@ class DownloadSession(AbstractAsyncContextManager):
         *urls: str,
         skip_existing: bool = True,
         progress: bool = False,
-        raise_for_status: bool = True,
     ) -> None:
         """
         download into a directory, files for different counties are kept on different sub directories
@@ -182,17 +217,30 @@ class DownloadSession(AbstractAsyncContextManager):
         for parent in {path.parent for path in url_paths.values()}:
             parent.mkdir(exist_ok=True)
 
-        async for path in tqdm(
-            self.client.download_binary_files(
-                url_paths, raise_for_status=raise_for_status
-            ),
-            initial=len(urls) - len(url_paths),
-            total=len(urls),
+        jobs = tuple(
+            self.client.download_binary(url, path)
+            for url, path in url_paths.items()
+        )
+
+        with tqdm(
+            initial=len(jobs) - len(url_paths),
+            total=len(url_paths),
             leave=True,
             disable=not progress,
             desc="download",
-        ):
-            assert path.is_file(), f"missing {path.name}"
+        ) as progress_bar:
+            for future in asyncio.as_completed(jobs):
+                progress_bar.update()
+                try:
+                    path = await future
+                except asyncio.CancelledError:  # pragma:no cover
+                    continue
+                except ClientResponseError as e:  # pragma:no cover
+                    if self.raise_for_status:
+                        raise
+                    warn(str(e), category=RuntimeWarning)
+                else:
+                    assert path.is_file(), f"missing {path.name}"
 
 
 def pollutant_id_from_url(url: str) -> int:
@@ -217,7 +265,7 @@ async def download(
     overwrite: bool = False,
     quiet: bool = True,
     raise_for_status: bool = False,
-    session: DownloadSession = DownloadSession(),
+    session: DownloadSession | None = None,
 ):
     """
     request file urls by country|[city]/pollutant and download unique files
@@ -229,31 +277,21 @@ async def download(
             countries = COUNTRY_CODES
         info = dataset.by_country(*countries, pollutant=pollutants)
 
+    if session is None:
+        session = DownloadSession(raise_for_status=raise_for_status)
     async with session:
         if summary_only:
-            summary = await session.summary(
-                *info, progress=not quiet, raise_for_status=raise_for_status
-            )
+            summary = await session.summary(*info, progress=not quiet)
             print(
                 "found {numberFiles:_} file(s), ~{size:_} MB in total".format_map(
                     summary
                 )
             )
         else:
-            async for urls in tqdm(
-                session.client.download_urls(
-                    unique := set(info),
-                    raise_for_status=raise_for_status,
-                ),
-                total=len(unique),
-                leave=True,
-                disable=quiet,
-                desc="generate",
-            ):
+            async for urls in session.url_to_files(*info):
                 await session.download_to_directory(
                     root_path,
                     *urls,
                     skip_existing=not overwrite,
                     progress=not quiet,
-                    raise_for_status=raise_for_status,
                 )
