@@ -68,7 +68,7 @@ class DB:
         Pollutant notations and unique ids.
 
         :return: The available pollutants, as a dictionary with
-        with notation as key and ID as value, e.g. {"NO": {38}, ...}
+        with notation as key and IDs as value, e.g. {"NO": {38}, ...}
         """
 
         with cls.cursor() as cur:
