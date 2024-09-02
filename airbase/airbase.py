@@ -12,7 +12,7 @@ from .fetch import (
     fetch_to_file,
     fetch_unique_lines,
 )
-from .resources import CURRENT_YEAR, METADATA_URL
+from .resources import CURRENT_YEAR, LIST_URL_HEADERS, METADATA_URL
 from .summary import DB
 from .util import link_list_url, string_safe_list
 
@@ -323,6 +323,7 @@ class AirbaseRequest:
             self._download_links,
             progress=self.verbose,
             encoding="utf-8-sig",
+            headers=LIST_URL_HEADERS,
         )
 
         # list of links (no duplicates)

@@ -18,6 +18,11 @@ LINK_LIST_URL_TEMPLATE = (
     "&Output=TEXT"
     "&UpdateDate={update_date}"
 )
+FME_TOKEN = "8f3a54b3e7054080813237004b35694fbff43580"
+LIST_URL_HEADERS = {
+    "Authorization": f"fmetoken token={FME_TOKEN}",
+    "Content-Type": "application/json",
+}
 
 METADATA_URL = (
     "http://discomap.eea.europa.eu/map/fme/metadata/PanEuropean_metadata.csv"

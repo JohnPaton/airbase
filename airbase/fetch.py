@@ -77,6 +77,7 @@ def fetcher(
     progress: bool = DEFAULT.progress,
     raise_for_status: bool = DEFAULT.raise_for_status,
     max_concurrent: int = DEFAULT.max_concurrent,
+    headers: dict[str, str] | None = None,
 ) -> AsyncIterator[str]:  # pragma: no cover
     ...
 
@@ -89,6 +90,7 @@ def fetcher(
     progress: bool = DEFAULT.progress,
     raise_for_status: bool = DEFAULT.raise_for_status,
     max_concurrent: int = DEFAULT.max_concurrent,
+    headers: dict[str, str] | None = None,
 ) -> AsyncIterator[Path]:  # pragma: no cover
     ...
 
@@ -100,6 +102,7 @@ async def fetcher(
     progress: bool = DEFAULT.progress,
     raise_for_status: bool = DEFAULT.raise_for_status,
     max_concurrent: int = DEFAULT.max_concurrent,
+    headers: dict[str, str] | None = None,
 ) -> AsyncIterator[str | Path]:
     """Request multiple urls and write request text into individual paths
     it a `dict[url, path]` is provided, or return the decoded text from each request
@@ -115,8 +118,7 @@ async def fetcher(
 
     :return: url text or path to downloaded text, one by one as the requests are completed
     """
-
-    async with aiohttp.ClientSession() as session:
+    async with aiohttp.ClientSession(headers=headers) as session:
         semaphore = asyncio.Semaphore(max_concurrent)
 
         async def fetch(url: str) -> str:
@@ -162,6 +164,7 @@ def fetch_unique_lines(
     progress: bool = DEFAULT.progress,
     raise_for_status: bool = DEFAULT.raise_for_status,
     max_concurrent: int = DEFAULT.max_concurrent,
+    headers: dict[str, str] | None = None,
 ) -> set[str]:
     """Request a list of url and return only the unique lines among all the responses
 
@@ -184,6 +187,7 @@ def fetch_unique_lines(
             progress=progress,
             raise_for_status=raise_for_status,
             max_concurrent=max_concurrent,
+            headers=headers,
         ):
             lines.update(text.splitlines())
         return lines
