@@ -52,16 +52,16 @@ def test_download(
     (
         pytest.param(
             "historical", "MT", "Valletta", "PM2.5",
-            "found 1 file(s), ~0 MB in total",
+            "found 1 file(s), ~0 Mb in total",
             id="historical",
         ),
         pytest.param(
             "verified", "MT", "Valletta", "O3",
-            "found 2 file(s), ~1 MB in total",
+            "found 2 file(s), ~1 Mb in total",
             id="verified"),
         pytest.param(
             "unverified", "MT", "Valletta", "PM10",
-            "found 4 file(s), ~0 MB in total",
+            "found 4 file(s), ~0 Mb in total",
             id="unverified"
         ),
     ),
