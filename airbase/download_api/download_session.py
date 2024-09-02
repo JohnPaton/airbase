@@ -3,10 +3,11 @@ from __future__ import annotations
 import asyncio
 import sys
 from collections import Counter, defaultdict
-from collections.abc import AsyncIterator
+from collections.abc import AsyncIterator, Awaitable, Iterator
 from contextlib import AbstractAsyncContextManager
 from pathlib import Path
 from types import TracebackType
+from typing import TypeVar
 from warnings import warn
 
 if sys.version_info >= (3, 11):  # pragma:no cover
@@ -27,6 +28,8 @@ from .api_client import (
     request_info_by_country,
 )
 from .concrete_api_client import Client, ClientResponseError
+
+_T = TypeVar("_T")
 
 
 class DownloadSession(AbstractAsyncContextManager):
@@ -107,18 +110,10 @@ class DownloadSession(AbstractAsyncContextManager):
         aggregated summary from multiple requests
 
         :param urls: info about requested urls
-        :param progress: show progress bar
-        :param raise_for_status: Raise exceptions if download links
-            return "bad" HTTP status codes. If False,
-            a :py:func:`warnings.warn` will be issued instead.
 
         :return: total number of files and file size
         """
         unique_info = set(download_infos)
-        jobs = tuple(
-            self.client.download_summary(info.payload()) for info in unique_info
-        )
-
         total: Counter[str] = Counter()
         with tqdm(
             initial=len(download_infos) - len(unique_info),
@@ -127,18 +122,12 @@ class DownloadSession(AbstractAsyncContextManager):
             disable=not self.progress,
             desc="totalize",
         ) as progress_bar:
-            for future in asyncio.as_completed(jobs):
+            async for summary in self.__completed(
+                self.client.download_summary(info.payload())
+                for info in unique_info
+            ):
                 progress_bar.update()
-                try:
-                    summary = await future
-                except asyncio.CancelledError:  # pragma:no cover
-                    continue
-                except ClientResponseError as e:  # pragma:no cover
-                    if self.raise_for_status:
-                        raise
-                    warn(str(e), category=RuntimeWarning)
-                else:
-                    total.update(summary)
+                total.update(summary)
 
         return dict(total)  # type:ignore[return-value]
 
@@ -158,9 +147,6 @@ class DownloadSession(AbstractAsyncContextManager):
         :return: unique file URLs among from all the responses
         """
         unique_info = set(download_infos)
-        jobs = tuple(
-            self.client.download_urls(info.payload()) for info in unique_info
-        )
 
         with tqdm(
             initial=len(download_infos) - len(unique_info),
@@ -169,24 +155,18 @@ class DownloadSession(AbstractAsyncContextManager):
             disable=not self.progress,
             desc="generate",
         ) as progress_bar:
-            for future in asyncio.as_completed(jobs):
+            async for text in self.__completed(
+                self.client.download_urls(info.payload())
+                for info in unique_info
+            ):
                 progress_bar.update()
-                try:
-                    text = await future
-                except asyncio.CancelledError:  # pragma:no cover
-                    continue
-                except ClientResponseError as e:  # pragma:no cover
-                    if self.raise_for_status:
-                        raise
-                    warn(str(e), category=RuntimeWarning)
-                else:
-                    lines = (line.strip() for line in text.splitlines())
-                    if urls := set(
-                        line
-                        for line in lines
-                        if line.startswith(("http://", "https://"))
-                    ):
-                        yield urls
+                lines = (line.strip() for line in text.splitlines())
+                if urls := set(
+                    line
+                    for line in lines
+                    if line.startswith(("http://", "https://"))
+                ):
+                    yield urls
 
     async def download_to_directory(
         self, root_path: Path, *urls: str, skip_existing: bool = True
@@ -221,30 +201,33 @@ class DownloadSession(AbstractAsyncContextManager):
         for parent in {path.parent for path in url_paths.values()}:
             parent.mkdir(exist_ok=True)
 
-        jobs = tuple(
-            self.client.download_binary(url, path)
-            for url, path in url_paths.items()
-        )
-
         with tqdm(
-            initial=len(jobs) - len(url_paths),
+            initial=len(urls) - len(url_paths),
             total=len(url_paths),
             leave=True,
             disable=not self.progress,
             desc="download",
         ) as progress_bar:
-            for future in asyncio.as_completed(jobs):
+            async for path in self.__completed(
+                self.client.download_binary(url, path)
+                for url, path in url_paths.items()
+            ):
+                assert path.is_file(), f"missing {path.name}"
                 progress_bar.update()
-                try:
-                    path = await future
-                except asyncio.CancelledError:  # pragma:no cover
-                    continue
-                except ClientResponseError as e:  # pragma:no cover
-                    if self.raise_for_status:
-                        raise
-                    warn(str(e), category=RuntimeWarning)
-                else:
-                    assert path.is_file(), f"missing {path.name}"
+
+    async def __completed(
+        self, jobs: Iterator[Awaitable[_T]]
+    ) -> AsyncIterator[_T]:
+        aws = tuple(jobs)
+        for future in asyncio.as_completed(aws):
+            try:
+                yield await future
+            except asyncio.CancelledError:  # pragma:no cover
+                continue
+            except ClientResponseError as e:  # pragma:no cover
+                if self.raise_for_status:
+                    raise
+                warn(str(e), category=RuntimeWarning)
 
 
 def pollutant_id_from_url(url: str) -> int:
