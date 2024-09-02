@@ -8,9 +8,9 @@ from contextlib import closing
 from pathlib import Path
 
 from airbase.download_api.abstract_api_client import (
-    CityResponse,
-    CountryResponse,
-    PropertyResponse,
+    CityJSON,
+    CountryJSON,
+    PropertyJSON,
 )
 from airbase.download_api.download_session import pollutant_id_from_url
 
@@ -100,14 +100,14 @@ def main(db_path: Path = Path("airbase/summary/summary.sqlite")):
         cur.executemany(INSERT_PROPERTY_JSON, property)
 
 
-def country_json() -> CountryResponse:
+def country_json() -> CountryJSON:
     cmd = f"curl -s -X 'GET' '{BASE_URL}/Country' -H 'accept: text/plain'"
     payload = subprocess.check_output(cmd, shell=True, encoding="UTF-8")
     assert payload, "no data"
     return json.loads(payload)  # type:ignore[no-any-return]
 
 
-def city_json(*country_codes: str) -> CityResponse:
+def city_json(*country_codes: str) -> CityJSON:
     cmd = (
         f"curl -s -X 'POST' '{BASE_URL}/City' "
         " -H 'accept: text/plain'"
@@ -119,7 +119,7 @@ def city_json(*country_codes: str) -> CityResponse:
     return json.loads(payload)  # type:ignore[no-any-return]
 
 
-def property_json() -> PropertyResponse:
+def property_json() -> PropertyJSON:
     cmd = f"curl -s -X 'GET' '{BASE_URL}/Property'  -H 'accept: text/plain'"
     payload = subprocess.check_output(cmd, shell=True)
     assert payload, "no data"

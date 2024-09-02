@@ -11,8 +11,8 @@ from airbase.download_api import (
     AbstractClient,
     Client,
     Dataset,
-    DownloadInfo,
     DownloadSession,
+    ParquetData,
     download,
 )
 from airbase.summary import COUNTRY_CODES, POLLUTANT_NAMES
@@ -55,7 +55,7 @@ def test_Dataset_by_city(
     dataset: Dataset = Dataset.Historical,
 ):
     assert list(dataset.by_city(city, pollutant=pollutant)) == [
-        DownloadInfo(country, dataset, pollutant, city)
+        ParquetData(country, dataset, pollutant, city)
     ]
 
 
@@ -81,7 +81,7 @@ def test_Dataset_by_country(
     dataset: Dataset = Dataset.Historical,
 ):
     assert list(dataset.by_country(country, pollutant=pollutant)) == [
-        DownloadInfo(country, dataset, pollutant)
+        ParquetData(country, dataset, pollutant)
     ]
 
 
@@ -126,25 +126,23 @@ def test_DownloadInfo_request_info(
 ):
     assert (
         json.dumps(
-            DownloadInfo(
+            ParquetData(
                 country, Dataset.Historical, {pollutant}, city
-            ).request_info()
+            ).payload()
         )
         == historical
     ), "unexpected historical info"
     assert (
         json.dumps(
-            DownloadInfo(
-                country, Dataset.Verified, {pollutant}, city
-            ).request_info()
+            ParquetData(country, Dataset.Verified, {pollutant}, city).payload()
         )
         == verified
     ), "unexpected verified info"
     assert (
         json.dumps(
-            DownloadInfo(
+            ParquetData(
                 country, Dataset.Unverified, {pollutant}, city
-            ).request_info()
+            ).payload()
         )
         == unverified
     ), "unexpected unverified info"
@@ -188,9 +186,9 @@ async def test_Client_city(client: AbstractClient):
 
 @pytest.mark.asyncio
 async def test_Client_download_urls(client: AbstractClient):
-    info = DownloadInfo("MT", Dataset.Historical, None, "Valletta")
+    info = ParquetData("MT", Dataset.Historical, None, "Valletta")
     async with client:
-        text = await client.download_urls(info.request_info())
+        text = await client.download_urls(info.payload())
 
     header, *urls = text.splitlines()
     assert header == "ParquetFileUrl"
@@ -262,7 +260,7 @@ async def test_DownloadSession_city(session: DownloadSession):
 
 @pytest.mark.asyncio
 async def test_DownloadSession_url_to_files(session: DownloadSession):
-    info = DownloadInfo("MT", Dataset.Historical, None, "Valletta")
+    info = ParquetData("MT", Dataset.Historical, None, "Valletta")
     async with session:
         async for urls in session.url_to_files(info):
             pass

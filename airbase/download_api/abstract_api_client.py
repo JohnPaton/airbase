@@ -17,30 +17,30 @@ else:
     from typing_extensions import TypeAlias  # pragma:no cover
 
 
-class CityDict(TypedDict):
+class CityData(TypedDict):
+    """part of `/City` response"""
+
     countryCode: str
     cityName: str
 
 
-CityResponse: TypeAlias = "list[CityDict]"
+"""full `/City` response"""
+CityJSON: TypeAlias = "list[CityData]"
 
 
-class CountryDict(TypedDict):
+class CountryData(TypedDict):
+    """part of `/Country` response"""
+
     countryCode: str
 
 
-CountryResponse: TypeAlias = "list[CountryDict]"
+"""full `/Country` response"""
+CountryJSON: TypeAlias = "list[CountryData]"
 
 
-class DownloadSummaryDict(TypedDict):
-    numberFiles: int
-    size: int
+class ParquetDataJSON(TypedDict):
+    """request payload to `/DownloadSummary`, `/ParquetFile` and `/ParquetFile/urls`"""
 
-
-DownloadSummaryResponse: TypeAlias = DownloadSummaryDict
-
-
-class ParquetDataDict(TypedDict):
     countries: list[str]
     cities: list[str]
     properties: list[str]
@@ -48,15 +48,22 @@ class ParquetDataDict(TypedDict):
     source: str
 
 
-ParquetDataRequest: TypeAlias = ParquetDataDict
+class DownloadSummaryJSON(TypedDict):
+    """full `/DownloadSummary` response"""
+
+    numberFiles: int
+    size: int
 
 
 class PropertyDict(TypedDict):
+    """part of `Property` response"""
+
     notation: str
     id: str
 
 
-PropertyResponse: TypeAlias = "list[PropertyDict]"
+"""full `Property` response"""
+PropertyJSON: TypeAlias = "list[PropertyDict]"
 
 
 class AbstractClient(AbstractAsyncContextManager):
@@ -64,31 +71,31 @@ class AbstractClient(AbstractAsyncContextManager):
     ABC for requests to Parquet downloads API v1
     https://eeadmz1-downloads-api-appservice.azurewebsites.net/swagger/index.html
 
-    Limiting the number or actives requests is part of the concrete implementation
+    Limiting the number or active requests is part of the concrete implementation
     """
 
     base_url = "https://eeadmz1-downloads-api-appservice.azurewebsites.net"
 
     @abstractmethod
-    async def city(self, data: tuple[str, ...]) -> CityResponse:
+    async def city(self, payload: tuple[str, ...]) -> CityJSON:
         """Single post request to /City"""
 
     @abstractmethod
-    async def country(self) -> CountryResponse:
+    async def country(self) -> CountryJSON:
         """Single get request to /Country"""
 
     @abstractmethod
-    async def property(self) -> PropertyResponse:
+    async def property(self) -> PropertyJSON:
         """Single get request to /Property"""
 
     @abstractmethod
     async def download_summary(
-        self, data: ParquetDataRequest
-    ) -> DownloadSummaryResponse:
+        self, payload: ParquetDataJSON
+    ) -> DownloadSummaryJSON:
         """Single post request to /DownloadSummary"""
 
     @abstractmethod
-    async def download_urls(self, data: ParquetDataRequest) -> str:
+    async def download_urls(self, payload: ParquetDataJSON) -> str:
         """Single post request to /ParquetFile/urls"""
 
     @abstractmethod

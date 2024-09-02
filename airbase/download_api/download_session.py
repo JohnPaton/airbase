@@ -19,8 +19,8 @@ from async_property import async_cached_property
 from tqdm import tqdm
 
 from ..summary import COUNTRY_CODES
-from .abstract_api_client import AbstractClient, DownloadSummaryDict
-from .api_client import Dataset, DownloadInfo
+from .abstract_api_client import AbstractClient, DownloadSummaryJSON
+from .api_client import Dataset, ParquetData
 from .concrete_api_client import Client, ClientResponseError
 
 
@@ -85,9 +85,9 @@ class DownloadSession(AbstractAsyncContextManager):
 
     async def summary(
         self,
-        *download_infos: DownloadInfo,
+        *download_infos: ParquetData,
         progress: bool = False,
-    ) -> DownloadSummaryDict:
+    ) -> DownloadSummaryJSON:
         """
         aggregated summary from multiple requests
 
@@ -101,8 +101,7 @@ class DownloadSession(AbstractAsyncContextManager):
         """
         unique_info = set(download_infos)
         jobs = tuple(
-            self.client.download_summary(info.request_info())
-            for info in unique_info
+            self.client.download_summary(info.payload()) for info in unique_info
         )
 
         total: Counter[str] = Counter()
@@ -130,7 +129,7 @@ class DownloadSession(AbstractAsyncContextManager):
 
     async def url_to_files(
         self,
-        *download_infos: DownloadInfo,
+        *download_infos: ParquetData,
         progress: bool = False,
     ) -> AsyncIterator[set[str]]:
         """
@@ -147,8 +146,7 @@ class DownloadSession(AbstractAsyncContextManager):
         """
         unique_info = set(download_infos)
         jobs = tuple(
-            self.client.download_urls(info.request_info())
-            for info in unique_info
+            self.client.download_urls(info.payload()) for info in unique_info
         )
 
         with tqdm(

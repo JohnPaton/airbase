@@ -6,7 +6,7 @@ from typing import NamedTuple
 from warnings import warn
 
 from ..summary import COUNTRY_CODES, DB
-from .abstract_api_client import ParquetDataRequest
+from .abstract_api_client import ParquetDataJSON
 
 
 class Dataset(IntEnum):
@@ -30,28 +30,28 @@ class Dataset(IntEnum):
 
     def by_city(
         self, *cities, pollutant: set[str] | None = None
-    ) -> Iterator[DownloadInfo]:
+    ) -> Iterator[ParquetData]:
         """download info one city at the time"""
         for city in cities:
             if (country := DB.search_city(city)) is None:
                 warn(f"Unknown {city=}, skip", UserWarning, stacklevel=-2)
                 continue
 
-            yield DownloadInfo(country, self, pollutant, city)
+            yield ParquetData(country, self, pollutant, city)
 
     def by_country(
         self, *countries, pollutant: set[str] | None = None
-    ) -> Iterator[DownloadInfo]:
+    ) -> Iterator[ParquetData]:
         """download info one country at the time"""
         for country in countries:
             if country not in COUNTRY_CODES:
                 warn(f"Unknown {country=}, skip", UserWarning, stacklevel=-2)
                 continue
 
-            yield DownloadInfo(country, self, pollutant)
+            yield ParquetData(country, self, pollutant)
 
 
-class DownloadInfo(NamedTuple):
+class ParquetData(NamedTuple):
     """
     info needed for requesting the URLs for country and dataset
     the request can be further restricted with the `pollutant` and `city` param
@@ -66,7 +66,7 @@ class DownloadInfo(NamedTuple):
     def __hash__(self) -> int:
         return hash(str(self))
 
-    def request_info(self) -> ParquetDataRequest:
+    def payload(self) -> ParquetDataJSON:
         return dict(
             countries=[self.country],
             cities=[] if self.city is None else [self.city],

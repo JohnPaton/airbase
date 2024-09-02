@@ -10,9 +10,9 @@ from airbase.summary import COUNTRY_CODES, DB
 
 if TYPE_CHECKING:
     from airbase.download_api.abstract_api_client import (
-        CityResponse,
-        CountryResponse,
-        PropertyResponse,
+        CityJSON,
+        CountryJSON,
+        PropertyJSON,
     )
 
 
@@ -22,30 +22,30 @@ def client() -> AbstractClient:
 
 
 @pytest_asyncio.fixture(scope="module")
-async def country_json(client: AbstractClient) -> CountryResponse:
+async def country_json(client: AbstractClient) -> CountryJSON:
     async with client:
         return await client.country()
 
 
 @pytest_asyncio.fixture(scope="module")
-async def city_json(client: AbstractClient) -> CityResponse:
+async def city_json(client: AbstractClient) -> CityJSON:
     async with client:
         return await client.city(tuple(COUNTRY_CODES))
 
 
 @pytest_asyncio.fixture(scope="module")
-async def property_json(client: AbstractClient) -> PropertyResponse:
+async def property_json(client: AbstractClient) -> PropertyJSON:
     async with client:
         return await client.property()
 
 
-def test_county(country_json: CountryResponse):
+def test_county(country_json: CountryJSON):
     assert DB.country_json() == country_json
 
 
-def test_city(city_json: CityResponse):
+def test_city(city_json: CityJSON):
     assert DB.city_json() == city_json
 
 
-def test_property(property_json: PropertyResponse):
+def test_property(property_json: PropertyJSON):
     assert DB.property_json() == property_json

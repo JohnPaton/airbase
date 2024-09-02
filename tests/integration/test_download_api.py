@@ -9,8 +9,8 @@ import pytest_asyncio
 
 from airbase.download_api import (
     Dataset,
-    DownloadInfo,
     DownloadSession,
+    ParquetData,
 )
 from airbase.summary import COUNTRY_CODES, POLLUTANT_IDS, POLLUTANT_NAMES
 from tests import resources
@@ -114,14 +114,14 @@ async def test_summary(
 ):
     async with session:
         summary = await session.summary(
-            DownloadInfo(country, Dataset.Historical, {pollutant})
+            ParquetData(country, Dataset.Historical, {pollutant})
         )
     assert summary == dict(numberFiles=files, size=size)
 
 
 @pytest.mark.asyncio
 async def test_url_to_files(session: DownloadSession):
-    info = DownloadInfo("MT", Dataset.Historical, city="Valletta")
+    info = ParquetData("MT", Dataset.Historical, city="Valletta")
     async with session:
         async for urls in session.url_to_files(info):
             pass
