@@ -35,11 +35,23 @@ class DownloadSession(AbstractAsyncContextManager):
     def __init__(
         self,
         *,
+        progress: bool = False,
         raise_for_status: bool = True,
         custom_client: AbstractClient | None = None,
     ) -> None:
+        """
+        :param progress: (optional, default `False`)
+            Show progress bars
+        :param raise_for_status: (optional, default `True`)
+            Raise exceptions if any request from `summary`, `url_to_files` or `download_to_directory`
+            methods returns "bad" HTTP status codes.
+            If False, a :py:func:`warnings.warn` will be issued instead. Default True.
+        """
+
         if custom_client is not None:
             self.client = custom_client
+
+        self.progress = progress
         self.raise_for_status = raise_for_status
 
     async def __aenter__(self) -> Self:
@@ -89,9 +101,7 @@ class DownloadSession(AbstractAsyncContextManager):
         return cities
 
     async def summary(
-        self,
-        *download_infos: ParquetData,
-        progress: bool = False,
+        self, *download_infos: ParquetData
     ) -> DownloadSummaryJSON:
         """
         aggregated summary from multiple requests
@@ -114,7 +124,7 @@ class DownloadSession(AbstractAsyncContextManager):
             initial=len(download_infos) - len(unique_info),
             total=len(download_infos),
             leave=True,
-            disable=not progress,
+            disable=not self.progress,
             desc="totalize",
         ) as progress_bar:
             for future in asyncio.as_completed(jobs):
@@ -133,9 +143,7 @@ class DownloadSession(AbstractAsyncContextManager):
         return dict(total)  # type:ignore[return-value]
 
     async def url_to_files(
-        self,
-        *download_infos: ParquetData,
-        progress: bool = False,
+        self, *download_infos: ParquetData
     ) -> AsyncIterator[set[str]]:
         """
         multiple request for file URLs and return only unique URLs from each responses
@@ -158,7 +166,7 @@ class DownloadSession(AbstractAsyncContextManager):
             initial=len(download_infos) - len(unique_info),
             total=len(download_infos),
             leave=True,
-            disable=not progress,
+            disable=not self.progress,
             desc="generate",
         ) as progress_bar:
             for future in asyncio.as_completed(jobs):
@@ -173,18 +181,15 @@ class DownloadSession(AbstractAsyncContextManager):
                     warn(str(e), category=RuntimeWarning)
                 else:
                     lines = (line.strip() for line in text.splitlines())
-                    yield set(
+                    if urls := set(
                         line
                         for line in lines
                         if line.startswith(("http://", "https://"))
-                    )
+                    ):
+                        yield urls
 
     async def download_to_directory(
-        self,
-        root_path: Path,
-        *urls: str,
-        skip_existing: bool = True,
-        progress: bool = False,
+        self, root_path: Path, *urls: str, skip_existing: bool = True
     ) -> None:
         """
         download into a directory, files for different counties are kept on different sub directories
@@ -194,10 +199,6 @@ class DownloadSession(AbstractAsyncContextManager):
         :param skip_existing: (optional) Don't re-download files if they exist in `root_path`.
             If False, existing files in `root_path` may be overwritten.
             Empty files will be re-downloaded regardless of this option. Default True.
-        :param progress: show progress bar
-        :param raise_for_status: (optional) Raise exceptions if
-            download links return "bad" HTTP status codes. If False,
-            a :py:func:`warnings.warn` will be issued instead. Default True.
         """
 
         if not root_path.is_dir():  # pragma: no cover
@@ -229,7 +230,7 @@ class DownloadSession(AbstractAsyncContextManager):
             initial=len(jobs) - len(url_paths),
             total=len(url_paths),
             leave=True,
-            disable=not progress,
+            disable=not self.progress,
             desc="download",
         ) as progress_bar:
             for future in asyncio.as_completed(jobs):
@@ -268,10 +269,17 @@ async def download(
     overwrite: bool = False,
     quiet: bool = True,
     raise_for_status: bool = False,
-    session: DownloadSession | None = None,
+    session: DownloadSession = DownloadSession(),
 ):
     """
     request file urls by country|[city]/pollutant and download unique files
+
+    :param quiet: (optional, default `True`)
+        Disable progress bars.
+    :param raise_for_status: (optional, default `False`)
+        Raise exceptions if any request return "bad" HTTP status codes.
+        If False, a :py:func:`warnings.warn` will be issued instead
+
     """
     if cities:  # one request for each city/pollutant
         info = request_info_by_city(dataset, *cities, pollutant=pollutants)
@@ -282,21 +290,21 @@ async def download(
             dataset, *countries, pollutant=pollutants
         )
 
-    if session is None:
-        session = DownloadSession(raise_for_status=raise_for_status)
+    session.progress = not quiet
+    session.raise_for_status = raise_for_status
     async with session:
+        summary = await session.summary(*info)
         if summary_only:
-            summary = await session.summary(*info, progress=not quiet)
             print(
                 "found {numberFiles:_} file(s), ~{size:_} MB in total".format_map(
                     summary
                 )
             )
-        else:
-            async for urls in session.url_to_files(*info):
-                await session.download_to_directory(
-                    root_path,
-                    *urls,
-                    skip_existing=not overwrite,
-                    progress=not quiet,
-                )
+            return
+
+        async for urls in session.url_to_files(*info):
+            await session.download_to_directory(
+                root_path,
+                *urls,
+                skip_existing=not overwrite,
+            )
