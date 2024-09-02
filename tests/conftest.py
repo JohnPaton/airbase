@@ -31,6 +31,11 @@ def mock_api(response: aioresponses):
         payload=DB.city_json(),
     )
     response.post(
+        "https://eeadmz1-downloads-api-appservice.azurewebsites.net/DownloadSummary",
+        body=resources.JSON_DOWNLOAD_SUMMARY_RESPONSE,
+        repeat=True,
+    )
+    response.post(
         "https://eeadmz1-downloads-api-appservice.azurewebsites.net/ParquetFile/urls",
         body=resources.CSV_PARQUET_URLS_RESPONSE,
         repeat=True,

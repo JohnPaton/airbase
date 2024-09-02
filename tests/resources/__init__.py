@@ -6,12 +6,14 @@ else:
     import importlib_resources as resources
 
 METADATA_RESPONSE: str
+JSON_DOWNLOAD_SUMMARY_RESPONSE: str
 CSV_PARQUET_URLS_RESPONSE: str
 
 
 def __getattr__(name: str):
     resource = dict(
         METADATA_RESPONSE="metadata.tsv",
+        JSON_DOWNLOAD_SUMMARY_RESPONSE="MT_Historical_Valletta.json",
         CSV_PARQUET_URLS_RESPONSE="MT_Historical_Valletta.csv",
     )
     if name not in resource:
