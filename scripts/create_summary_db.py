@@ -7,7 +7,11 @@ import subprocess
 from contextlib import closing
 from pathlib import Path
 
-from airbase.download_api.api_client import CityDict, CountryDict, PropertyDict
+from airbase.download_api.abstract_api_client import (
+    CityResponse,
+    CountryResponse,
+    PropertyResponse,
+)
 from airbase.download_api.download_session import pollutant_id_from_url
 
 BASE_URL = "https://eeadmz1-downloads-api-appservice.azurewebsites.net"
@@ -96,14 +100,14 @@ def main(db_path: Path = Path("airbase/summary/summary.sqlite")):
         cur.executemany(INSERT_PROPERTY_JSON, property)
 
 
-def country_json() -> list[CountryDict]:
+def country_json() -> CountryResponse:
     cmd = f"curl -s -X 'GET' '{BASE_URL}/Country' -H 'accept: text/plain'"
     payload = subprocess.check_output(cmd, shell=True, encoding="UTF-8")
     assert payload, "no data"
     return json.loads(payload)  # type:ignore[no-any-return]
 
 
-def city_json(*country_codes: str) -> list[CityDict]:
+def city_json(*country_codes: str) -> CityResponse:
     cmd = (
         f"curl -s -X 'POST' '{BASE_URL}/City' "
         " -H 'accept: text/plain'"
@@ -115,7 +119,7 @@ def city_json(*country_codes: str) -> list[CityDict]:
     return json.loads(payload)  # type:ignore[no-any-return]
 
 
-def property_json() -> list[PropertyDict]:
+def property_json() -> PropertyResponse:
     cmd = f"curl -s -X 'GET' '{BASE_URL}/Property'  -H 'accept: text/plain'"
     payload = subprocess.check_output(cmd, shell=True)
     assert payload, "no data"

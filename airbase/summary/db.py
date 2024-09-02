@@ -12,10 +12,10 @@ else:  # pragma: no cover
     import importlib_resources as resources
 
 if TYPE_CHECKING:
-    from airbase.download_api.api_client import (
-        CityDict,
-        CountryDict,
-        PropertyDict,
+    from airbase.download_api.abstract_api_client import (
+        CityResponse,
+        CountryResponse,
+        PropertyResponse,
     )
 
 
@@ -143,7 +143,7 @@ class DB:
             return None if row is None else row[0]
 
     @classmethod
-    def city_json(cls) -> list[CityDict]:
+    def city_json(cls) -> CityResponse:
         """
         simulate a request to
         https://eeadmz1-downloads-api-appservice.azurewebsites.net/City
@@ -158,7 +158,7 @@ class DB:
             ]
 
     @classmethod
-    def country_json(cls) -> list[CountryDict]:
+    def country_json(cls) -> CountryResponse:
         """
         simulate a request to
         https://eeadmz1-downloads-api-appservice.azurewebsites.net/Country
@@ -168,7 +168,7 @@ class DB:
             return [dict(countryCode=country_code) for (country_code,) in cur]
 
     @classmethod
-    def property_json(cls) -> list[PropertyDict]:
+    def property_json(cls) -> PropertyResponse:
         """
         simulate a request to
         https://eeadmz1-downloads-api-appservice.azurewebsites.net/Property

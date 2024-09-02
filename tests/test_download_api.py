@@ -8,8 +8,9 @@ from pathlib import Path
 import pytest
 
 from airbase.download_api import (
+    AbstractClient,
+    Client,
     Dataset,
-    DownloadAPI,
     DownloadInfo,
     DownloadSession,
     download,
@@ -19,15 +20,15 @@ from tests.resources import CSV_PARQUET_URLS_RESPONSE
 
 
 @pytest.fixture
-def client(mock_api) -> DownloadAPI:
-    """DownloadAPI with loaded mocks"""
-    return DownloadAPI()
+def client(mock_api) -> AbstractClient:
+    """Client with loaded mocks"""
+    return Client()
 
 
 @pytest.fixture
-def session(mock_api) -> DownloadSession:
+def session(client: AbstractClient, mock_api) -> DownloadSession:
     """DownloadSession with loaded mocks"""
-    return DownloadSession()
+    return DownloadSession(custom_client=client)
 
 
 def test_Dataset():
@@ -150,7 +151,7 @@ def test_DownloadInfo_request_info(
 
 
 @pytest.mark.asyncio
-async def test_DownloadAPI_country(client: DownloadAPI):
+async def test_Client_country(client: AbstractClient):
     async with client:
         payload = await client.country()
 
@@ -161,7 +162,7 @@ async def test_DownloadAPI_country(client: DownloadAPI):
 
 
 @pytest.mark.asyncio
-async def test_DownloadAPI_property(client: DownloadAPI):
+async def test_Client_property(client: AbstractClient):
     async with client:
         payload = await client.property()
 
@@ -173,7 +174,7 @@ async def test_DownloadAPI_property(client: DownloadAPI):
 
 
 @pytest.mark.asyncio
-async def test_DownloadAPI_city(client: DownloadAPI):
+async def test_Client_city(client: AbstractClient):
     async with client:
         payload = await client.city(tuple(COUNTRY_CODES))
 
@@ -186,23 +187,22 @@ async def test_DownloadAPI_city(client: DownloadAPI):
 
 
 @pytest.mark.asyncio
-async def test_DownloadAPI_download_urls(client: DownloadAPI):
+async def test_Client_download_urls(client: AbstractClient):
     info = DownloadInfo("MT", Dataset.Historical, None, "Valletta")
     async with client:
-        async for urls in client.download_urls({info}, raise_for_status=True):
-            pass
+        text = await client.download_urls(info.request_info())
 
-    assert urls
+    header, *urls = text.splitlines()
+    assert header == "ParquetFileUrl"
+    assert len(urls) == 22
+
     regex = re.compile(rf"https://.*/{info.country}/.*\.parquet")
     for url in urls:
         assert regex.match(url) is not None, f"wrong {url=} start"
-    assert len(urls) == 22
 
 
 @pytest.mark.asyncio
-async def test_DownloadAPI_download_binary_files(
-    tmp_path: Path, client: DownloadAPI
-):
+async def test_Client_download_binary_files(tmp_path: Path, client: Client):
     urls = {
         "https://data_is_here.eu/FI/data.parquet": tmp_path / "FI.parquet",
         "https://data_is_here.eu/NO/data.parquet": tmp_path / "NO.parquet",
@@ -211,10 +211,9 @@ async def test_DownloadAPI_download_binary_files(
     }
     assert not tuple(tmp_path.glob("*.parquet"))
     async with client:
-        async for path in client.download_binary_files(
-            urls, raise_for_status=True
-        ):
-            assert path in urls.values()
+        for url, path in urls.items():
+            assert await client.download_binary(url, path) == path
+            assert path.is_file()
 
     assert len(tuple(tmp_path.glob("*.parquet"))) == len(urls)
 

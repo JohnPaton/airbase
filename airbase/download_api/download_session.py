@@ -19,8 +19,8 @@ from async_property import async_cached_property
 from tqdm import tqdm
 
 from ..summary import COUNTRY_CODES
-from .abstract_api_client import AbstractClient
-from .api_client import Dataset, DownloadInfo, DownloadSummaryDict
+from .abstract_api_client import AbstractClient, DownloadSummaryDict
+from .api_client import Dataset, DownloadInfo
 from .concrete_api_client import Client, ClientResponseError
 
 

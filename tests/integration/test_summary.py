@@ -5,61 +5,47 @@ from typing import TYPE_CHECKING
 import pytest
 import pytest_asyncio
 
-from airbase.download_api import DownloadAPI
+from airbase.download_api import AbstractClient, Client
 from airbase.summary import COUNTRY_CODES, DB
 
 if TYPE_CHECKING:
-    from airbase.download_api.api_client import (
-        CityDict,
-        CountryDict,
-        PropertyDict,
+    from airbase.download_api.abstract_api_client import (
+        CityResponse,
+        CountryResponse,
+        PropertyResponse,
     )
 
 
 @pytest.fixture(scope="module")
-def client() -> DownloadAPI:
-    return DownloadAPI()
+def client() -> AbstractClient:
+    return Client()
 
 
 @pytest_asyncio.fixture(scope="module")
-async def country_json(client: DownloadAPI) -> list[CountryDict]:
+async def country_json(client: AbstractClient) -> CountryResponse:
     async with client:
-        return await client._get("/Country", encoding="UTF-8")
+        return await client.country()
 
 
 @pytest_asyncio.fixture(scope="module")
-async def city_json(client: DownloadAPI) -> list[CityDict]:
+async def city_json(client: AbstractClient) -> CityResponse:
     async with client:
-        return await client._post(
-            "/City", tuple(COUNTRY_CODES), encoding="UTF-8"
-        )
+        return await client.city(tuple(COUNTRY_CODES))
 
 
 @pytest_asyncio.fixture(scope="module")
-async def property_json(client: DownloadAPI) -> list[PropertyDict]:
+async def property_json(client: AbstractClient) -> PropertyResponse:
     async with client:
-        return await client._get("/Property", encoding="UTF-8")
+        return await client.property()
 
 
-@pytest.fixture
-def city_dump() -> list[CityDict]:
-    with DB.cursor() as cur:
-        cur.execute(
-            "SELECT country_code, city_name FROM city WHERE city_name IS NOT NULL;"
-        )
-        return [
-            dict(countryCode=country_code, cityName=city_name)
-            for (country_code, city_name) in cur
-        ]
-
-
-def test_county(country_json: list[CountryDict]):
+def test_county(country_json: CountryResponse):
     assert DB.country_json() == country_json
 
 
-def test_city(city_json: list[CityDict]):
+def test_city(city_json: CityResponse):
     assert DB.city_json() == city_json
 
 
-def test_property(property_json: list[PropertyDict]):
+def test_property(property_json: PropertyResponse):
     assert DB.property_json() == property_json
