@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from collections.abc import Iterator
 from enum import IntEnum
 from typing import NamedTuple
 from warnings import warn
@@ -28,28 +27,6 @@ class Dataset(IntEnum):
     def __str__(self) -> str:  # pragma:no cover
         return self.name
 
-    def by_city(
-        self, *cities, pollutant: set[str] | None = None
-    ) -> Iterator[ParquetData]:
-        """download info one city at the time"""
-        for city in cities:
-            if (country := DB.search_city(city)) is None:
-                warn(f"Unknown {city=}, skip", UserWarning, stacklevel=-2)
-                continue
-
-            yield ParquetData(country, self, pollutant, city)
-
-    def by_country(
-        self, *countries, pollutant: set[str] | None = None
-    ) -> Iterator[ParquetData]:
-        """download info one country at the time"""
-        for country in countries:
-            if country not in COUNTRY_CODES:
-                warn(f"Unknown {country=}, skip", UserWarning, stacklevel=-2)
-                continue
-
-            yield ParquetData(country, self, pollutant)
-
 
 class ParquetData(NamedTuple):
     """
@@ -76,3 +53,33 @@ class ParquetData(NamedTuple):
             datasets=[self.dataset],
             source=self.source,
         )
+
+
+def request_info_by_city(
+    dataset: Dataset, *cities, pollutant: set[str] | None = None
+) -> set[ParquetData]:
+    """download info one city at the time"""
+    info: set[ParquetData] = set()
+    for city in cities:
+        if (country := DB.search_city(city)) is None:
+            warn(f"Unknown {city=}, skip", UserWarning, stacklevel=-2)
+            continue
+
+        info.add(ParquetData(country, dataset, pollutant, city))
+
+    return info
+
+
+def request_info_by_country(
+    dataset: Dataset, *countries, pollutant: set[str] | None = None
+) -> set[ParquetData]:
+    """download info one country at the time"""
+    info: set[ParquetData] = set()
+    for country in countries:
+        if country not in COUNTRY_CODES:
+            warn(f"Unknown {country=}, skip", UserWarning, stacklevel=-2)
+            continue
+
+        info.add(ParquetData(country, dataset, pollutant))
+
+    return info

@@ -20,7 +20,12 @@ from tqdm import tqdm
 
 from ..summary import COUNTRY_CODES
 from .abstract_api_client import AbstractClient, DownloadSummaryJSON
-from .api_client import Dataset, ParquetData
+from .api_client import (
+    Dataset,
+    ParquetData,
+    request_info_by_city,
+    request_info_by_country,
+)
 from .concrete_api_client import Client, ClientResponseError
 
 
@@ -269,11 +274,13 @@ async def download(
     request file urls by country|[city]/pollutant and download unique files
     """
     if cities:  # one request for each city/pollutant
-        info = dataset.by_city(*cities, pollutant=pollutants)
+        info = request_info_by_city(dataset, *cities, pollutant=pollutants)
     else:  # one request for each country/pollutant
         if not countries:
             countries = COUNTRY_CODES
-        info = dataset.by_country(*countries, pollutant=pollutants)
+        info = request_info_by_country(
+            dataset, *countries, pollutant=pollutants
+        )
 
     if session is None:
         session = DownloadSession(raise_for_status=raise_for_status)

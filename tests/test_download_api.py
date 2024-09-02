@@ -14,6 +14,8 @@ from airbase.download_api import (
     DownloadSession,
     ParquetData,
     download,
+    request_info_by_city,
+    request_info_by_country,
 )
 from airbase.summary import COUNTRY_CODES, POLLUTANT_NAMES
 from tests.resources import CSV_PARQUET_URLS_RESPONSE
@@ -48,23 +50,23 @@ def test_Dataset():
         pytest.param("Göteborg", "SE", None, id="Göteborg"),
     ),
 )
-def test_Dataset_by_city(
+def test_request_info_by_city(
     city: str,
     country: str,
     pollutant: set[str] | None,
     dataset: Dataset = Dataset.Historical,
 ):
-    assert list(dataset.by_city(city, pollutant=pollutant)) == [
+    assert request_info_by_city(dataset, city, pollutant=pollutant) == {
         ParquetData(country, dataset, pollutant, city)
-    ]
+    }
 
 
-def test_Dataset_by_city_warning(
+def test_request_info_by_city_warning(
     city: str = "Bad City Name",
     dataset: Dataset = Dataset.Historical,
 ):
     with pytest.warns(UserWarning, match=rf"Unknown city='{city}'"):
-        assert not list(dataset.by_city(city))
+        assert not request_info_by_city(dataset, city)
 
 
 @pytest.mark.parametrize(
@@ -75,22 +77,22 @@ def test_Dataset_by_city_warning(
         pytest.param("SE", None, id="SE"),
     ),
 )
-def test_Dataset_by_country(
+def test_request_info_by_country(
     country: str,
     pollutant: set[str] | None,
     dataset: Dataset = Dataset.Historical,
 ):
-    assert list(dataset.by_country(country, pollutant=pollutant)) == [
+    assert request_info_by_country(dataset, country, pollutant=pollutant) == {
         ParquetData(country, dataset, pollutant)
-    ]
+    }
 
 
-def test_Dataset_by_country_warning(
+def test_request_info_by_country_warning(
     country: str = "Bad City Name",
     dataset: Dataset = Dataset.Historical,
 ):
     with pytest.warns(UserWarning, match=rf"Unknown country='{country}'"):
-        assert not list(dataset.by_country(country))
+        assert not request_info_by_country(dataset, country)
 
 
 @pytest.mark.parametrize(
