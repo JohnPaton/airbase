@@ -86,46 +86,41 @@ class Client(AbstractClient):
 
     async def country(self) -> CountryJSON:
         """get request to /Country"""
-        async with self._semaphore:
-            async with self._session.get(f"{self.base_url}/Country") as r:
-                r.raise_for_status()
-                return await r.json(encoding="UTF-8")  # type:ignore[no-any-return]
+        async with self._session.get(f"{self.base_url}/Country") as r:
+            r.raise_for_status()
+            return await r.json(encoding="UTF-8")  # type:ignore[no-any-return]
 
     async def property(self) -> PropertyJSON:
         """get request to /Property"""
-        async with self._semaphore:
-            async with self._session.get(f"{self.base_url}/Property") as r:
-                r.raise_for_status()
-                return await r.json(encoding="UTF-8")  # type:ignore[no-any-return]
+        async with self._session.get(f"{self.base_url}/Property") as r:
+            r.raise_for_status()
+            return await r.json(encoding="UTF-8")  # type:ignore[no-any-return]
 
     async def city(self, payload: tuple[str, ...]) -> CityJSON:
         """post request to /City"""
-        async with self._semaphore:
-            async with self._session.post(
-                f"{self.base_url}/City", json=payload
-            ) as r:
-                r.raise_for_status()
-                return await r.json(encoding="UTF-8")  # type:ignore[no-any-return]
+        async with self._session.post(
+            f"{self.base_url}/City", json=payload
+        ) as r:
+            r.raise_for_status()
+            return await r.json(encoding="UTF-8")  # type:ignore[no-any-return]
 
     async def download_summary(
         self, payload: ParquetDataJSON
     ) -> DownloadSummaryJSON:
         """post request to /DownloadSummary"""
-        async with self._semaphore:
-            async with self._session.post(
-                f"{self.base_url}/DownloadSummary", json=payload
-            ) as r:
-                r.raise_for_status()
-                return await r.json(encoding="UTF-8")  # type:ignore[no-any-return]
+        async with self._session.post(
+            f"{self.base_url}/DownloadSummary", json=payload
+        ) as r:
+            r.raise_for_status()
+            return await r.json(encoding="UTF-8")  # type:ignore[no-any-return]
 
     async def download_urls(self, payload: ParquetDataJSON) -> str:
         """post request to /ParquetFile/urls"""
-        async with self._semaphore:
-            async with self._session.post(
-                f"{self.base_url}/ParquetFile/urls", json=payload
-            ) as r:
-                r.raise_for_status()
-                return await r.text(encoding="UTF-8")  # type:ignore[no-any-return]
+        async with self._session.post(
+            f"{self.base_url}/ParquetFile/urls", json=payload
+        ) as r:
+            r.raise_for_status()
+            return await r.text(encoding="UTF-8")  # type:ignore[no-any-return]
 
     async def download_binary(self, url: str, path: Path) -> Path:
         """get request to `url`, write response body content (in binary form) into a a binary file,
