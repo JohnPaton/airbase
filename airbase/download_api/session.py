@@ -21,14 +21,14 @@ from async_property import async_cached_property
 from tqdm import tqdm
 
 from ..summary import COUNTRY_CODES
-from .api_client import (
+from .client import Client, ClientResponseError
+from .dataset import (
     Dataset,
     ParquetData,
     request_info_by_city,
     request_info_by_country,
 )
-from .api_types import DownloadSummaryJSON
-from .concrete_api_client import Client, ClientResponseError
+from .types import DownloadSummaryJSON
 
 _T = TypeVar("_T")
 

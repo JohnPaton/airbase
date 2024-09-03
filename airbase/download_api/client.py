@@ -19,7 +19,7 @@ if sys.version_info >= (3, 11):  # pragma:no cover
 else:
     from typing_extensions import Self  # pragma:no cover
 
-from .api_types import (
+from .types import (
     CityJSON,
     CountryJSON,
     DownloadSummaryJSON,

@@ -7,12 +7,12 @@ import subprocess
 from contextlib import closing
 from pathlib import Path
 
-from airbase.download_api.api_types import (
+from airbase.download_api.session import pollutant_id_from_url
+from airbase.download_api.types import (
     CityJSON,
     CountryJSON,
     PropertyJSON,
 )
-from airbase.download_api.download_session import pollutant_id_from_url
 
 BASE_URL = "https://eeadmz1-downloads-api-appservice.azurewebsites.net"
 

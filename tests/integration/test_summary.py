@@ -9,7 +9,7 @@ from airbase.download_api import Client
 from airbase.summary import COUNTRY_CODES, DB
 
 if TYPE_CHECKING:
-    from airbase.download_api.api_types import (
+    from airbase.download_api.types import (
         CityJSON,
         CountryJSON,
         PropertyJSON,

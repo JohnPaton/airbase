@@ -1,8 +1,8 @@
-from .api_client import (
+from .client import Client
+from .dataset import (
     Dataset,
     ParquetData,
     request_info_by_city,
     request_info_by_country,
 )
-from .concrete_api_client import Client
-from .download_session import DownloadSession, download
+from .session import DownloadSession, download
