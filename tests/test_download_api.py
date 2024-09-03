@@ -8,7 +8,6 @@ from pathlib import Path
 import pytest
 
 from airbase.download_api import (
-    AbstractClient,
     Client,
     Dataset,
     DownloadSession,
@@ -22,15 +21,15 @@ from tests.resources import CSV_PARQUET_URLS_RESPONSE
 
 
 @pytest.fixture
-def client(mock_api) -> AbstractClient:
+def client(mock_api) -> Client:
     """Client with loaded mocks"""
     return Client()
 
 
 @pytest.fixture
-def session(client: AbstractClient, mock_api) -> DownloadSession:
+def session(mock_api) -> DownloadSession:
     """DownloadSession with loaded mocks"""
-    return DownloadSession(custom_client=client)
+    return DownloadSession()
 
 
 def test_Dataset():
@@ -151,7 +150,7 @@ def test_DownloadInfo_request_info(
 
 
 @pytest.mark.asyncio
-async def test_Client_country(client: AbstractClient):
+async def test_Client_country(client: Client):
     async with client:
         payload = await client.country()
 
@@ -162,7 +161,7 @@ async def test_Client_country(client: AbstractClient):
 
 
 @pytest.mark.asyncio
-async def test_Client_property(client: AbstractClient):
+async def test_Client_property(client: Client):
     async with client:
         payload = await client.property()
 
@@ -174,7 +173,7 @@ async def test_Client_property(client: AbstractClient):
 
 
 @pytest.mark.asyncio
-async def test_Client_city(client: AbstractClient):
+async def test_Client_city(client: Client):
     async with client:
         payload = await client.city(tuple(COUNTRY_CODES))
 
@@ -187,7 +186,7 @@ async def test_Client_city(client: AbstractClient):
 
 
 @pytest.mark.asyncio
-async def test_Client_download_urls(client: AbstractClient):
+async def test_Client_download_urls(client: Client):
     info = ParquetData("MT", Dataset.Historical, None, "Valletta")
     async with client:
         text = await client.download_urls(info.payload())

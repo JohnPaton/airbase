@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import asyncio
 import sys
+from contextlib import AbstractAsyncContextManager
 from pathlib import Path
 from types import TracebackType
 
@@ -18,8 +19,7 @@ if sys.version_info >= (3, 11):  # pragma:no cover
 else:
     from typing_extensions import Self  # pragma:no cover
 
-from .abstract_api_client import (
-    AbstractClient,
+from .api_types import (
     CityJSON,
     CountryJSON,
     DownloadSummaryJSON,
@@ -30,11 +30,13 @@ from .abstract_api_client import (
 ClientResponseError = aiohttp.ClientResponseError
 
 
-class Client(AbstractClient):
+class Client(AbstractAsyncContextManager):
     """
     Handle for requests to Parquet downloads API v1
     https://eeadmz1-downloads-api-appservice.azurewebsites.net/swagger/index.html
     """
+
+    base_url = "https://eeadmz1-downloads-api-appservice.azurewebsites.net"
 
     def __init__(
         self,

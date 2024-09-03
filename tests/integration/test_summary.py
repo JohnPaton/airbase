@@ -5,11 +5,11 @@ from typing import TYPE_CHECKING
 import pytest
 import pytest_asyncio
 
-from airbase.download_api import AbstractClient, Client
+from airbase.download_api import Client
 from airbase.summary import COUNTRY_CODES, DB
 
 if TYPE_CHECKING:
-    from airbase.download_api.abstract_api_client import (
+    from airbase.download_api.api_types import (
         CityJSON,
         CountryJSON,
         PropertyJSON,
@@ -17,24 +17,24 @@ if TYPE_CHECKING:
 
 
 @pytest.fixture(scope="module")
-def client() -> AbstractClient:
+def client() -> Client:
     return Client()
 
 
 @pytest_asyncio.fixture(scope="module")
-async def country_json(client: AbstractClient) -> CountryJSON:
+async def country_json(client: Client) -> CountryJSON:
     async with client:
         return await client.country()
 
 
 @pytest_asyncio.fixture(scope="module")
-async def city_json(client: AbstractClient) -> CityJSON:
+async def city_json(client: Client) -> CityJSON:
     async with client:
         return await client.city(tuple(COUNTRY_CODES))
 
 
 @pytest_asyncio.fixture(scope="module")
-async def property_json(client: AbstractClient) -> PropertyJSON:
+async def property_json(client: Client) -> PropertyJSON:
     async with client:
         return await client.property()
 

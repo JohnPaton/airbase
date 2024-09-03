@@ -21,27 +21,26 @@ from async_property import async_cached_property
 from tqdm import tqdm
 
 from ..summary import COUNTRY_CODES
-from .abstract_api_client import AbstractClient, DownloadSummaryJSON
 from .api_client import (
     Dataset,
     ParquetData,
     request_info_by_city,
     request_info_by_country,
 )
+from .api_types import DownloadSummaryJSON
 from .concrete_api_client import Client, ClientResponseError
 
 _T = TypeVar("_T")
 
 
 class DownloadSession(AbstractAsyncContextManager):
-    client: AbstractClient = Client()
+    client: Client = Client()
 
     def __init__(
         self,
         *,
         progress: bool = False,
         raise_for_status: bool = True,
-        custom_client: AbstractClient | None = None,
     ) -> None:
         """
         :param progress: (optional, default `False`)
@@ -51,10 +50,6 @@ class DownloadSession(AbstractAsyncContextManager):
             methods returns "bad" HTTP status codes.
             If False, a :py:func:`warnings.warn` will be issued instead. Default True.
         """
-
-        if custom_client is not None:
-            self.client = custom_client
-
         self.progress = progress
         self.raise_for_status = raise_for_status
 

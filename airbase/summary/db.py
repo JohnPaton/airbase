@@ -12,7 +12,7 @@ else:  # pragma: no cover
     import importlib_resources as resources
 
 if TYPE_CHECKING:
-    from airbase.download_api.abstract_api_client import (
+    from airbase.download_api.api_types import (
         CityJSON,
         CountryJSON,
         PropertyJSON,

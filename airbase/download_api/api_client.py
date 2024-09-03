@@ -5,7 +5,7 @@ from typing import NamedTuple
 from warnings import warn
 
 from ..summary import COUNTRY_CODES, DB
-from .abstract_api_client import ParquetDataJSON
+from .api_types import ParquetDataJSON
 
 
 class Dataset(IntEnum):

@@ -7,7 +7,7 @@ import subprocess
 from contextlib import closing
 from pathlib import Path
 
-from airbase.download_api.abstract_api_client import (
+from airbase.download_api.api_types import (
     CityJSON,
     CountryJSON,
     PropertyJSON,
