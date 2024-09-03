@@ -5,6 +5,7 @@ import sys
 from collections import Counter, defaultdict
 from collections.abc import AsyncIterator, Awaitable, Iterator
 from contextlib import AbstractAsyncContextManager
+from functools import cached_property
 from pathlib import Path
 from types import TracebackType
 from typing import TypeVar
@@ -57,16 +58,8 @@ class DownloadSession(AbstractAsyncContextManager):
         self.progress = progress
         self.raise_for_status = raise_for_status
 
-        """files/Mb downloaded so far"""
-        self.count: Counter[str] = Counter()
-
-        """files/Mb in total"""
-        self.total: Counter[str] = Counter()
-
     async def __aenter__(self) -> Self:
         await self.client.__aenter__()
-        self.count.clear()
-        self.total.clear()
         return self
 
     async def __aexit__(
@@ -76,6 +69,15 @@ class DownloadSession(AbstractAsyncContextManager):
         exc_tb: TracebackType | None,
     ) -> None:
         await self.client.__aexit__(exc_type, exc_val, exc_tb)
+
+        # exit progress bars
+        self.progress_summary.close()
+        self.progress_urls.clear()
+        self.progress_download.clear()
+        # clear cached properties
+        del self.progress_summary
+        del self.progress_urls
+        del self.progress_download
 
     @async_cached_property
     async def countries(self) -> list[str]:
@@ -122,21 +124,54 @@ class DownloadSession(AbstractAsyncContextManager):
         :return: total number of files and file size
         """
         unique_info = set(download_infos)
-        with tqdm(
-            desc="totalize",
-            unit="requests",
-            total=len(download_infos),
-            disable=not self.progress,
-        ) as progress_bar:
-            async for summary in self.__completed(
-                self.client.download_summary(info.payload())
-                for info in unique_info
-            ):
-                progress_bar.update()
-                self.total.update(numberRequests=1, **summary)
+        self.progress_summary.total += len(unique_info)
+        total: Counter[str] = Counter()  # numberFiles [1], size [Mb]
+        async for summary in self.__completed(
+            self.client.download_summary(info.payload()) for info in unique_info
+        ):
+            self.progress_summary.update()
+            total.update(summary)
+        self.progress_summary.refresh()
 
-        return dict(
-            numberFiles=self.total["numberFiles"], size=self.total["size"]
+        self.progress_urls.total += total["numberFiles"]
+        self.progress_urls.refresh()
+
+        self.progress_download.total += total["size"] * 1_024 * 1_024
+        self.progress_download.refresh()
+
+        return dict(numberFiles=total["numberFiles"], size=total["size"])
+
+    @cached_property
+    def progress_summary(self) -> tqdm:
+        return tqdm(
+            position=0,
+            desc="summary".ljust(8),
+            unit="requests",
+            total=0,
+            disable=not self.progress,
+        )
+
+    @cached_property
+    def progress_urls(self) -> tqdm:
+        return tqdm(
+            position=1,
+            desc="URLs".ljust(8),
+            unit="URL",
+            unit_scale=True,
+            total=0,
+            disable=not self.progress,
+        )
+
+    @cached_property
+    def progress_download(self) -> tqdm:
+        return tqdm(
+            position=2,
+            desc="download".ljust(8),
+            unit="b",
+            unit_scale=True,
+            unit_divisor=1_024,
+            total=0,
+            disable=not self.progress,
         )
 
     async def url_to_files(
@@ -155,32 +190,23 @@ class DownloadSession(AbstractAsyncContextManager):
         :return: unique file URLs among from all the responses
         """
         unique_info = set(download_infos)
-        self.count.update(numberFiles=len(download_infos) - len(unique_info))
-        if not self.total["numberFiles"]:  # did not run summary before
-            self.total.update(numberFiles=len(download_infos))
+        if self.progress and not self.progress_urls.total:
+            await self.summary(*unique_info)
+        self.progress_urls.update(len(download_infos) - len(unique_info))
 
-        with tqdm(
-            desc="generate",
-            unit="files",
-            unit_scale=True,
-            initial=self.count["numberFiles"],
-            total=self.total["numberFiles"],
-            disable=not self.progress,
-        ) as progress_bar:
-            async for text in self.__completed(
-                self.client.download_urls(info.payload())
-                for info in unique_info
+        async for text in self.__completed(
+            self.client.download_urls(info.payload()) for info in unique_info
+        ):
+            lines = (line.strip() for line in text.splitlines())
+            if urls := set(
+                line
+                for line in lines
+                if line.startswith(("http://", "https://"))
             ):
-                self.count.update(numberRequests=1)
-                lines = (line.strip() for line in text.splitlines())
-                if urls := set(
-                    line
-                    for line in lines
-                    if line.startswith(("http://", "https://"))
-                ):
-                    progress_bar.update(numberFiles := len(urls))
-                    self.count.update(numberFiles=numberFiles)
-                    yield urls
+                self.progress_urls.update(len(urls))
+                yield urls
+
+        self.progress_urls.refresh()
 
     async def download_to_directory(
         self, root_path: Path, *urls: str, skip_existing: bool = True
@@ -207,34 +233,25 @@ class DownloadSession(AbstractAsyncContextManager):
             existing = {
                 url: path
                 for url, path in url_paths.items()
+                # re-download empty files
                 if path.is_file() and path.stat().st_size >= 0
             }
             for url, path in existing.items():
-                # re-download empty files
-                self.count.update(size=path.stat().st_size / 1_048_576)  # type:ignore[call-overload]
+                self.progress_download.update(path.stat().st_size)
                 del url_paths[url]
 
         # create missing country sum-directories before downloading
         for parent in {path.parent for path in url_paths.values()}:
             parent.mkdir(exist_ok=True)
 
-        with tqdm(
-            desc="download",
-            unit="b",
-            unit_scale=True,
-            unit_divisor=1_024,
-            initial=self.count["size"],
-            total=self.total["size"],
-            disable=not self.progress,
-            leave=self.count["numberRequests"] >= self.total["numberRequests"],
-        ) as progress_bar:
-            async for path in self.__completed(
-                self.client.download_binary(url, path)
-                for url, path in url_paths.items()
-            ):
-                assert path.is_file(), f"missing {path.name}"
-                progress_bar.update(size := path.stat().st_size)
-                self.count.update(size=size / 1_048_576)  # type:ignore[call-overload]
+        async for path in self.__completed(
+            self.client.download_binary(url, path)
+            for url, path in url_paths.items()
+        ):
+            assert path.is_file(), f"missing {path.name}"
+            self.progress_download.update(path.stat().st_size)
+
+        self.progress_download.refresh()
 
     async def __completed(
         self, jobs: Iterator[Awaitable[_T]]
@@ -296,32 +313,21 @@ async def download(
 
     session.progress = not quiet
     session.raise_for_status = raise_for_status
-    async with session:
-        await session.summary(*info)
-        if not summary_only:
-            async for urls in session.url_to_files(*info):
-                await session.download_to_directory(
-                    root_path,
-                    *urls,
-                    skip_existing=not overwrite,
-                )
-
     if summary_only:
-        tqdm.write(
+        async with session:
+            summary = await session.summary(*info)
+        print(
             "found {numberFiles:_} file(s), ~{size:_} Mb in total".format_map(
-                session.total
+                summary
             ),
             file=sys.stderr,
         )
-    elif not quiet:
-        tqdm.write(
-            (
-                "got {numberFiles:_} file(s), ~{size:_.0f} Mb".format_map(
-                    session.count
-                )
-                + " from {numberFiles:_} file(s), ~{size:_} Mb".format_map(
-                    session.total
-                )
-            ),
-            file=sys.stderr,
-        )
+        return
+
+    async with session:
+        async for urls in session.url_to_files(*info):
+            await session.download_to_directory(
+                root_path,
+                *urls,
+                skip_existing=not overwrite,
+            )
