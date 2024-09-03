@@ -9,7 +9,7 @@ import typer
 
 from . import __version__
 from .download_api import Dataset, download
-from .summary import COUNTRY_CODES, POLLUTANT_NAMES
+from .summary import DB
 
 main = typer.Typer(add_completion=False, no_args_is_help=True)
 
@@ -18,7 +18,7 @@ class Country(str, Enum):
     _ignore_ = "country Country"  # type:ignore[misc]
 
     Country = vars()
-    for country in sorted(COUNTRY_CODES):
+    for country in sorted(DB.countries()):
         Country[country] = country
 
     def __str__(self) -> str:
@@ -29,7 +29,7 @@ class Pollutant(str, Enum):
     _ignore_ = "poll Pollutant"  # type:ignore[misc]
 
     Pollutant = vars()
-    for poll in sorted(POLLUTANT_NAMES, key=lambda poll: len(poll)):
+    for poll in sorted(DB.pollutants(), key=lambda poll: len(poll)):
         Pollutant[poll] = poll
 
     def __str__(self) -> str:
