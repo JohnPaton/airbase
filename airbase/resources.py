@@ -5,7 +5,7 @@ import datetime
 E1A_SUMMARY_URL = "http://discomap.eea.europa.eu/map/fme/E1a/summaryE1a.js"
 
 LINK_LIST_URL_TEMPLATE = (
-    "http://fme.discomap.eea.europa.eu/fmedatastreaming/"
+    "https://fme.discomap.eea.europa.eu/fmedatastreaming/"
     "AirQualityDownload/AQData_Extract.fmw"
     "?CountryCode={country}"
     "&CityName="
@@ -18,6 +18,11 @@ LINK_LIST_URL_TEMPLATE = (
     "&Output=TEXT"
     "&UpdateDate={update_date}"
 )
+FME_TOKEN = "8f3a54b3e7054080813237004b35694fbff43580"
+LIST_URL_HEADERS = {
+    "Authorization": f"fmetoken token={FME_TOKEN}",
+    "Content-Type": "application/json",
+}
 
 METADATA_URL = (
     "http://discomap.eea.europa.eu/map/fme/metadata/PanEuropean_metadata.csv"
