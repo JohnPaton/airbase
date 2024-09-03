@@ -179,3 +179,6 @@ class DB:
                 dict(notation=pollutant, id=definition_url)
                 for (pollutant, definition_url) in cur
             ]
+
+
+COUNTRY_CODES = set(DB.countries())
