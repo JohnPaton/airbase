@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import re
-from itertools import chain
 from pathlib import Path
 
 import pytest
@@ -12,7 +11,7 @@ from airbase.download_api import (
     DownloadSession,
     ParquetData,
 )
-from airbase.summary import COUNTRY_CODES, POLLUTANT_IDS, POLLUTANT_NAMES
+from airbase.summary import COUNTRY_CODES, DB
 from tests import resources
 
 
@@ -48,13 +47,7 @@ async def test_countries(countries: list[str]):
 
 @pytest.mark.asyncio
 async def test_pollutants(pollutants: dict[str, set[str]]):
-    assert pollutants.keys() == POLLUTANT_NAMES, "pollutant names changed"
-    ids = tuple(chain.from_iterable(pollutants.values()))
-    assert set(ids) == POLLUTANT_IDS, "duplicated pollutant IDs"
-    assert len(ids) == len(set(ids)), "duplicated pollutant IDs"
-
-    for poll, id in {"PM10": 5, "O3": 7, "NO2": 8, "SO2": 1}.items():
-        assert pollutants.get(poll) == {id}, f"unknown {poll} {id=}"
+    assert pollutants == DB.pollutants()
 
 
 @pytest.mark.parametrize(

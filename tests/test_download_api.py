@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import json
 import re
-from itertools import chain
 from pathlib import Path
 
 import pytest
@@ -16,7 +15,7 @@ from airbase.download_api import (
     request_info_by_city,
     request_info_by_country,
 )
-from airbase.summary import COUNTRY_CODES, POLLUTANT_NAMES
+from airbase.summary import COUNTRY_CODES, DB
 from tests.resources import CSV_PARQUET_URLS_RESPONSE
 
 
@@ -166,6 +165,7 @@ async def test_Client_property(client: Client):
         payload = await client.property()
 
     # some pollutants have more than one ID
+    POLLUTANT_NAMES = set(DB.pollutants())
     assert len(payload) >= len(POLLUTANT_NAMES)
 
     notations = set(pollutant["notation"] for pollutant in payload)
@@ -231,10 +231,7 @@ async def test_DownloadSession_pollutants(session: DownloadSession):
     async with session:
         pollutants = await session.pollutants
 
-    assert pollutants.keys() == POLLUTANT_NAMES
-
-    ids = tuple(chain.from_iterable(pollutants.values()))
-    assert len(ids) == len(set(ids)) == 648
+    assert pollutants == DB.pollutants()
 
 
 @pytest.mark.asyncio
