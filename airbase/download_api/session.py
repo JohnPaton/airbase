@@ -204,7 +204,10 @@ class DownloadSession(AbstractAsyncContextManager):
         self.progress_urls.refresh()
 
     async def download_to_directory(
-        self, root_path: Path, *urls: str, skip_existing: bool = True
+        self,
+        root_path: Path,
+        *urls: str,
+        skip_existing: bool = True,
     ) -> None:
         """
         download into a directory, files for different counties are kept on different sub directories
@@ -247,6 +250,29 @@ class DownloadSession(AbstractAsyncContextManager):
             self.progress_download.update(path.stat().st_size)
 
         self.progress_download.refresh()
+
+    async def download_metadata(
+        self,
+        path: Path,
+        skip_existing: bool = True,
+    ) -> None:
+        """
+        download station metadata into the given `path`.
+
+        :param path: :py:class:`pathlib.Path` to the station metadata (parent directory must exist)
+        :param skip_existing: (optional, default `True`)
+            Don't re-download metadata if `path` already exists.
+            If False, `path` may be overwritten.
+        """
+        if not path.parent.is_dir():  # pragma: no cover
+            raise NotADirectoryError(
+                f"{path.parent.resolve()} is not a directory."
+            )
+
+        if skip_existing and path.exists():
+            return
+
+        await self.client.download_metadata(path)
 
     async def __completed(
         self, jobs: Iterator[Awaitable[_T]]

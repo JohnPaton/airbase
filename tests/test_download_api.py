@@ -294,6 +294,20 @@ async def test_DownloadSession_download_to_directory(
 
 
 @pytest.mark.asyncio
+async def test_DownloadSession_download_metadata(
+    tmp_path: Path, session: DownloadSession
+):
+    path = tmp_path / "metadata.csv"
+    assert not path.is_file()
+    async with session:
+        await session.download_metadata(path)
+        assert path.is_file()
+
+    with path.open() as file:
+        assert len(file.readlines()) == 276
+
+
+@pytest.mark.asyncio
 async def test_download(tmp_path: Path, session: DownloadSession):
     assert not tuple(tmp_path.glob("MT/*.parquet"))
     await download(
