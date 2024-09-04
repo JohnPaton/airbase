@@ -4,7 +4,7 @@ import json
 import subprocess
 from pathlib import Path
 
-from airbase.download_api import Dataset, ParquetData
+from airbase.parquet_api import Dataset, ParquetData
 
 BASE_URL = "https://eeadmz1-downloads-api-appservice.azurewebsites.net"
 

@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from airbase.download_api import (
+from airbase.parquet_api import (
     Client,
     Dataset,
     ParquetData,

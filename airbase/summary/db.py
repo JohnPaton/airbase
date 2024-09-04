@@ -12,7 +12,7 @@ else:  # pragma: no cover
     import importlib_resources as resources
 
 if TYPE_CHECKING:
-    from airbase.download_api.types import (
+    from airbase.parquet_api.types import (
         CityJSON,
         CountryJSON,
         PropertyJSON,

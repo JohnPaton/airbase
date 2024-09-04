@@ -8,7 +8,7 @@ from typing import List, Optional
 import typer
 
 from . import __version__
-from .download_api import Dataset, download
+from .parquet_api import Dataset, download
 from .summary import DB
 
 main = typer.Typer(add_completion=False, no_args_is_help=True)

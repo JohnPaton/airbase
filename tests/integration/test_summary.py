@@ -5,11 +5,11 @@ from typing import TYPE_CHECKING
 import pytest
 import pytest_asyncio
 
-from airbase.download_api import Client
+from airbase.parquet_api import Client
 from airbase.summary import COUNTRY_CODES, DB
 
 if TYPE_CHECKING:
-    from airbase.download_api.types import (
+    from airbase.parquet_api.types import (
         CityJSON,
         CountryJSON,
         PropertyJSON,

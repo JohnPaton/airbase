@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 import pytest_asyncio
 
-from airbase.download_api import (
+from airbase.parquet_api import (
     Dataset,
     ParquetData,
     Session,

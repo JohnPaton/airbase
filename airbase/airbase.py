@@ -5,8 +5,8 @@ import sys
 from pathlib import Path
 from typing import Iterable, Literal, TypedDict
 
-from .download_api import Dataset, Session, download
 from .fetch import fetch_text
+from .parquet_api import Dataset, Session, download
 from .resources import METADATA_URL
 from .summary import DB
 from .util import string_safe_list

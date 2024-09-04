@@ -7,8 +7,8 @@ import subprocess
 from contextlib import closing
 from pathlib import Path
 
-from airbase.download_api.session import pollutant_id_from_url
-from airbase.download_api.types import (
+from airbase.parquet_api.session import pollutant_id_from_url
+from airbase.parquet_api.types import (
     CityJSON,
     CountryJSON,
     PropertyJSON,
