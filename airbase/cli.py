@@ -56,7 +56,9 @@ def callback(
 COUNTRIES = typer.Option([], "-c", "--country")
 POLLUTANTS = typer.Option([], "-p", "--pollutant")
 CITIES = typer.Option([], "-C", "--city", help="only from selected <cities>")
-PATH = typer.Option("data", "--path", exists=True, dir_okay=True, writable=True)
+METADATA = typer.Option(
+    False, "-M", "--metadata", help="download station metadata"
+)
 SUMMARY = typer.Option(
     False,
     "-n",
@@ -75,6 +77,7 @@ def historical(
     countries: List[Country] = COUNTRIES,
     pollutants: List[Pollutant] = POLLUTANTS,
     cities: List[str] = CITIES,
+    metadata: bool = METADATA,
     path: Path = typer.Option(
         "data/historical", "--path", exists=True, dir_okay=True, writable=True
     ),
@@ -92,6 +95,7 @@ def historical(
             countries=set(map(str, countries)),
             pollutants=set(map(str, pollutants)),
             cities=set(cities),
+            metadata=metadata,
             summary_only=summary_only,
             overwrite=overwrite,
             quiet=quiet,
@@ -104,6 +108,7 @@ def verified(
     countries: List[Country] = COUNTRIES,
     pollutants: List[Pollutant] = POLLUTANTS,
     cities: List[str] = CITIES,
+    metadata: bool = METADATA,
     path: Path = typer.Option(
         "data/verified", "--path", exists=True, dir_okay=True, writable=True
     ),
@@ -121,6 +126,7 @@ def verified(
             countries=set(map(str, countries)),
             pollutants=set(map(str, pollutants)),
             cities=set(cities),
+            metadata=metadata,
             summary_only=summary_only,
             overwrite=overwrite,
             quiet=quiet,
@@ -133,6 +139,7 @@ def unverified(
     countries: List[Country] = COUNTRIES,
     pollutants: List[Pollutant] = POLLUTANTS,
     cities: List[str] = CITIES,
+    metadata: bool = METADATA,
     path: Path = typer.Option(
         "data/unverified", "--path", exists=True, dir_okay=True, writable=True
     ),
@@ -150,6 +157,7 @@ def unverified(
             countries=set(map(str, countries)),
             pollutants=set(map(str, pollutants)),
             cities=set(cities),
+            metadata=metadata,
             summary_only=summary_only,
             overwrite=overwrite,
             quiet=quiet,

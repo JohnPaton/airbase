@@ -272,6 +272,8 @@ class Session(AbstractAsyncContextManager):
         if skip_existing and path.exists():
             return
 
+        if self.progress:
+            tqdm.write(f"downloading station metadata to {path}")
         await self.client.download_metadata(path)
 
     async def __completed(
@@ -307,6 +309,7 @@ async def download(
     countries: set[str],
     pollutants: set[str] | None = None,
     cities: set[str] | None = None,
+    metadata: bool = False,
     summary_only: bool = False,
     overwrite: bool = False,
     quiet: bool = True,
@@ -346,6 +349,9 @@ async def download(
         return
 
     async with session:
+        if metadata:
+            await session.download_metadata(root_path / "metadata.csv")
+
         async for urls in session.url_to_files(*info):
             await session.download_to_directory(
                 root_path,
