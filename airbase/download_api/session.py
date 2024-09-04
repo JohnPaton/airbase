@@ -16,12 +16,12 @@ if sys.version_info >= (3, 11):  # pragma:no cover
 else:
     from typing_extensions import Self  # pragma:no cover
 
-
+import aiohttp
 from async_property import async_cached_property
 from tqdm import tqdm
 
 from ..summary import COUNTRY_CODES
-from .client import Client, ClientResponseError
+from .client import Client
 from .dataset import (
     Dataset,
     ParquetData,
@@ -257,7 +257,7 @@ class DownloadSession(AbstractAsyncContextManager):
                 yield await future
             except asyncio.CancelledError:  # pragma:no cover
                 continue
-            except ClientResponseError as e:  # pragma:no cover
+            except aiohttp.ClientResponseError as e:  # pragma:no cover
                 if self.raise_for_status:
                     raise
                 warn(str(e), category=RuntimeWarning)

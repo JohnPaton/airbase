@@ -218,6 +218,18 @@ async def test_Client_download_binary_files(tmp_path: Path, client: Client):
 
 
 @pytest.mark.asyncio
+async def test_Client_download_metadata(tmp_path: Path, client: Client):
+    path = tmp_path / "metadata.csv"
+    assert not path.is_file()
+    async with client:
+        assert await client.download_metadata(path) == path
+        assert path.is_file()
+
+    with path.open() as file:
+        assert len(file.readlines()) == 276
+
+
+@pytest.mark.asyncio
 async def test_DownloadSession_country(session: DownloadSession):
     async with session:
         country_codes = await session.countries

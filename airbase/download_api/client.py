@@ -10,6 +10,8 @@ import sys
 from contextlib import AbstractAsyncContextManager
 from pathlib import Path
 from types import TracebackType
+from warnings import warn
+from zipfile import ZipFile, is_zipfile
 
 import aiofiles
 import aiohttp
@@ -27,7 +29,9 @@ from .types import (
     PropertyJSON,
 )
 
-ClientResponseError = aiohttp.ClientResponseError
+API_BASE_URL = "https://eeadmz1-downloads-api-appservice.azurewebsites.net"
+METADATA_URL = "https://discomap.eea.europa.eu/App/AQViewer/download?fqn=Airquality_Dissem.b2g.measurements&f=csv"
+METADATA_ARCHIVE = "DataExtract.csv.zip"
 
 
 class Client(AbstractAsyncContextManager):
@@ -35,8 +39,6 @@ class Client(AbstractAsyncContextManager):
     Handle for requests to Parquet downloads API v1
     https://eeadmz1-downloads-api-appservice.azurewebsites.net/swagger/index.html
     """
-
-    base_url = "https://eeadmz1-downloads-api-appservice.azurewebsites.net"
 
     def __init__(
         self,
@@ -88,20 +90,20 @@ class Client(AbstractAsyncContextManager):
 
     async def country(self) -> CountryJSON:
         """get request to /Country"""
-        async with self._session.get(f"{self.base_url}/Country") as r:
+        async with self._session.get(f"{API_BASE_URL}/Country") as r:
             r.raise_for_status()
             return await r.json(encoding="UTF-8")  # type:ignore[no-any-return]
 
     async def property(self) -> PropertyJSON:
         """get request to /Property"""
-        async with self._session.get(f"{self.base_url}/Property") as r:
+        async with self._session.get(f"{API_BASE_URL}/Property") as r:
             r.raise_for_status()
             return await r.json(encoding="UTF-8")  # type:ignore[no-any-return]
 
     async def city(self, payload: tuple[str, ...]) -> CityJSON:
         """post request to /City"""
         async with self._session.post(
-            f"{self.base_url}/City", json=payload
+            f"{API_BASE_URL}/City", json=payload
         ) as r:
             r.raise_for_status()
             return await r.json(encoding="UTF-8")  # type:ignore[no-any-return]
@@ -111,7 +113,7 @@ class Client(AbstractAsyncContextManager):
     ) -> DownloadSummaryJSON:
         """post request to /DownloadSummary"""
         async with self._session.post(
-            f"{self.base_url}/DownloadSummary", json=payload
+            f"{API_BASE_URL}/DownloadSummary", json=payload
         ) as r:
             r.raise_for_status()
             return await r.json(encoding="UTF-8")  # type:ignore[no-any-return]
@@ -119,7 +121,7 @@ class Client(AbstractAsyncContextManager):
     async def download_urls(self, payload: ParquetDataJSON) -> str:
         """post request to /ParquetFile/urls"""
         async with self._session.post(
-            f"{self.base_url}/ParquetFile/urls", json=payload
+            f"{API_BASE_URL}/ParquetFile/urls", json=payload
         ) as r:
             r.raise_for_status()
             return await r.text(encoding="UTF-8")  # type:ignore[no-any-return]
@@ -135,3 +137,39 @@ class Client(AbstractAsyncContextManager):
                 await f.write(payload)
 
         return path
+
+    async def download_metadata(self, path: Path) -> Path:
+        """download compressed metadata file and returns path to uncompressed csv"""
+        archive = await self.download_binary(
+            METADATA_URL, path.with_name(METADATA_ARCHIVE)
+        )
+        loop = asyncio.get_event_loop()
+        return await loop.run_in_executor(
+            None, extract_metadata_csv, archive, path
+        )
+
+
+def extract_metadata_csv(archive: Path, metadata: Path) -> Path:
+    """extract metadata CSV from zip file"""
+    if archive.suffix != ".zip" or not is_zipfile(archive):
+        warn(
+            f"{archive.name} is not a zip file, skip extraction",
+            category=RuntimeWarning,
+        )
+        return archive
+
+    try:
+        path = archive.with_suffix("")  # without the '.zip'
+        with ZipFile(archive) as zip:
+            zip.extract(path.name, archive.parent)
+    except KeyError:
+        warn(
+            f"{path.name} not in {archive.name}, skip extraction",
+            category=RuntimeWarning,
+        )
+        return archive
+
+    assert path.is_file() and path.stat().st_size > 0
+    archive.unlink()
+
+    return path.rename(metadata)

@@ -43,6 +43,11 @@ def mock_api(response: aioresponses):
         repeat=True,
     )
     response.get(
+        "https://discomap.eea.europa.eu/App/AQViewer/download?fqn=Airquality_Dissem.b2g.measurements&f=csv",
+        body=resources.ZIP_CSV_METADATA_RESPONSE,
+        repeat=False,
+    )
+    response.get(
         re.compile(r"https://.*/../.*\.parquet"),  # any parquet file
         body=b"",
         repeat=True,
