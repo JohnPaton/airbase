@@ -8,34 +8,32 @@ import pytest_asyncio
 
 from airbase.download_api import (
     Dataset,
-    DownloadSession,
     ParquetData,
+    Session,
 )
 from airbase.summary import COUNTRY_CODES, DB
 from tests import resources
 
 
 @pytest.fixture(scope="module")
-def session() -> DownloadSession:
-    return DownloadSession()
+def session() -> Session:
+    return Session()
 
 
 @pytest_asyncio.fixture
-async def countries(session: DownloadSession) -> list[str]:
+async def countries(session: Session) -> list[str]:
     async with session:
         return list(await session.countries)
 
 
 @pytest_asyncio.fixture
-async def pollutants(session: DownloadSession) -> dict[str, set[int]]:
+async def pollutants(session: Session) -> dict[str, set[int]]:
     async with session:
         return dict(await session.pollutants)
 
 
 @pytest_asyncio.fixture
-async def country_cities(
-    session: DownloadSession, country: str
-) -> dict[str, set[str]]:
+async def country_cities(session: Session, country: str) -> dict[str, set[str]]:
     async with session:
         return dict(await session.cities(country))
 
@@ -80,7 +78,7 @@ async def test_cities(
 
 
 @pytest.mark.asyncio
-async def test_cities_invalid_country(session: DownloadSession):
+async def test_cities_invalid_country(session: Session):
     async with session:
         with pytest.warns(UserWarning, match="Unknown country"):
             cities = await session.cities("Norway", "Finland", "USA")
@@ -99,7 +97,7 @@ async def test_cities_invalid_country(session: DownloadSession):
 )
 @pytest.mark.asyncio
 async def test_summary(
-    session: DownloadSession,
+    session: Session,
     pollutant: str,
     country: str,
     files: int,
@@ -113,7 +111,7 @@ async def test_summary(
 
 
 @pytest.mark.asyncio
-async def test_url_to_files(session: DownloadSession):
+async def test_url_to_files(session: Session):
     info = ParquetData("MT", Dataset.Historical, city="Valletta")
     async with session:
         async for urls in session.url_to_files(info):
@@ -127,7 +125,7 @@ async def test_url_to_files(session: DownloadSession):
 
 
 @pytest.mark.asyncio
-async def test_download_to_directory(session: DownloadSession, tmp_path: Path):
+async def test_download_to_directory(session: Session, tmp_path: Path):
     assert not tuple(tmp_path.glob("??/*.parquet"))
     urls = tuple(resources.CSV_PARQUET_URLS_RESPONSE.splitlines())[-5:]
     async with session:

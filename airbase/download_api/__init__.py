@@ -5,7 +5,7 @@ from .dataset import (
     request_info_by_city,
     request_info_by_country,
 )
-from .session import DownloadSession, download
+from .session import Session, download
 
 __all__ = [
     "Client",
@@ -13,6 +13,6 @@ __all__ = [
     "ParquetData",
     "request_info_by_city",
     "request_info_by_country",
-    "DownloadSession",
+    "Session",
     "download",
 ]

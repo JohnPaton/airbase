@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 from typing import Iterable, Literal, TypedDict
 
-from .download_api import Dataset, DownloadSession, download
+from .download_api import Dataset, Session, download
 from .fetch import fetch_text
 from .resources import METADATA_URL
 from .summary import DB
@@ -159,7 +159,7 @@ class AirbaseClient:
 
 
 class AirbaseRequest:
-    session = DownloadSession()
+    session = Session()
 
     def __init__(
         self,

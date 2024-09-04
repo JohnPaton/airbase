@@ -9,8 +9,8 @@ import pytest
 from airbase.download_api import (
     Client,
     Dataset,
-    DownloadSession,
     ParquetData,
+    Session,
     download,
     request_info_by_city,
     request_info_by_country,
@@ -26,9 +26,9 @@ def client(mock_api) -> Client:
 
 
 @pytest.fixture
-def session(mock_api) -> DownloadSession:
-    """DownloadSession with loaded mocks"""
-    return DownloadSession()
+def session(mock_api) -> Session:
+    """Session with loaded mocks"""
+    return Session()
 
 
 def test_Dataset():
@@ -230,7 +230,7 @@ async def test_Client_download_metadata(tmp_path: Path, client: Client):
 
 
 @pytest.mark.asyncio
-async def test_DownloadSession_country(session: DownloadSession):
+async def test_Session_country(session: Session):
     async with session:
         country_codes = await session.countries
 
@@ -239,7 +239,7 @@ async def test_DownloadSession_country(session: DownloadSession):
 
 
 @pytest.mark.asyncio
-async def test_DownloadSession_pollutants(session: DownloadSession):
+async def test_Session_pollutants(session: Session):
     async with session:
         pollutants = await session.pollutants
 
@@ -247,7 +247,7 @@ async def test_DownloadSession_pollutants(session: DownloadSession):
 
 
 @pytest.mark.asyncio
-async def test_DownloadSession_city(session: DownloadSession):
+async def test_Session_city(session: Session):
     async with session:
         cities = await session.cities()
 
@@ -269,7 +269,7 @@ async def test_DownloadSession_city(session: DownloadSession):
 
 
 @pytest.mark.asyncio
-async def test_DownloadSession_url_to_files(session: DownloadSession):
+async def test_Session_url_to_files(session: Session):
     info = ParquetData("MT", Dataset.Historical, None, "Valletta")
     async with session:
         async for urls in session.url_to_files(info):
@@ -283,9 +283,7 @@ async def test_DownloadSession_url_to_files(session: DownloadSession):
 
 
 @pytest.mark.asyncio
-async def test_DownloadSession_download_to_directory(
-    tmp_path: Path, session: DownloadSession
-):
+async def test_Session_download_to_directory(tmp_path: Path, session: Session):
     assert not tuple(tmp_path.glob("??/*.parquet"))
     urls = tuple(CSV_PARQUET_URLS_RESPONSE.splitlines())[-5:]
     async with session:
@@ -294,9 +292,7 @@ async def test_DownloadSession_download_to_directory(
 
 
 @pytest.mark.asyncio
-async def test_DownloadSession_download_metadata(
-    tmp_path: Path, session: DownloadSession
-):
+async def test_Session_download_metadata(tmp_path: Path, session: Session):
     path = tmp_path / "metadata.csv"
     assert not path.is_file()
     async with session:
@@ -308,7 +304,7 @@ async def test_DownloadSession_download_metadata(
 
 
 @pytest.mark.asyncio
-async def test_download(tmp_path: Path, session: DownloadSession):
+async def test_download(tmp_path: Path, session: Session):
     assert not tuple(tmp_path.glob("MT/*.parquet"))
     await download(
         Dataset.Historical,

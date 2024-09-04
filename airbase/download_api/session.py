@@ -33,7 +33,7 @@ from .types import DownloadSummaryJSON
 _T = TypeVar("_T")
 
 
-class DownloadSession(AbstractAsyncContextManager):
+class Session(AbstractAsyncContextManager):
     client: Client = Client()
 
     def __init__(
@@ -311,7 +311,7 @@ async def download(
     overwrite: bool = False,
     quiet: bool = True,
     raise_for_status: bool = False,
-    session: DownloadSession = DownloadSession(),
+    session: Session = Session(),
 ):
     """
     request file urls by country|[city]/pollutant and download unique files
