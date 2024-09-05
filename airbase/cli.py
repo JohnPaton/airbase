@@ -117,7 +117,7 @@ def verified(
     quiet: bool = QUIET,
 ):
     """
-    Verified data (E1a) from 2013 to 2022 reported by countries by 30 September each year for the previous year.
+    Verified data (E1a) from 2013 to 2023 reported by countries by 30 September each year for the previous year.
     """
     asyncio.run(
         download(
@@ -148,7 +148,7 @@ def unverified(
     quiet: bool = QUIET,
 ):
     """
-    Unverified data transmitted continuously (Up-To-Date/UTD/E2a) data from the beginning of 2023.
+    Unverified data transmitted continuously (Up-To-Date/UTD/E2a) data from the beginning of 2024.
     """
     asyncio.run(
         download(

@@ -1,5 +1,5 @@
 """
-Abstract Client for Parquet downloads API v1
+type annotations from
 https://eeadmz1-downloads-api-appservice.azurewebsites.net/swagger/index.html
 """
 
