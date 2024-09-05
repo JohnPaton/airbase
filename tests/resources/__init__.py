@@ -5,7 +5,11 @@ if sys.version_info >= (3, 11):
 else:
     import importlib_resources as resources
 
-METADATA_RESPONSE: str
+# Legacy CSV API
+LEGACY_CSV_URLS_RESPONSE: str
+LEGACY_METADATA_RESPONSE: str
+
+# Parquet downloads API
 JSON_DOWNLOAD_SUMMARY_RESPONSE: str
 CSV_PARQUET_URLS_RESPONSE: str
 ZIP_CSV_METADATA_RESPONSE: bytes
@@ -13,7 +17,8 @@ ZIP_CSV_METADATA_RESPONSE: bytes
 
 def __getattr__(name: str):
     text_response = dict(
-        METADATA_RESPONSE="metadata.tsv",
+        LEGACY_CSV_URLS_RESPONSE="Legacy_MT_SO2.csv",
+        LEGACY_METADATA_RESPONSE="Legacy_metadata.tsv",
         JSON_DOWNLOAD_SUMMARY_RESPONSE="MT_Historical_Valletta.json",
         CSV_PARQUET_URLS_RESPONSE="MT_Historical_Valletta.csv",
     )

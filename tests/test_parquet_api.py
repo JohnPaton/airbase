@@ -20,13 +20,13 @@ from tests.resources import CSV_PARQUET_URLS_RESPONSE
 
 
 @pytest.fixture
-def client(mock_api) -> Client:
+def client(mock_parquet_api) -> Client:
     """Client with loaded mocks"""
     return Client()
 
 
 @pytest.fixture
-def session(mock_api) -> Session:
+def session(mock_parquet_api) -> Session:
     """Session with loaded mocks"""
     return Session()
 
@@ -201,7 +201,7 @@ async def test_Client_download_urls(client: Client):
 
 
 @pytest.mark.asyncio
-async def test_Client_download_binary_files(tmp_path: Path, client: Client):
+async def test_Client_download_binary(tmp_path: Path, client: Client):
     urls = {
         "https://data_is_here.eu/FI/data.parquet": tmp_path / "FI.parquet",
         "https://data_is_here.eu/NO/data.parquet": tmp_path / "NO.parquet",

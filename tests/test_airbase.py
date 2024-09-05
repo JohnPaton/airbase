@@ -5,11 +5,11 @@ from pathlib import Path
 import pytest
 
 import airbase
-from tests.resources import METADATA_RESPONSE
+from tests.resources import LEGACY_METADATA_RESPONSE
 
 
 @pytest.fixture
-def client(mock_api, metadata_response) -> airbase.AirbaseClient:
+def client(mock_parquet_api, mock_csv_api) -> airbase.AirbaseClient:
     """initialized client with mocked responses"""
     return airbase.AirbaseClient()
 
@@ -26,7 +26,7 @@ class TestAirbaseClient:
         path = tmp_path / "meta.csv"
         client.download_metadata(path)
         assert path.exists()
-        assert path.read_text() == METADATA_RESPONSE
+        assert path.read_text() == LEGACY_METADATA_RESPONSE
 
     def test_request_raises_bad_country(self, client: airbase.AirbaseClient):
         with pytest.raises(ValueError):

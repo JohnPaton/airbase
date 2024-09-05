@@ -5,7 +5,6 @@ import re
 import pytest
 from aioresponses import aioresponses
 
-from airbase.resources import METADATA_URL
 from airbase.summary import DB
 from tests import resources
 
@@ -18,8 +17,8 @@ def response():
 
 
 @pytest.fixture
-def mock_api(response: aioresponses):
-    """mock responses from Download API entry points"""
+def mock_parquet_api(response: aioresponses):
+    """mock responses from Parquet downloads API"""
     response.get(
         "https://eeadmz1-downloads-api-appservice.azurewebsites.net/Country",
         payload=DB.country_json(),
@@ -55,9 +54,21 @@ def mock_api(response: aioresponses):
 
 
 @pytest.fixture()
-def metadata_response(response: aioresponses):
-    """mock response from metadata url"""
+def mock_csv_api(response: aioresponses):
+    """mock response from Legacy AirQualityExport"""
     response.get(
-        METADATA_URL,
-        body=resources.METADATA_RESPONSE,
+        re.compile(
+            r"https://fme\.discomap\.eea\.europa\.eu/fmedatastreaming/AirQualityDownload/AQData_Extract\.fmw?.*&Output=TEXT&.*"
+        ),
+        body=resources.LEGACY_CSV_URLS_RESPONSE,
+        repeat=True,
+    )
+    response.get(
+        "http://discomap.eea.europa.eu/map/fme/metadata/PanEuropean_metadata.csv",
+        body=resources.LEGACY_METADATA_RESPONSE,
+    )
+    response.get(
+        re.compile(r"https://.*/../.*\.csv"),  # any CSV file
+        body="",
+        repeat=True,
     )

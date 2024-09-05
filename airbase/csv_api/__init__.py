@@ -1,3 +1,4 @@
+from .client import Client
 from .dataset import (
     CSVData,
     Source,
@@ -6,6 +7,7 @@ from .dataset import (
 )
 
 __all__ = [
+    "Client",
     "CSVData",
     "Source",
     "request_info_by_city",

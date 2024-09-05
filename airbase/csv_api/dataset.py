@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from enum import Enum
-from itertools import product
+from itertools import chain, product
 from typing import NamedTuple
 from warnings import warn
 
@@ -38,30 +38,29 @@ class Output(str, Enum):
 
 class CSVData(NamedTuple):
     """
-    info needed for requesting the URLs for country, source and year
-    the request can be further restricted with the `pollutant` and `city` param
+    info needed for requesting the URLs for country, source, year and pollutant_id
+    the request can be further restricted with the `city` param
     """
 
     country: str
+    pollutant_id: int
     source: Source
     year: int
-    pollutant: int | None = None
     city: str | None = None
     output: Output = Output.TEXT
 
     def __hash__(self) -> int:
         return hash(str(self))
 
-    def payload(self) -> CSVDataJSON:
+    def param(self) -> CSVDataJSON:
         payload: CSVDataJSON = dict(
             CountryCode=self.country,
+            Pollutant=self.pollutant_id,
             Year_from=self.year,
             Year_to=self.year,
             Source=self.source,
             Output=self.output,
         )
-        if self.pollutant is not None:
-            payload["Pollutant"] = self.pollutant
         if self.city is not None:
             payload["CityName"] = self.city
         return payload
@@ -78,17 +77,16 @@ def request_info_by_city(
             continue
         countries[city] = country
 
-    if pollutant is None:
-        return set(
-            CSVData(country, source, year, city=city)
-            for city, country in countries.items()
-        )
+    if pollutant:
+        ids = set(DB.search_pollutants(*pollutant))
+    else:
+        ids = set(chain.from_iterable(DB.pollutants().values()))
 
     return set(
-        CSVData(country, source, year, id, city)
+        CSVData(country, id, source, year, city=city)
         for (city, country), id in product(
             countries.items(),
-            DB.search_pollutants(*pollutant),
+            ids,
         )
     )
 
@@ -100,16 +98,15 @@ def request_info_by_country(
     for country in set(countries) - COUNTRY_CODES:
         warn(f"Unknown {country=}, skip", UserWarning, stacklevel=-2)
 
-    if pollutant is None:
-        return set(
-            CSVData(country, source, year)
-            for country in COUNTRY_CODES.intersection(countries)
-        )
+    if pollutant:
+        ids = set(DB.search_pollutants(*pollutant))
+    else:
+        ids = set(chain.from_iterable(DB.pollutants().values()))
 
     return set(
-        CSVData(country, source, year, id)
+        CSVData(country, id, source, year)
         for country, id in product(
             COUNTRY_CODES.intersection(countries),
-            DB.search_pollutants(*pollutant),
+            ids,
         )
     )
