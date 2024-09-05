@@ -108,8 +108,8 @@ class DB:
         :param query: The pollutant to search for.
         :param limit: (optional) Max number of results.
 
-        :return: The best pollutant matches, as a dictionary with
-        with notation as keys with IDs as values, e.g. {"NO": {38}, ...}
+        :return: The best pollutant matches, as tuples of notation and ID,
+            e.g. ("NO", 38)
         """
 
         with cls.cursor() as cur:
@@ -123,6 +123,28 @@ class DB:
             )
             for pollutant, pollutant_id in cur.fetchall():
                 yield Pollutant(pollutant, pollutant_id)
+
+    @classmethod
+    def search_pollutants(cls, *pollutants: str) -> Iterator[int]:
+        """
+        Search for a pollutant ID numbers based from exact matches to pollutant names.
+
+        :param pollutants: The pollutant name(s)/notation(s) to search for.
+
+        :return: ID(s) corresponding to the name(s)/notation(s),
+            e.g. "NO" --> 38
+        """
+
+        with cls.cursor() as cur:
+            cur.execute(
+                f"""
+                SELECT pollutant_id FROM pollutants
+                WHERE pollutant in ({",".join("?"*len(pollutants))});
+                """,
+                pollutants,
+            )
+            for row in cur.fetchall():
+                yield row[0]
 
     @classmethod
     def search_city(cls, city: str) -> str | None:

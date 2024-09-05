@@ -116,7 +116,7 @@ def test_request_info_by_country_warning(
         ),
     ),
 )
-def test_DownloadInfo_request_info(
+def test_ParquetData_payload(
     pollutant: str,
     country: str,
     city: str | None,
