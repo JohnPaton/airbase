@@ -83,29 +83,25 @@ class Session(AbstractAsyncContextManager):
         """remove URL from unique URLs ready for download"""
         self._urls_to_download.remove(url)
 
-    async def url_to_files(self, *download_infos: CSVData) -> int:
+    async def url_to_files(self, *download_infos: CSVData) -> None:
         """
         multiple request for file URLs and return only unique URLs from each responses
 
         :param download_infos: info about requested urls
-
-        :return: number of unique URLs ready for download
         """
         unique_info = set(download_infos)
         with tqdm(
             desc="URLs".ljust(8),
             unit="URL",
             unit_scale=True,
-            disable=not self.progress,
             total=len(unique_info),
+            disable=not self.progress,
         ) as progress:
             async for text in self.__completed(
                 self.client.download_urls(info.param()) for info in unique_info
             ):
                 progress.update()
                 self.add_urls(text.strip().splitlines())
-
-        return self.number_of_urls
 
     async def download_to_directory(
         self,
@@ -121,7 +117,8 @@ class Session(AbstractAsyncContextManager):
             Empty files will be re-downloaded regardless of this option. Default True.
 
         NOTE
-        need to call `url_to_files` first, in order to retrieve the URLs to download
+        need to call `url_to_files` first, in order to retrieve the URLs to download, or
+        add the urls directly with `add_urls`
         """
 
         if not root_path.is_dir():  # pragma: no cover
@@ -160,15 +157,15 @@ class Session(AbstractAsyncContextManager):
             desc="download".ljust(8),
             unit="files",
             unit_scale=True,
-            disable=not self.progress,
             total=len(paths),
+            disable=not self.progress,
         ) as progress:
             async for path in self.__completed(
                 self.client.download_binary(url, path)
                 for path, url in paths.items()
             ):
-                progress.update()
                 assert path.is_file(), f"missing {path.name}"
+                progress.update()
                 url = paths.pop(path)
                 self.remove_url(url)
 
@@ -237,7 +234,6 @@ async def download(
     :param raise_for_status: (optional, default `False`)
         Raise exceptions if any request return "bad" HTTP status codes.
         If False, a :py:func:`warnings.warn` will be issued instead
-
     """
     if cities:  # one request for each city/pollutant
         info = request_info_by_city(

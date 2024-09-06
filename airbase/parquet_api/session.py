@@ -2,10 +2,9 @@ from __future__ import annotations
 
 import asyncio
 import sys
-from collections import Counter, defaultdict
-from collections.abc import AsyncIterator, Awaitable, Iterator
+from collections import defaultdict
+from collections.abc import AsyncIterator, Awaitable, Iterable, Iterator
 from contextlib import AbstractAsyncContextManager
-from functools import cached_property
 from pathlib import Path
 from types import TracebackType
 from typing import TypeVar
@@ -28,7 +27,6 @@ from .dataset import (
     request_info_by_city,
     request_info_by_country,
 )
-from .types import DownloadSummaryJSON
 
 _T = TypeVar("_T")
 
@@ -52,6 +50,9 @@ class Session(AbstractAsyncContextManager):
         """
         self.progress = progress
         self.raise_for_status = raise_for_status
+        self._expected_files: int = 0
+        self._expected_size: int = 0  # in bytes
+        self._urls_to_download: set[str] = set()
 
     async def __aenter__(self) -> Self:
         await self.client.__aenter__()
@@ -65,14 +66,53 @@ class Session(AbstractAsyncContextManager):
     ) -> None:
         await self.client.__aexit__(exc_type, exc_val, exc_tb)
 
-        # exit progress bars
-        self.progress_summary.close()
-        self.progress_urls.clear()
-        self.progress_download.clear()
-        # clear cached properties
-        del self.progress_summary
-        del self.progress_urls
-        del self.progress_download
+    @property
+    def expected_files(self) -> int:
+        """expected number of files to download"""
+        return self._expected_files
+
+    @expected_files.setter
+    def expected_files(self, n: int) -> None:
+        """expected number of files to download"""
+        self._expected_files = n
+
+    @property
+    def expected_size(self) -> int:
+        """expected download size in Mb"""
+        return self._expected_size // (1_024 * 1_024)
+
+    @expected_size.setter
+    def expected_size(self, n: int) -> None:
+        """expected download size in Mb"""
+        self._expected_size = n
+
+    def add_expected(self, numberFiles: int, size: int) -> None:
+        """add to the expected download files and size in Mb"""
+        self._expected_files += numberFiles
+        self._expected_size += size * 1_024 * 1_024
+
+    @property
+    def number_of_urls(self) -> int:
+        """number of unique URLs ready for download"""
+        return len(self._urls_to_download)
+
+    @property
+    def urls(self) -> Iterable[str]:
+        """unique URLs ready for download"""
+        yield from self._urls_to_download
+
+    def add_urls(self, more_urls: Iterable[str]) -> int:
+        """add to the unique URLs ready for download"""
+        old_urls = self.number_of_urls
+        urls = (u.strip() for u in more_urls)
+        self._urls_to_download.update(
+            u for u in urls if u.startswith(("http://", "https://"))
+        )
+        return self.number_of_urls - old_urls
+
+    def remove_url(self, url: str) -> None:
+        """remove URL from unique URLs ready for download"""
+        self._urls_to_download.remove(url)
 
     @async_cached_property
     async def countries(self) -> list[str]:
@@ -108,115 +148,66 @@ class Session(AbstractAsyncContextManager):
             cities[key].add(val)
         return cities
 
-    async def summary(
-        self, *download_infos: ParquetData
-    ) -> DownloadSummaryJSON:
+    async def summary(self, *download_infos: ParquetData) -> None:
         """
         aggregated summary from multiple requests
 
-        :param urls: info about requested urls
-
-        :return: total number of files and file size
+        :param download_infos: info about requested urls
         """
         unique_info = set(download_infos)
-        self.progress_summary.total += len(unique_info)
-        total: Counter[str] = Counter()  # numberFiles [1], size [Mb]
-        async for summary in self.__completed(
-            self.client.download_summary(info.payload()) for info in unique_info
-        ):
-            self.progress_summary.update()
-            total.update(summary)
-        self.progress_summary.refresh()
-
-        self.progress_urls.total += total["numberFiles"]
-        self.progress_urls.refresh()
-
-        self.progress_download.total += total["size"] * 1_024 * 1_024
-        self.progress_download.refresh()
-
-        return dict(numberFiles=total["numberFiles"], size=total["size"])
-
-    @cached_property
-    def progress_summary(self) -> tqdm:
-        return tqdm(
-            position=0,
+        with tqdm(
             desc="summary".ljust(8),
             unit="requests",
-            total=0,
+            total=len(unique_info),
             disable=not self.progress,
-        )
+        ) as progress:
+            async for summary in self.__completed(
+                self.client.download_summary(info.payload())
+                for info in unique_info
+            ):
+                progress.update()
+                self.add_expected(**summary)
 
-    @cached_property
-    def progress_urls(self) -> tqdm:
-        return tqdm(
-            position=1,
-            desc="URLs".ljust(8),
-            unit="URL",
-            unit_scale=True,
-            total=0,
-            disable=not self.progress,
-        )
-
-    @cached_property
-    def progress_download(self) -> tqdm:
-        return tqdm(
-            position=2,
-            desc="download".ljust(8),
-            unit="b",
-            unit_scale=True,
-            unit_divisor=1_024,
-            total=0,
-            disable=not self.progress,
-        )
-
-    async def url_to_files(
-        self, *download_infos: ParquetData
-    ) -> AsyncIterator[set[str]]:
+    async def url_to_files(self, *download_infos: ParquetData) -> None:
         """
         multiple request for file URLs and return only unique URLs from each responses
 
-
-        :param urls: info about requested urls
-        :param progress: show progress bar
-        :param raise_for_status: Raise exceptions if download links
-            return "bad" HTTP status codes. If False,
-            a :py:func:`warnings.warn` will be issued instead.
-
-        :return: unique file URLs among from all the responses
+        :param download_infos: info about requested urls
         """
         unique_info = set(download_infos)
-        if self.progress and not self.progress_urls.total:
+        if self.progress and self.expected_files == 0:
             await self.summary(*unique_info)
-        self.progress_urls.update(len(download_infos) - len(unique_info))
 
-        async for text in self.__completed(
-            self.client.download_urls(info.payload()) for info in unique_info
-        ):
-            lines = (line.strip() for line in text.splitlines())
-            if urls := set(
-                line
-                for line in lines
-                if line.startswith(("http://", "https://"))
+        with tqdm(
+            desc="URLs".ljust(8),
+            unit="URL",
+            unit_scale=True,
+            total=self.expected_files,
+            disable=not self.progress,
+        ) as progress:
+            async for text in self.__completed(
+                self.client.download_urls(info.payload())
+                for info in unique_info
             ):
-                self.progress_urls.update(len(urls))
-                yield urls
-
-        self.progress_urls.refresh()
+                new_urls = self.add_urls(text.strip().splitlines())
+                progress.update(new_urls)
 
     async def download_to_directory(
         self,
         root_path: Path,
-        *urls: str,
         skip_existing: bool = True,
     ) -> None:
         """
         download into a directory, files for different counties are kept on different sub directories
 
         :param root_path: The directory to save files in (must exist)
-        :param urls: urls to files to download
         :param skip_existing: (optional) Don't re-download files if they exist in `root_path`.
             If False, existing files in `root_path` may be overwritten.
             Empty files will be re-downloaded regardless of this option. Default True.
+
+        NOTE
+        need to call `url_to_files` first, in order to retrieve the URLs to download, or
+        add the urls directly with `add_urls`
         """
 
         if not root_path.is_dir():  # pragma: no cover
@@ -224,32 +215,58 @@ class Session(AbstractAsyncContextManager):
                 f"{root_path.resolve()} is not a directory."
             )
 
-        url_paths: dict[str, Path] = {
-            url: root_path / "/".join(url.split("/")[-2:]) for url in urls
+        if self.number_of_urls < 1:
+            warn(
+                f"No URLs to download, call {self.__class__.__name__}.url_to_files before calling this method"
+                f" or add the urls directly with {self.__class__.__name__}.add_urls",
+                UserWarning,
+                stacklevel=2,
+            )
+            return
+
+        paths: dict[Path, str] = {
+            root_path.joinpath(*url.split("/")[-2:]): url for url in self.urls
         }
         if skip_existing:
             existing = {
-                url: path
-                for url, path in url_paths.items()
+                path: size
+                for path in paths
                 # re-download empty files
-                if path.is_file() and path.stat().st_size >= 0
+                if path.is_file() and (size := path.stat().st_size) >= 0
             }
-            for url, path in existing.items():
-                self.progress_download.update(path.stat().st_size)
-                del url_paths[url]
+            for path in existing:
+                url = paths.pop(path)
+                self.remove_url(url)
+            self.add_expected(
+                numberFiles=-len(existing),
+                size=-sum(existing.values()) // (1_024 * 1_024),
+            )
 
         # create missing country sub-directories before downloading
-        for parent in {path.parent for path in url_paths.values()}:
+        for parent in {path.parent for path in paths}:
             parent.mkdir(exist_ok=True)
 
-        async for path in self.__completed(
-            self.client.download_binary(url, path)
-            for url, path in url_paths.items()
-        ):
-            assert path.is_file(), f"missing {path.name}"
-            self.progress_download.update(path.stat().st_size)
+        with tqdm(
+            desc="download".ljust(8),
+            unit="b",
+            unit_scale=True,
+            unit_divisor=1_024,
+            total=self.expected_size * 1_024 * 1_024,
+            disable=not self.progress,
+        ) as progress:
+            async for path in self.__completed(
+                self.client.download_binary(url, path)
+                for path, url in paths.items()
+            ):
+                assert path.is_file(), f"missing {path.name}"
+                progress.update(path.stat().st_size)
+                url = paths.pop(path)
+                self.remove_url(url)
 
-        self.progress_download.refresh()
+        assert not paths, "still some paths to download"
+        assert self.number_of_urls == 0, "still some URLs to download"
+        self.expected_files = 0
+        self.expected_size = 0
 
     async def download_metadata(
         self,
@@ -324,7 +341,6 @@ async def download(
     :param raise_for_status: (optional, default `False`)
         Raise exceptions if any request return "bad" HTTP status codes.
         If False, a :py:func:`warnings.warn` will be issued instead
-
     """
     if cities:  # one request for each city/pollutant
         info = request_info_by_city(dataset, *cities, pollutants=pollutants)
@@ -343,11 +359,10 @@ async def download(
     session.raise_for_status = raise_for_status
     if summary_only:
         async with session:
-            summary = await session.summary(*info)
+            await session.summary(*info)
+
         print(
-            "found {numberFiles:_} file(s), ~{size:_} Mb in total".format_map(
-                summary
-            ),
+            f"found {session.expected_files:_} file(s), ~{session.expected_size:_} Mb in total",
             file=sys.stderr,
         )
         return
@@ -359,9 +374,8 @@ async def download(
                 skip_existing=not overwrite,
             )
 
-        async for urls in session.url_to_files(*info):
-            await session.download_to_directory(
-                root_path,
-                *urls,
-                skip_existing=not overwrite,
-            )
+        await session.url_to_files(*info)
+        await session.download_to_directory(
+            root_path,
+            skip_existing=not overwrite,
+        )
