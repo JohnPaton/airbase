@@ -15,13 +15,12 @@ def client(mock_parquet_api, mock_csv_api) -> airbase.AirbaseClient:
 
 
 class TestAirbaseClient:
-    def test_init(self):
-        client = airbase.AirbaseClient()
+    def test_init(self, client: airbase.AirbaseClient):
         assert isinstance(client.countries, set)
         assert isinstance(client.pollutants, set)
 
     def test_download_metadata(
-        self, tmp_path: Path, capsys, client: airbase.AirbaseClient
+        self, tmp_path: Path, client: airbase.AirbaseClient
     ):
         path = tmp_path / "meta.csv"
         client.download_metadata(path)
@@ -72,7 +71,7 @@ class TestAirbaseClient:
         assert result[0]["poll"] == "NO3"
 
 
-@pytest.mark.usefixtures("mock_api", "metadata_response")
+@pytest.mark.usefixtures("mock_parquet_api", "mock_csv_api")
 class TestAirbaseRequest:
     def test_verbose_produces_output(self, capsys, tmp_path: Path):
         r = airbase.AirbaseRequest(
