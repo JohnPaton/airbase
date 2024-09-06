@@ -25,9 +25,10 @@ class AirbaseClient:
         :example:
             >>> client = AirbaseClient()
             >>> r = client.request("Historical", "NL", "DE", poll=["O3", "NO2"])
-            >>> r.download_to_directory("data/raw")
-            generate: 100%|██████████| 4/4 [00:09<00:00,  2.64s/it]
-            download: 100%|██████████| 1799/1799 [43:39<00:00,  1.95it/s]
+            >>> r.download("data/raw")
+            summary : 100%|██████████| 2/2 [00:00<00:00,  2.19requests/s]
+            URLs    : 100%|██████████| 1.80k/1.80k [00:00<00:00, 17.4kURL/s]
+            download: 2.05Gb [01:58, 18.6Mb/s]
             >>> r.download_metadata("data/metadata.tsv")
             Writing metadata to data/metadata.tsv...
         """
@@ -84,9 +85,10 @@ class AirbaseClient:
         :example:
             >>> client = AirbaseClient()
             >>> r = client.request("Historical", "NL", "DE", poll=["O3", "NO2"])
-            >>> r.download_to_directory("data/raw")
-            generate: 100%|██████████| 4/4 [00:09<00:00,  2.64s/it]
-            download: 100%|██████████| 1799/1799 [43:39<00:00,  1.95it/s]
+            >>> r.download("data/raw")
+            summary : 100%|██████████| 2/2 [00:00<00:00,  2.19requests/s]
+            URLs    : 100%|██████████| 1.80k/1.80k [00:00<00:00, 17.4kURL/s]
+            download: 2.05Gb [01:58, 18.6Mb/s]
             >>> r.download_metadata("data/metadata.tsv")
             Writing metadata to data/metadata.tsv...
         """
@@ -204,7 +206,7 @@ class AirbaseRequest:
         dir: str | Path,
         skip_existing: bool = True,
         raise_for_status: bool = True,
-    ) -> AirbaseRequest:
+    ) -> None:
         """
         Download into a directory, preserving original file structure.
 
@@ -234,8 +236,6 @@ class AirbaseRequest:
                 raise_for_status=raise_for_status,
             )
         )
-
-        return self
 
     def download_metadata(self, filepath: str | Path) -> None:
         """
