@@ -14,6 +14,11 @@ runner = CliRunner()
     "cmd,country,city,pollutant,expected",
     (
         pytest.param(
+            "download", "MT", "Valletta", "SO2",
+            {"MT_1_27896_2024_timeseries.csv"},
+            id="legacy",
+        ),
+        pytest.param(
             "historical", "MT", "Valletta", "PM2.5",
             {"SPO-MT00005_06001_100.parquet"},
             id="historical",
@@ -43,7 +48,7 @@ def test_download(
         result = runner.invoke(main, options.split())
         assert result.exit_code == 0
 
-    files = set(path.name for path in tmp_path.glob(f"{country}/*.parquet"))
+    files = set(path.name for path in tmp_path.glob(f"{country}/*.*"))
     assert files >= expected > set()
 
 

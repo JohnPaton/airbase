@@ -243,13 +243,16 @@ async def download(
         info = request_info_by_city(
             source, year, *cities, pollutants=pollutants
         )
-        assert info, "no info"
     else:  # one request for each country/pollutant
         if not countries:
             countries = COUNTRY_CODES
         info = request_info_by_country(
             source, year, *countries, pollutants=pollutants
         )
+
+    if not info:
+        warn("No data to download, please check the download options")
+        return
 
     session.progress = not quiet
     session.raise_for_status = raise_for_status

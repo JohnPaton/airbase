@@ -75,16 +75,17 @@ def request_info_by_city(
         if (country := DB.search_city(city)) is None:
             warn(f"Unknown {city=}, skip", UserWarning, stacklevel=-2)
             continue
+
         countries[city] = country
 
     if not pollutants:
         return set(
-            CSVData(country, "", source, year, city=city)
+            CSVData(country, "", source, year, city)
             for city, country in countries.items()
         )
 
     return set(
-        CSVData(country, id, source, year, city=city)
+        CSVData(country, id, source, year, city)
         for (city, country), id in product(
             countries.items(),
             set(DB.search_pollutants(*pollutants)),

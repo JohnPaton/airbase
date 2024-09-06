@@ -335,6 +335,10 @@ async def download(
             dataset, *countries, pollutants=pollutants
         )
 
+    if not info:
+        warn("No data to download, please check the download options")
+        return
+
     session.progress = not quiet
     session.raise_for_status = raise_for_status
     if summary_only:
