@@ -281,24 +281,31 @@ async def test_Session_city(session: Session):
 @pytest.mark.asyncio
 async def test_Session_url_to_files(session: Session):
     info = ParquetData("MT", Dataset.Historical, None, "Valletta")
-    async with session:
-        async for urls in session.url_to_files(info):
-            pass
 
-    assert urls
-    regex = re.compile(rf"https://.*/{info.country}/.*\.parquet")
-    for url in urls:
-        assert regex.match(url) is not None, f"wrong {url=} start"
-    assert len(urls) == 22
+    assert session.number_of_urls == 0
+    async with session:
+        await session.url_to_files(info)
+        assert session.number_of_urls == 22
+
+        regex = re.compile(rf"https://.*/{info.country}/.*\.parquet")
+        for url in session.urls:
+            assert regex.match(url) is not None, f"wrong {url=} start"
+
+    assert session.number_of_urls == 0
 
 
 @pytest.mark.asyncio
 async def test_Session_download_to_directory(tmp_path: Path, session: Session):
+    assert session.number_of_urls == 0
+    session.add_urls(CSV_PARQUET_URLS_RESPONSE.splitlines()[-5:])
+    assert session.number_of_urls == 5
+
     assert not tuple(tmp_path.glob("??/*.parquet"))
-    urls = tuple(CSV_PARQUET_URLS_RESPONSE.splitlines())[-5:]
     async with session:
-        await session.download_to_directory(tmp_path, *urls)
-    assert len(tuple(tmp_path.glob("??/*.parquet"))) == len(urls) == 5
+        await session.download_to_directory(tmp_path)
+        assert session.number_of_urls == 0
+
+    assert len(tuple(tmp_path.glob("??/*.parquet"))) == 5
 
 
 @pytest.mark.asyncio

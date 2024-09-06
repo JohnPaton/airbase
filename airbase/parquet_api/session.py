@@ -65,6 +65,7 @@ class Session(AbstractAsyncContextManager):
         exc_tb: TracebackType | None,
     ) -> None:
         await self.client.__aexit__(exc_type, exc_val, exc_tb)
+        self.clear()
 
     @property
     def expected_files(self) -> int:
@@ -113,6 +114,12 @@ class Session(AbstractAsyncContextManager):
     def remove_url(self, url: str) -> None:
         """remove URL from unique URLs ready for download"""
         self._urls_to_download.remove(url)
+
+    def clear(self) -> None:
+        """reset URLs and expected download values"""
+        self._expected_files = 0
+        self._expected_size = 0
+        self._urls_to_download.clear()
 
     @async_cached_property
     async def countries(self) -> list[str]:
@@ -360,11 +367,10 @@ async def download(
     if summary_only:
         async with session:
             await session.summary(*info)
-
-        print(
-            f"found {session.expected_files:_} file(s), ~{session.expected_size:_} Mb in total",
-            file=sys.stderr,
-        )
+            print(
+                f"found {session.expected_files:_} file(s), ~{session.expected_size:_} Mb in total",
+                file=sys.stderr,
+            )
         return
 
     async with session:

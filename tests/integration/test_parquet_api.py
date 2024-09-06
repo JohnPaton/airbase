@@ -103,31 +103,45 @@ async def test_summary(
     files: int,
     size: int,
 ):
+    assert session.expected_files == session.expected_size == 0
+
     async with session:
-        summary = await session.summary(
+        await session.summary(
             ParquetData(country, Dataset.Historical, frozenset({pollutant}))
         )
-    assert summary == dict(numberFiles=files, size=size)
+        assert session.expected_files == files
+        assert session.expected_size == size
+
+    assert session.expected_files == session.expected_size == 0
 
 
 @pytest.mark.asyncio
 async def test_url_to_files(session: Session):
     info = ParquetData("MT", Dataset.Historical, city="Valletta")
-    async with session:
-        async for urls in session.url_to_files(info):
-            pass
+    assert session.number_of_urls == 0
 
-    assert urls
-    regex = re.compile(r"https://.*/MT/.*\.parquet")
-    for url in urls:
-        assert regex.match(url) is not None, f"wrong {url=} start"
-    assert len(urls) == 22
+    async with session:
+        await session.url_to_files(info)
+        assert session.number_of_urls == 22
+
+        regex = re.compile(r"https://.*/MT/.*\.parquet")
+        for url in session.urls:
+            assert regex.match(url) is not None, f"wrong {url=} start"
+
+    assert session.number_of_urls == 0
 
 
 @pytest.mark.asyncio
 async def test_download_to_directory(session: Session, tmp_path: Path):
+    assert session.number_of_urls == 0
     assert not tuple(tmp_path.glob("??/*.parquet"))
-    urls = tuple(resources.CSV_PARQUET_URLS_RESPONSE.splitlines())[-5:]
     async with session:
-        await session.download_to_directory(tmp_path, *urls)
-    assert len(tuple(tmp_path.glob("??/*.parquet"))) == len(urls) == 5
+        session.add_urls(
+            (resources.CSV_PARQUET_URLS_RESPONSE.splitlines())[-5:]
+        )
+        assert session.number_of_urls == 5
+
+        await session.download_to_directory(tmp_path)
+        assert session.number_of_urls == 0
+
+    assert len(tuple(tmp_path.glob("??/*.parquet"))) == 5

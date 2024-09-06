@@ -61,6 +61,7 @@ class Session(AbstractAsyncContextManager):
         exc_tb: TracebackType | None,
     ) -> None:
         await self.client.__aexit__(exc_type, exc_val, exc_tb)
+        self.clear()
 
     @property
     def number_of_urls(self) -> int:
@@ -82,6 +83,10 @@ class Session(AbstractAsyncContextManager):
     def remove_url(self, url: str) -> None:
         """remove URL from unique URLs ready for download"""
         self._urls_to_download.remove(url)
+
+    def clear(self) -> None:
+        """reset URLs"""
+        self._urls_to_download.clear()
 
     async def url_to_files(self, *download_infos: CSVData) -> None:
         """
