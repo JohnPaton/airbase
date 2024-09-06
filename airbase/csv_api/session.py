@@ -17,8 +17,14 @@ else:
 import aiohttp
 from tqdm import tqdm
 
+from ..summary import COUNTRY_CODES
 from .client import Client
-from .dataset import CSVData
+from .dataset import (
+    CSVData,
+    Source,
+    request_info_by_city,
+    request_info_by_country,
+)
 
 _T = TypeVar("_T")
 
@@ -146,7 +152,7 @@ class Session(AbstractAsyncContextManager):
                 url = paths.pop(path)
                 self.remove_url(url)
 
-        # create missing country sum-directories before downloading
+        # create missing country sub-directories before downloading
         for parent in {path.parent for path in paths}:
             parent.mkdir(exist_ok=True)
 
@@ -167,7 +173,7 @@ class Session(AbstractAsyncContextManager):
                 self.remove_url(url)
 
         assert not paths, "still some paths to download"
-        assert not self._urls_to_download, "still some URLs to download"
+        assert self.number_of_urls == 0, "still some URLs to download"
 
     async def download_metadata(
         self,
@@ -207,3 +213,55 @@ class Session(AbstractAsyncContextManager):
                 if self.raise_for_status:
                     raise
                 warn(str(e), category=RuntimeWarning)
+
+
+async def download(
+    source: Source,
+    year: int,
+    root_path: Path,
+    *,
+    countries: frozenset[str] | set[str],
+    pollutants: frozenset[str] | set[str] | None = None,
+    cities: frozenset[str] | set[str] | None = None,
+    metadata: bool = False,
+    overwrite: bool = False,
+    quiet: bool = True,
+    raise_for_status: bool = False,
+    session: Session = Session(),
+):
+    """
+    request file urls by country|city/pollutant and download unique files
+
+    :param quiet: (optional, default `True`)
+        Disable progress bars.
+    :param raise_for_status: (optional, default `False`)
+        Raise exceptions if any request return "bad" HTTP status codes.
+        If False, a :py:func:`warnings.warn` will be issued instead
+
+    """
+    if cities:  # one request for each city/pollutant
+        info = request_info_by_city(
+            source, year, *cities, pollutants=pollutants
+        )
+        assert info, "no info"
+    else:  # one request for each country/pollutant
+        if not countries:
+            countries = COUNTRY_CODES
+        info = request_info_by_country(
+            source, year, *countries, pollutants=pollutants
+        )
+
+    session.progress = not quiet
+    session.raise_for_status = raise_for_status
+    async with session:
+        if metadata:
+            await session.download_metadata(
+                root_path / "metadata.tsv",
+                skip_existing=not overwrite,
+            )
+
+        await session.url_to_files(*info)
+        await session.download_to_directory(
+            root_path,
+            skip_existing=not overwrite,
+        )

@@ -238,7 +238,7 @@ class Session(AbstractAsyncContextManager):
                 self.progress_download.update(path.stat().st_size)
                 del url_paths[url]
 
-        # create missing country sum-directories before downloading
+        # create missing country sub-directories before downloading
         for parent in {path.parent for path in url_paths.values()}:
             parent.mkdir(exist_ok=True)
 
@@ -317,7 +317,7 @@ async def download(
     session: Session = Session(),
 ):
     """
-    request file urls by country|[city]/pollutant and download unique files
+    request file urls by country|city/pollutant and download unique files
 
     :param quiet: (optional, default `True`)
         Disable progress bars.
@@ -330,7 +330,7 @@ async def download(
         info = request_info_by_city(dataset, *cities, pollutants=pollutants)
     else:  # one request for each country/pollutant
         if not countries:
-            countries = COUNTRY_CODES  # type:ignore
+            countries = COUNTRY_CODES
         info = request_info_by_country(
             dataset, *countries, pollutants=pollutants
         )
@@ -350,7 +350,10 @@ async def download(
 
     async with session:
         if metadata:
-            await session.download_metadata(root_path / "metadata.csv")
+            await session.download_metadata(
+                root_path / "metadata.csv",
+                skip_existing=not overwrite,
+            )
 
         async for urls in session.url_to_files(*info):
             await session.download_to_directory(

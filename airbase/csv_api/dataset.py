@@ -64,7 +64,10 @@ class CSVData(NamedTuple):
 
 
 def request_info_by_city(
-    source: Source, year: int, *cities: str, pollutants: set[str] | None = None
+    source: Source,
+    year: int,
+    *cities: str,
+    pollutants: frozenset[str] | set[str] | None = None,
 ) -> set[CSVData]:
     """download info one city at the time"""
     countries: dict[str, str] = {}
@@ -93,7 +96,7 @@ def request_info_by_country(
     source: Source,
     year: int,
     *countries: str,
-    pollutants: set[str] | None = None,
+    pollutants: frozenset[str] | set[str] | None = None,
 ) -> set[CSVData]:
     """download info one country at the time"""
     for country in set(countries) - COUNTRY_CODES:

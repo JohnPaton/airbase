@@ -5,13 +5,14 @@ from .dataset import (
     request_info_by_city,
     request_info_by_country,
 )
-from .session import Session
+from .session import Session, download
 
 __all__ = [
     "Client",
     "CSVData",
     "Session",
     "Source",
+    "download",
     "request_info_by_city",
     "request_info_by_country",
 ]

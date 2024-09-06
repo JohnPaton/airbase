@@ -12,6 +12,7 @@ from airbase.csv_api import (
     CSVData,
     Session,
     Source,
+    download,
     request_info_by_city,
     request_info_by_country,
 )
@@ -224,3 +225,24 @@ async def test_Session_download_metadata(tmp_path: Path, session: Session):
 
     with path.open() as file:
         assert len(file.readlines()) == 58_687
+
+
+@pytest.mark.asyncio
+async def test_download(tmp_path: Path, session: Session):
+    assert session.number_of_urls == 0
+    assert not tuple(tmp_path.rglob("*.csv"))
+    assert not tuple(tmp_path.rglob("*.tsv"))
+
+    await download(
+        Source.Unverified,
+        2024,
+        tmp_path,
+        countries={"MT"},
+        cities={"Valletta"},
+        metadata=True,
+        session=session,
+    )
+
+    assert session.number_of_urls == 0
+    assert len(tuple(tmp_path.glob("MT/*.csv"))) == 5
+    assert tmp_path.joinpath("metadata.tsv").is_file()
