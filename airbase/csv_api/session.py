@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import sys
-from collections.abc import AsyncIterator, Awaitable, Iterator
+from collections.abc import AsyncIterator, Awaitable, Iterable, Iterator
 from contextlib import AbstractAsyncContextManager
 from pathlib import Path
 from types import TracebackType
@@ -57,9 +57,25 @@ class Session(AbstractAsyncContextManager):
         await self.client.__aexit__(exc_type, exc_val, exc_tb)
 
     @property
-    def urls_to_download(self) -> int:
+    def number_of_urls(self) -> int:
         """number of unique URLs ready for download"""
         return len(self._urls_to_download)
+
+    @property
+    def urls(self) -> Iterable[str]:
+        """unique URLs ready for download"""
+        yield from self._urls_to_download
+
+    def add_urls(self, more_urls: Iterable[str]) -> None:
+        """add to the unique URLs ready for download"""
+        urls = (u.strip() for u in more_urls)
+        self._urls_to_download.update(
+            u for u in urls if u.startswith(("http://", "https://"))
+        )
+
+    def remove_url(self, url: str) -> None:
+        """remove URL from unique URLs ready for download"""
+        self._urls_to_download.remove(url)
 
     async def url_to_files(self, *download_infos: CSVData) -> int:
         """
@@ -81,15 +97,9 @@ class Session(AbstractAsyncContextManager):
                 self.client.download_urls(info.param()) for info in unique_info
             ):
                 progress.update()
-                lines = (line.strip() for line in text.splitlines())
-                if urls := set(
-                    line
-                    for line in lines
-                    if line.startswith(("http://", "https://"))
-                ):
-                    self._urls_to_download.update(urls)
+                self.add_urls(text.strip().splitlines())
 
-        return self.urls_to_download
+        return self.number_of_urls
 
     async def download_to_directory(
         self,
@@ -113,17 +123,17 @@ class Session(AbstractAsyncContextManager):
                 f"{root_path.resolve()} is not a directory."
             )
 
-        if self._urls_to_download:
+        if self.number_of_urls < 1:
             warn(
-                f"No URLs to download, call {self.__class__.__name__}.url_to_files before calling this method",
+                f"No URLs to download, call {self.__class__.__name__}.url_to_files before calling this method"
+                f" or add the urls directly with {self.__class__.__name__}.add_urls",
                 UserWarning,
                 stacklevel=2,
             )
             return
 
         paths: dict[Path, str] = {
-            root_path / "/".join(url.split("/")[-2:]): url
-            for url in self._urls_to_download
+            root_path.joinpath(*url.split("/")[-2:]): url for url in self.urls
         }
         if skip_existing:
             existing = (
@@ -134,7 +144,7 @@ class Session(AbstractAsyncContextManager):
             )
             for path in list(existing):
                 url = paths.pop(path)
-                self._urls_to_download.remove(url)
+                self.remove_url(url)
 
         # create missing country sum-directories before downloading
         for parent in {path.parent for path in paths}:
@@ -154,10 +164,35 @@ class Session(AbstractAsyncContextManager):
                 progress.update()
                 assert path.is_file(), f"missing {path.name}"
                 url = paths.pop(path)
-                self._urls_to_download.remove(url)
+                self.remove_url(url)
 
         assert not paths, "still some paths to download"
         assert not self._urls_to_download, "still some URLs to download"
+
+    async def download_metadata(
+        self,
+        path: Path,
+        skip_existing: bool = True,
+    ) -> None:
+        """
+        download station metadata into the given `path`.
+
+        :param path: :py:class:`pathlib.Path` to the station metadata (parent directory must exist)
+        :param skip_existing: (optional, default `True`)
+            Don't re-download metadata if `path` already exists.
+            If False, `path` may be overwritten.
+        """
+        if not path.parent.is_dir():  # pragma: no cover
+            raise NotADirectoryError(
+                f"{path.parent.resolve()} is not a directory."
+            )
+
+        if skip_existing and path.exists():
+            return
+
+        if self.progress:
+            tqdm.write(f"downloading station metadata to {path}")
+        await self.client.download_metadata(path)
 
     async def __completed(
         self, jobs: Iterator[Awaitable[_T]]

@@ -104,3 +104,7 @@ class Client(AbstractAsyncContextManager):
                 await f.write(payload)
 
         return path
+
+    async def download_metadata(self, path: Path) -> Path:
+        """download metadata file and return `path` (exactly as the input)"""
+        return await self.download_binary(METADATA_URL, path)
