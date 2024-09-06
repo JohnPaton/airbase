@@ -32,41 +32,25 @@ $ pip install airbase
 ```pycon
 >>> import airbase
 >>> client = airbase.AirbaseClient()
->>> client.all_countries
-['GR', 'ES', 'IS', 'CY', 'NL', 'AT', 'LV', 'BE', 'CH', 'EE', 'FR', 'DE', ...
+>>> client.countries
+frozenset({'LI', 'CY', 'IE', 'LV', 'BE', 'EE', ...})
 
->>> client.all_pollutants
-{'k': 412, 'CO': 10, 'NO': 38, 'O3': 7, 'As': 2018, 'Cd': 2014, ...
+>>> client.pollutants
+frozenset({'Co', 'sum-PCB', 'PCB-26', 'HNO3', ...})
 
->>> client.pollutants_per_country
-{'AD': [{'pl': 'CO', 'shortpl': 10}, {'pl': 'NO', 'shortpl': 38}, ...
 
 >>> client.search_pollutant("O3")
-[{'pl': 'O3', 'shortpl': 7}, {'pl': 'NO3', 'shortpl': 46}, ...
+[{'poll': 'O3', 'id': 7}, {'poll': 'NO3', 'id': 46}, ...]
 ```
 
-🗂 Request download links from the server and save the resulting CSVs into a directory:
+🗂 Request download links from the server and save the resulting Parquet files into a directory:
 
 ```pycon
->>> r = client.request(country=["NL", "DE"], pl="NO3", year_from=2015)
+>>> r = client.request("Verified", "NL", "DE", poll=["NO3", "NO3- in PM2.5", "NO3- in PM10"])
 >>> r.download_to_directory(dir="data", skip_existing=True)
-Generating CSV download links...
-100%|██████████| 2/2 [00:03<00:00,  2.03s/it]
-Generated 12 CSV links ready for downloading
-Downloading CSVs to data...
-100%|██████████| 12/12 [00:01<00:00,  8.44it/s]
-```
-
-💾 Or concatenate them into one big file:
-
-```pycon
->>> r = client.request(country="FR", pl=["O3", "PM10"], year_to=2014)
->>> r.download_to_file("data/raw.csv")
-Generating CSV download links...
-100%|██████████| 2/2 [00:12<00:00,  7.40s/it]
-Generated 2,029 CSV links ready for downloading
-Writing data to data/raw.csv...
-100%|██████████| 2029/2029 [31:23<00:00,  1.04it/s]
+summary : 100%|█████| 2/2 [00:00<00:00,  4.48requests/s]
+URLs    : 100%|█████| 29.0/29.0 [00:00<00:00, 490URL/s]
+download: 386kb [00:00, 570kb/s]  
 ```
 
 📦 Download the entire dataset (not for the faint of heart):
