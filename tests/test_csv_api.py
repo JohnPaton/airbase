@@ -16,7 +16,6 @@ from airbase.csv_api import (
     request_info_by_city,
     request_info_by_country,
 )
-from airbase.summary import DB
 from tests import resources
 
 
@@ -30,13 +29,6 @@ def client(mock_csv_api) -> Client:
 def session(mock_csv_api) -> Session:
     """Session with loaded mocks"""
     return Session()
-
-
-@pytest.fixture(scope="module")
-def pollutant_ids() -> set[int]:
-    ids: set[int] = set()
-    ids.update(*DB.pollutants().values())
-    return ids
 
 
 def test_Dataset():

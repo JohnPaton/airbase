@@ -174,11 +174,10 @@ async def test_Client_property(client: Client):
         payload = await client.property()
 
     # some pollutants have more than one ID
-    POLLUTANT_NAMES = set(DB.pollutants())
-    assert len(payload) >= len(POLLUTANT_NAMES)
+    assert len(payload) >= len(DB.POLLUTANTS)
 
     notations = set(pollutant["notation"] for pollutant in payload)
-    assert notations == POLLUTANT_NAMES
+    assert notations == DB.POLLUTANTS
 
 
 @pytest.mark.asyncio

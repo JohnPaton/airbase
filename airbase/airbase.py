@@ -33,10 +33,10 @@ class AirbaseClient:
         """
 
         """All countries available from AirBase"""
-        self.countries = set(DB.countries())
+        self.countries = DB.COUNTRY_CODES
 
         """All pollutants available from AirBase"""
-        self.pollutants = set(DB.pollutants())
+        self.pollutants = DB.POLLUTANTS
 
     def request(
         self,
@@ -95,7 +95,7 @@ class AirbaseClient:
             countries = tuple(self.countries)
         else:
             countries = string_safe_list(countries)
-            unknown = sorted(set(countries) - set(self.countries))
+            unknown = sorted(set(countries) - self.countries)
             if unknown:
                 raise ValueError(
                     f"Unknown country code(s) {', '.join(unknown)}."
@@ -105,7 +105,7 @@ class AirbaseClient:
         if isinstance(poll, str) and poll not in self.pollutants:
             raise ValueError(f"'{poll}' is not a valid pollutant name")
         if isinstance(poll, list):
-            unknown = sorted(set(poll) - set(self.pollutants))
+            unknown = sorted(set(poll) - self.pollutants)
             if unknown:
                 raise ValueError(
                     f"Unknown pollutant name(s) {', '.join(unknown)}."

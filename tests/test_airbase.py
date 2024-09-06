@@ -16,8 +16,8 @@ def client(mock_parquet_api, mock_csv_api) -> airbase.AirbaseClient:
 
 class TestAirbaseClient:
     def test_init(self, client: airbase.AirbaseClient):
-        assert isinstance(client.countries, set)
-        assert isinstance(client.pollutants, set)
+        assert isinstance(client.countries, frozenset)
+        assert isinstance(client.pollutants, frozenset)
 
     def test_download_metadata(
         self, tmp_path: Path, client: airbase.AirbaseClient

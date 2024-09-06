@@ -21,7 +21,7 @@ class Country(str, Enum):
     _ignore_ = "country Country"  # type:ignore[misc]
 
     Country = vars()
-    for country in sorted(DB.countries()):
+    for country in sorted(DB.COUNTRY_CODES):
         Country[country] = country
 
     def __str__(self) -> str:
@@ -32,7 +32,7 @@ class Pollutant(str, Enum):
     _ignore_ = "poll Pollutant"  # type:ignore[misc]
 
     Pollutant = vars()
-    for poll in sorted(DB.pollutants(), key=lambda poll: len(poll)):
+    for poll in sorted(DB.POLLUTANTS, key=lambda poll: len(poll)):
         Pollutant[poll] = poll
 
     def __str__(self) -> str:

@@ -4,6 +4,7 @@ import sqlite3
 import sys
 from contextlib import closing, contextmanager
 from functools import cached_property
+from itertools import chain
 from pathlib import Path
 from typing import TYPE_CHECKING, Iterator, NamedTuple
 
@@ -64,6 +65,7 @@ class SummaryDB:
 
     @cached_property
     def COUNTRY_CODES(self) -> frozenset[str]:
+        """All unique country codes"""
         return frozenset(self.countries())
 
     def pollutants(self) -> dict[str, set[int]]:
@@ -80,6 +82,16 @@ class SummaryDB:
                 pollutant: set(map(int, ids.split(",")))
                 for pollutant, ids in cur.fetchall()
             }
+
+    @cached_property
+    def POLLUTANTS(self) -> frozenset[str]:
+        """All unique pollutant names/notations"""
+        return frozenset(self.pollutants())
+
+    @cached_property
+    def POLLUTANT_IDS(self) -> frozenset[int]:
+        """All unique pollutant IDs"""
+        return frozenset(chain.from_iterable(self.pollutants().values()))
 
     def properties(self, *pollutants: str) -> list[str]:
         """
