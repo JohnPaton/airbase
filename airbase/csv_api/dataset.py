@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 from enum import Enum
-from itertools import chain, product
-from typing import NamedTuple
+from itertools import product
+from typing import Literal, NamedTuple
 from warnings import warn
 
 from ..summary import COUNTRY_CODES, DB
@@ -43,7 +43,7 @@ class CSVData(NamedTuple):
     """
 
     country: str
-    pollutant_id: int
+    pollutant_id: int | Literal[""]
     source: Source
     year: int
     city: str | None = None
@@ -67,7 +67,7 @@ class CSVData(NamedTuple):
 
 
 def request_info_by_city(
-    source: Source, year: int, *cities, pollutant: set[str] | None = None
+    source: Source, year: int, *cities: str, pollutants: set[str] | None = None
 ) -> set[CSVData]:
     """download info one city at the time"""
     countries: dict[str, str] = {}
@@ -77,36 +77,41 @@ def request_info_by_city(
             continue
         countries[city] = country
 
-    if pollutant:
-        ids = set(DB.search_pollutants(*pollutant))
-    else:
-        ids = set(chain.from_iterable(DB.pollutants().values()))
+    if not pollutants:
+        return set(
+            CSVData(country, "", source, year, city=city)
+            for city, country in countries.items()
+        )
 
     return set(
         CSVData(country, id, source, year, city=city)
         for (city, country), id in product(
             countries.items(),
-            ids,
+            set(DB.search_pollutants(*pollutants)),
         )
     )
 
 
 def request_info_by_country(
-    source: Source, year: int, *countries, pollutant: set[str] | None = None
+    source: Source,
+    year: int,
+    *countries: str,
+    pollutants: set[str] | None = None,
 ) -> set[CSVData]:
     """download info one country at the time"""
     for country in set(countries) - COUNTRY_CODES:
         warn(f"Unknown {country=}, skip", UserWarning, stacklevel=-2)
 
-    if pollutant:
-        ids = set(DB.search_pollutants(*pollutant))
-    else:
-        ids = set(chain.from_iterable(DB.pollutants().values()))
+    if not pollutants:
+        return set(
+            CSVData(country, "", source, year)
+            for country in COUNTRY_CODES.intersection(countries)
+        )
 
     return set(
         CSVData(country, id, source, year)
         for country, id in product(
             COUNTRY_CODES.intersection(countries),
-            ids,
+            set(DB.search_pollutants(*pollutants)),
         )
     )

@@ -132,7 +132,7 @@ class Session(AbstractAsyncContextManager):
                 # re-download empty files
                 if path.is_file() and path.stat().st_size >= 0
             )
-            for path in existing:
+            for path in list(existing):
                 url = paths.pop(path)
                 self._urls_to_download.remove(url)
 

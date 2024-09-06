@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import json
 import re
-from itertools import chain
 from pathlib import Path
 
 import pytest
@@ -25,7 +24,9 @@ def client(mock_csv_api) -> Client:
 
 @pytest.fixture(scope="module")
 def pollutant_ids() -> set[int]:
-    return set(chain.from_iterable(DB.pollutants().values()))
+    ids: set[int] = set()
+    ids.update(*DB.pollutants().values())
+    return ids
 
 
 def test_Dataset():
@@ -40,30 +41,32 @@ def test_Dataset():
 
 
 @pytest.mark.parametrize(
-    "city,country,pollutant,ids",
+    "city,country,pollutant_ids",
     (
-        pytest.param(
-            "Reykjavik", "IS", {"PM10", "NO"}, {5, 38}, id="Reykjavik"
-        ),
-        pytest.param("Oslo", "NO", set(), set(), id="Oslo"),
-        pytest.param("Göteborg", "SE", None, None, id="Göteborg"),
+        pytest.param("Reykjavik", "IS", {5: "PM10", 38: "NO"}, id="pollutant"),
+        pytest.param("Oslo", "NO", {}, id="no-pollutant"),
     ),
 )
 def test_request_info_by_city(
     city: str,
     country: str,
-    pollutant: set[str] | None,
-    ids: set[int] | None,
-    pollutant_ids: set[int],
+    pollutant_ids: dict[int, str],
     year: int = 2024,
     source: Source = Source.Unverified,
 ):
-    if not ids:
-        ids = pollutant_ids
-
-    assert request_info_by_city(source, year, city, pollutant=pollutant) == {
-        CSVData(country, id, source, year, city=city) for id in ids
-    }
+    if not pollutant_ids:
+        assert (
+            request_info_by_city(source, year, city)
+            == request_info_by_city(source, year, city, pollutants=set())
+            == {CSVData(country, "", source, year, city=city)}
+        )
+    else:
+        assert request_info_by_city(
+            source, year, city, pollutants=set(pollutant_ids.values())
+        ) == {
+            CSVData(country, id, source, year, city=city)
+            for id in pollutant_ids
+        }
 
 
 def test_request_info_by_city_warning(
@@ -76,27 +79,28 @@ def test_request_info_by_city_warning(
 
 
 @pytest.mark.parametrize(
-    "country,pollutant,ids",
+    "country,pollutant_ids",
     (
-        pytest.param("IS", {"PM10", "NO"}, {5, 38}, id="IS"),
-        pytest.param("NO", set(), set(), id="NO"),
-        pytest.param("SE", None, None, id="SE"),
+        pytest.param("IS", {5: "PM10", 38: "NO"}, id="pollutant"),
+        pytest.param("NO", {}, id="no-pollutant"),
     ),
 )
 def test_request_info_by_country(
     country: str,
-    pollutant: set[str] | None,
-    ids: set[int] | None,
-    pollutant_ids: set[int],
+    pollutant_ids: dict[int, str],
     year: int = 2024,
     source: Source = Source.Unverified,
 ):
-    if not ids:
-        ids = pollutant_ids
-
-    assert request_info_by_country(
-        source, year, country, pollutant=pollutant
-    ) == {CSVData(country, id, source, year) for id in ids}
+    if not pollutant_ids:
+        assert (
+            request_info_by_country(source, year, country)
+            == request_info_by_country(source, year, country, pollutants=set())
+            == {CSVData(country, "", source, year)}
+        )
+    else:
+        assert request_info_by_country(
+            source, year, country, pollutants=set(pollutant_ids.values())
+        ) == {CSVData(country, id, source, year) for id in pollutant_ids}
 
 
 def test_request_info_by_country_warning(

@@ -24,15 +24,18 @@ class CSVDataJSON(TypedDict):
     https://fme.discomap.eea.europa.eu/fmedatastreaming/AirQualityDownload/AQData_Extract.fmw
 
     NOTE
-    - "&CountryCode=" means all countries
-    - "&Pollutant="   means ID=1 (SO2)
-    - "&Source="      means "ALL"
+    -    "&CountryCode=" --> all available countries
+    -    "&Pollutant="   --> all available pollutants
+    -    "&Source="      --> all available sources
+    - no "&CountryCode=" --> no results
+    - no "&Pollutant="   --> only SO2 (ID=1)
+    - no "&Source="      --> error
     """
 
     CountryCode: str
-    Pollutant: int
-    Year_from: NotRequired[int]
-    Year_to: NotRequired[int]
+    Pollutant: int | Literal[""]
+    Year_from: NotRequired[int | Literal[""]]
+    Year_to: NotRequired[int | Literal[""]]
     Station: NotRequired[str]
     Samplingpoint: NotRequired[str]
     EoICode: NotRequired[str]
