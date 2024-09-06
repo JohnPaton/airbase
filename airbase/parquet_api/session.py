@@ -306,9 +306,9 @@ async def download(
     dataset: Dataset,
     root_path: Path,
     *,
-    countries: set[str],
-    pollutants: set[str] | None = None,
-    cities: set[str] | None = None,
+    countries: frozenset[str] | set[str],
+    pollutants: frozenset[str] | set[str] | None = None,
+    cities: frozenset[str] | set[str] | None = None,
     metadata: bool = False,
     summary_only: bool = False,
     overwrite: bool = False,
@@ -327,12 +327,12 @@ async def download(
 
     """
     if cities:  # one request for each city/pollutant
-        info = request_info_by_city(dataset, *cities, pollutant=pollutants)
+        info = request_info_by_city(dataset, *cities, pollutants=pollutants)
     else:  # one request for each country/pollutant
         if not countries:
-            countries = COUNTRY_CODES
+            countries = COUNTRY_CODES  # type:ignore
         info = request_info_by_country(
-            dataset, *countries, pollutant=pollutants
+            dataset, *countries, pollutants=pollutants
         )
 
     session.progress = not quiet

@@ -105,7 +105,7 @@ async def test_summary(
 ):
     async with session:
         summary = await session.summary(
-            ParquetData(country, Dataset.Historical, {pollutant})
+            ParquetData(country, Dataset.Historical, frozenset({pollutant}))
         )
     assert summary == dict(numberFiles=files, size=size)
 

@@ -41,22 +41,28 @@ def test_Dataset():
 
 
 @pytest.mark.parametrize(
-    "city,country,pollutant",
+    "city,country,pollutants",
     (
-        pytest.param("Reykjavik", "IS", {"PM10", "NO"}, id="Reykjavik"),
-        pytest.param("Oslo", "NO", set(), id="Oslo"),
-        pytest.param("Göteborg", "SE", None, id="Göteborg"),
+        pytest.param("Reykjavik", "IS", {"PM10", "NO"}, id="pollutants"),
+        pytest.param("Göteborg", "SE", None, id="no-pollutants"),
     ),
 )
 def test_request_info_by_city(
     city: str,
     country: str,
-    pollutant: set[str] | None,
+    pollutants: set[str] | None,
     dataset: Dataset = Dataset.Historical,
 ):
-    assert request_info_by_city(dataset, city, pollutant=pollutant) == {
-        ParquetData(country, dataset, pollutant, city)
-    }
+    if not pollutants:
+        assert (
+            request_info_by_city(dataset, city)
+            == request_info_by_city(dataset, city, pollutants=set())
+            == {ParquetData(country, dataset, city=city)}
+        )
+    else:
+        assert request_info_by_city(dataset, city, pollutants=pollutants) == {
+            ParquetData(country, dataset, frozenset(pollutants), city)
+        }
 
 
 def test_request_info_by_city_warning(
@@ -68,7 +74,7 @@ def test_request_info_by_city_warning(
 
 
 @pytest.mark.parametrize(
-    "country,pollutant",
+    "country,pollutants",
     (
         pytest.param("IS", {"PM10", "NO"}, id="IS"),
         pytest.param("NO", set(), id="NO"),
@@ -77,12 +83,19 @@ def test_request_info_by_city_warning(
 )
 def test_request_info_by_country(
     country: str,
-    pollutant: set[str] | None,
+    pollutants: set[str] | None,
     dataset: Dataset = Dataset.Historical,
 ):
-    assert request_info_by_country(dataset, country, pollutant=pollutant) == {
-        ParquetData(country, dataset, pollutant)
-    }
+    if not pollutants:
+        assert (
+            request_info_by_country(dataset, country)
+            == request_info_by_country(dataset, country, pollutants=set())
+            == {ParquetData(country, dataset)}
+        )
+    else:
+        assert request_info_by_country(
+            dataset, country, pollutants=pollutants
+        ) == {ParquetData(country, dataset, frozenset(pollutants))}
 
 
 def test_request_info_by_country_warning(
@@ -94,10 +107,10 @@ def test_request_info_by_country_warning(
 
 
 @pytest.mark.parametrize(
-    "pollutant,country,city,historical,verified,unverified",
+    "pollutants,country,city,historical,verified,unverified",
     (
         pytest.param(
-            "PM10",
+            frozenset({"PM10"}),
             "NO",
             None,
             '{"countries": ["NO"], "cities": [], "properties": ["http://dd.eionet.europa.eu/vocabulary/aq/pollutant/5"], "datasets": [3], "source": "API"}',
@@ -106,7 +119,7 @@ def test_request_info_by_country_warning(
             id="PM10-NO",
         ),
         pytest.param(
-            "O3",
+            frozenset({"O3"}),
             "IS",
             "Reykjavik",
             '{"countries": ["IS"], "cities": ["Reykjavik"], "properties": ["http://dd.eionet.europa.eu/vocabulary/aq/pollutant/7"], "datasets": [3], "source": "API"}',
@@ -117,7 +130,7 @@ def test_request_info_by_country_warning(
     ),
 )
 def test_ParquetData_payload(
-    pollutant: str,
+    pollutants: frozenset[str],
     country: str,
     city: str | None,
     historical: str,
@@ -126,23 +139,19 @@ def test_ParquetData_payload(
 ):
     assert (
         json.dumps(
-            ParquetData(
-                country, Dataset.Historical, {pollutant}, city
-            ).payload()
+            ParquetData(country, Dataset.Historical, pollutants, city).payload()
         )
         == historical
     ), "unexpected historical info"
     assert (
         json.dumps(
-            ParquetData(country, Dataset.Verified, {pollutant}, city).payload()
+            ParquetData(country, Dataset.Verified, pollutants, city).payload()
         )
         == verified
     ), "unexpected verified info"
     assert (
         json.dumps(
-            ParquetData(
-                country, Dataset.Unverified, {pollutant}, city
-            ).payload()
+            ParquetData(country, Dataset.Unverified, pollutants, city).payload()
         )
         == unverified
     ), "unexpected unverified info"

@@ -49,9 +49,6 @@ class CSVData(NamedTuple):
     city: str | None = None
     output: Output = Output.TEXT
 
-    def __hash__(self) -> int:
-        return hash(str(self))
-
     def param(self) -> CSVDataJSON:
         payload: CSVDataJSON = dict(
             CountryCode=self.country,

@@ -36,12 +36,9 @@ class ParquetData(NamedTuple):
 
     country: str
     dataset: Dataset
-    pollutant: set[str] | None = None
+    pollutant: frozenset[str] | None = None
     city: str | None = None
     source: str = "API"  # for EEA internal use
-
-    def __hash__(self) -> int:
-        return hash(str(self))
 
     def payload(self) -> ParquetDataJSON:
         return dict(
@@ -56,30 +53,44 @@ class ParquetData(NamedTuple):
 
 
 def request_info_by_city(
-    dataset: Dataset, *cities, pollutant: set[str] | None = None
+    dataset: Dataset,
+    *cities,
+    pollutants: frozenset[str] | set[str] | None = None,
 ) -> set[ParquetData]:
     """download info one city at the time"""
+    if not pollutants:
+        pollutants = None
+    if isinstance(pollutants, set):
+        pollutants = frozenset(pollutants)
+
     info: set[ParquetData] = set()
     for city in cities:
         if (country := DB.search_city(city)) is None:
             warn(f"Unknown {city=}, skip", UserWarning, stacklevel=-2)
             continue
 
-        info.add(ParquetData(country, dataset, pollutant, city))
+        info.add(ParquetData(country, dataset, pollutants, city))
 
     return info
 
 
 def request_info_by_country(
-    dataset: Dataset, *countries, pollutant: set[str] | None = None
+    dataset: Dataset,
+    *countries,
+    pollutants: frozenset[str] | set[str] | None = None,
 ) -> set[ParquetData]:
     """download info one country at the time"""
+    if not pollutants:
+        pollutants = None
+    if isinstance(pollutants, set):
+        pollutants = frozenset(pollutants)
+
     info: set[ParquetData] = set()
     for country in countries:
         if country not in COUNTRY_CODES:
             warn(f"Unknown {country=}, skip", UserWarning, stacklevel=-2)
             continue
 
-        info.add(ParquetData(country, dataset, pollutant))
+        info.add(ParquetData(country, dataset, pollutants))
 
     return info

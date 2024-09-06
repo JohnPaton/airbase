@@ -203,4 +203,4 @@ class DB:
             ]
 
 
-COUNTRY_CODES = set(DB.countries())
+COUNTRY_CODES = frozenset(DB.countries())
