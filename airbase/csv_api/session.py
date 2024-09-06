@@ -252,7 +252,10 @@ async def download(
         )
 
     if not info:
-        warn("No data to download, please check the download options")
+        warn(
+            "No data to download, please check the download options",
+            UserWarning,
+        )
         return
 
     session.progress = not quiet
@@ -265,6 +268,15 @@ async def download(
             )
 
         await session.url_to_files(*info)
+        if session.number_of_urls == 0:
+            warn(
+                "Found not data matching tour selection, please try different cites/pollutants"
+                if cities
+                else "Found not data matching tour selection, please try different pollutants",
+                UserWarning,
+            )
+            return
+
         await session.download_to_directory(
             root_path,
             skip_existing=not overwrite,
