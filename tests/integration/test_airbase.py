@@ -3,7 +3,7 @@ from pathlib import Path
 import pytest
 
 import airbase
-from tests.resources import LEGACY_METADATA_RESPONSE
+from tests import resources
 
 
 @pytest.fixture(scope="module")
@@ -26,6 +26,6 @@ def test_download_metadata(client: airbase.AirbaseClient, tmp_path: Path):
 
     # make sure metadata format hasn't changed
     headers_downloaded = path.read_text().splitlines()[0]
-    headers_expected = LEGACY_METADATA_RESPONSE.splitlines()[0]
+    headers_expected = resources.LEGACY_METADATA_RESPONSE.splitlines()[0]
 
     assert headers_downloaded == headers_expected
