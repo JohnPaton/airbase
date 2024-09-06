@@ -5,7 +5,7 @@ from itertools import product
 from typing import Literal, NamedTuple
 from warnings import warn
 
-from ..summary import COUNTRY_CODES, DB
+from ..summary import DB
 from .types import CSVDataJSON
 
 
@@ -100,19 +100,19 @@ def request_info_by_country(
     pollutants: frozenset[str] | set[str] | None = None,
 ) -> set[CSVData]:
     """download info one country at the time"""
-    for country in set(countries) - COUNTRY_CODES:
+    for country in set(countries) - DB.COUNTRY_CODES:
         warn(f"Unknown {country=}, skip", UserWarning, stacklevel=-2)
 
     if not pollutants:
         return set(
             CSVData(country, "", source, year)
-            for country in COUNTRY_CODES.intersection(countries)
+            for country in DB.COUNTRY_CODES.intersection(countries)
         )
 
     return set(
         CSVData(country, id, source, year)
         for country, id in product(
-            COUNTRY_CODES.intersection(countries),
+            DB.COUNTRY_CODES.intersection(countries),
             set(DB.search_pollutants(*pollutants)),
         )
     )

@@ -20,7 +20,7 @@ import aiohttp
 from async_property import async_cached_property
 from tqdm import tqdm
 
-from ..summary import COUNTRY_CODES
+from ..summary import DB
 from .client import Client
 from .dataset import (
     Dataset,
@@ -93,8 +93,8 @@ class Session(AbstractAsyncContextManager):
 
     async def cities(self, *countries: str) -> defaultdict[str, set[str]]:
         """city names id and notation from API"""
-        if not COUNTRY_CODES.issuperset(countries):
-            unknown = sorted(set(countries) - COUNTRY_CODES)
+        if not DB.COUNTRY_CODES.issuperset(countries):
+            unknown = sorted(set(countries) - DB.COUNTRY_CODES)
             warn(
                 f"Unknown country code(s) {', '.join(unknown)}",
                 UserWarning,
@@ -330,7 +330,7 @@ async def download(
         info = request_info_by_city(dataset, *cities, pollutants=pollutants)
     else:  # one request for each country/pollutant
         if not countries:
-            countries = COUNTRY_CODES
+            countries = DB.COUNTRY_CODES
         info = request_info_by_country(
             dataset, *countries, pollutants=pollutants
         )

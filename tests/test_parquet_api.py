@@ -15,7 +15,7 @@ from airbase.parquet_api import (
     request_info_by_city,
     request_info_by_country,
 )
-from airbase.summary import COUNTRY_CODES, DB
+from airbase.summary import DB
 from tests.resources import CSV_PARQUET_URLS_RESPONSE
 
 
@@ -162,10 +162,10 @@ async def test_Client_country(client: Client):
     async with client:
         payload = await client.country()
 
-    assert len(payload) == len(COUNTRY_CODES)
+    assert len(payload) == len(DB.COUNTRY_CODES)
 
     country_codes = set(country["countryCode"] for country in payload)
-    assert country_codes == COUNTRY_CODES
+    assert country_codes == DB.COUNTRY_CODES
 
 
 @pytest.mark.asyncio
@@ -184,12 +184,12 @@ async def test_Client_property(client: Client):
 @pytest.mark.asyncio
 async def test_Client_city(client: Client):
     async with client:
-        payload = await client.city(tuple(COUNTRY_CODES))
+        payload = await client.city(tuple(DB.COUNTRY_CODES))
 
     # come countries have no cities
     country_codes = set(country["countryCode"] for country in payload)
-    assert country_codes <= COUNTRY_CODES
-    assert country_codes == COUNTRY_CODES - {
+    assert country_codes <= DB.COUNTRY_CODES
+    assert country_codes == DB.COUNTRY_CODES - {
         "AD", "AL", "BA", "GI", "LI", "ME", "MK", "RS", "TR", "XK",
     }  # fmt: skip
 
@@ -243,8 +243,10 @@ async def test_Session_country(session: Session):
     async with session:
         country_codes = await session.countries
 
-    assert len(country_codes) == len(set(country_codes)) == len(COUNTRY_CODES)
-    assert set(country_codes) == COUNTRY_CODES
+    assert (
+        len(country_codes) == len(set(country_codes)) == len(DB.COUNTRY_CODES)
+    )
+    assert set(country_codes) == DB.COUNTRY_CODES
 
 
 @pytest.mark.asyncio
@@ -261,8 +263,8 @@ async def test_Session_city(session: Session):
         cities = await session.cities()
 
     # come countries have no cities
-    assert cities.keys() <= COUNTRY_CODES
-    assert cities.keys() == COUNTRY_CODES - {
+    assert cities.keys() <= DB.COUNTRY_CODES
+    assert cities.keys() == DB.COUNTRY_CODES - {
         "AD", "AL", "BA", "GI", "LI", "ME", "MK", "RS", "TR", "XK",
     }  # fmt: skip
 

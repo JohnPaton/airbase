@@ -11,7 +11,7 @@ from airbase.parquet_api import (
     ParquetData,
     Session,
 )
-from airbase.summary import COUNTRY_CODES, DB
+from airbase.summary import DB
 from tests import resources
 
 
@@ -40,7 +40,7 @@ async def country_cities(session: Session, country: str) -> dict[str, set[str]]:
 
 @pytest.mark.asyncio
 async def test_countries(countries: list[str]):
-    assert set(countries) == COUNTRY_CODES
+    assert set(countries) == DB.COUNTRY_CODES
 
 
 @pytest.mark.asyncio

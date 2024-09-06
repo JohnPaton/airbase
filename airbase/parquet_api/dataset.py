@@ -4,7 +4,7 @@ from enum import IntEnum
 from typing import NamedTuple
 from warnings import warn
 
-from ..summary import COUNTRY_CODES, DB
+from ..summary import DB
 from .types import ParquetDataJSON
 
 
@@ -87,7 +87,7 @@ def request_info_by_country(
 
     info: set[ParquetData] = set()
     for country in countries:
-        if country not in COUNTRY_CODES:
+        if country not in DB.COUNTRY_CODES:
             warn(f"Unknown {country=}, skip", UserWarning, stacklevel=-2)
             continue
 

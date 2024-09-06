@@ -6,7 +6,7 @@ import pytest
 import pytest_asyncio
 
 from airbase.parquet_api import Client
-from airbase.summary import COUNTRY_CODES, DB
+from airbase.summary import DB
 
 if TYPE_CHECKING:
     from airbase.parquet_api.types import (
@@ -30,7 +30,7 @@ async def country_json(client: Client) -> CountryJSON:
 @pytest_asyncio.fixture(scope="module")
 async def city_json(client: Client) -> CityJSON:
     async with client:
-        return await client.city(tuple(COUNTRY_CODES))
+        return await client.city(tuple(DB.COUNTRY_CODES))
 
 
 @pytest_asyncio.fixture(scope="module")

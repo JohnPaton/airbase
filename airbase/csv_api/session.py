@@ -17,7 +17,7 @@ else:
 import aiohttp
 from tqdm import tqdm
 
-from ..summary import COUNTRY_CODES
+from ..summary import DB
 from .client import Client
 from .dataset import (
     CSVData,
@@ -245,7 +245,7 @@ async def download(
         )
     else:  # one request for each country/pollutant
         if not countries:
-            countries = COUNTRY_CODES
+            countries = DB.COUNTRY_CODES
         info = request_info_by_country(
             source, year, *countries, pollutants=pollutants
         )

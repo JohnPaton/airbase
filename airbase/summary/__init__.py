@@ -1,3 +1,3 @@
-from .db import COUNTRY_CODES, DB
+from .db import DB
 
-__all__ = ["DB", "COUNTRY_CODES"]
+__all__ = ["DB"]

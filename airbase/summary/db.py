@@ -3,6 +3,7 @@ from __future__ import annotations
 import sqlite3
 import sys
 from contextlib import closing, contextmanager
+from functools import cached_property
 from pathlib import Path
 from typing import TYPE_CHECKING, Iterator, NamedTuple
 
@@ -31,7 +32,7 @@ class Pollutant(NamedTuple):
     id: int
 
 
-class DB:
+class SummaryDB:
     """
     In DB containing the available country and pollutants
 
@@ -50,7 +51,6 @@ class DB:
         with closing(cls.db.cursor()) as cur:
             yield cur
 
-    @classmethod
     def countries(cls) -> list[str]:
         """
         Unique country codes.
@@ -62,8 +62,11 @@ class DB:
             cur.execute("SELECT country_code FROM countries;")
             return list(row[0] for row in cur.fetchall())
 
-    @classmethod
-    def pollutants(cls) -> dict[str, set[int]]:
+    @cached_property
+    def COUNTRY_CODES(self) -> frozenset[str]:
+        return frozenset(self.countries())
+
+    def pollutants(self) -> dict[str, set[int]]:
         """
         Pollutant notations and unique ids.
 
@@ -71,15 +74,14 @@ class DB:
         with notation as key and IDs as value, e.g. {"NO": {38}, ...}
         """
 
-        with cls.cursor() as cur:
+        with self.cursor() as cur:
             cur.execute("SELECT pollutant, ids FROM pollutant_ids;")
             return {
                 pollutant: set(map(int, ids.split(",")))
                 for pollutant, ids in cur.fetchall()
             }
 
-    @classmethod
-    def properties(cls, *pollutants: str) -> list[str]:
+    def properties(self, *pollutants: str) -> list[str]:
         """
         Pollutant description URLs
 
@@ -88,7 +90,7 @@ class DB:
         if not pollutants:
             return []
 
-        with cls.cursor() as cur:
+        with self.cursor() as cur:
             cur.execute(
                 f"""
                 SELECT definition_url FROM property
@@ -98,9 +100,8 @@ class DB:
             )
             return [url for (url,) in cur]
 
-    @classmethod
     def search_pollutant(
-        cls, query: str, *, limit: int | None = None
+        self, query: str, *, limit: int | None = None
     ) -> Iterator[Pollutant]:
         """
         Search for a pollutant's ID number based on its name.
@@ -112,7 +113,7 @@ class DB:
             e.g. ("NO", 38)
         """
 
-        with cls.cursor() as cur:
+        with self.cursor() as cur:
             cur.execute(
                 f"""
                 SELECT pollutant, pollutant_id FROM pollutants
@@ -124,8 +125,7 @@ class DB:
             for pollutant, pollutant_id in cur.fetchall():
                 yield Pollutant(pollutant, pollutant_id)
 
-    @classmethod
-    def search_pollutants(cls, *pollutants: str) -> Iterator[int]:
+    def search_pollutants(self, *pollutants: str) -> Iterator[int]:
         """
         Search for a pollutant ID numbers based from exact matches to pollutant names.
 
@@ -135,7 +135,7 @@ class DB:
             e.g. "NO" --> 38
         """
 
-        with cls.cursor() as cur:
+        with self.cursor() as cur:
             cur.execute(
                 f"""
                 SELECT pollutant_id FROM pollutants
@@ -146,8 +146,7 @@ class DB:
             for row in cur.fetchall():
                 yield row[0]
 
-    @classmethod
-    def search_city(cls, city: str) -> str | None:
+    def search_city(self, city: str) -> str | None:
         """
         Search for a country code from city name
 
@@ -156,7 +155,7 @@ class DB:
         :return: country code, e.g. "NO" for "Oslo"
         """
 
-        with cls.cursor() as cur:
+        with self.cursor() as cur:
             cur.execute(
                 "SELECT country_code FROM city WHERE city_name IS ?;",
                 (city,),
@@ -164,13 +163,12 @@ class DB:
             row: tuple[str] | None = cur.fetchone()
             return None if row is None else row[0]
 
-    @classmethod
-    def city_json(cls) -> CityJSON:
+    def city_json(self) -> CityJSON:
         """
         simulate a request to
         https://eeadmz1-downloads-api-appservice.azurewebsites.net/City
         """
-        with cls.cursor() as cur:
+        with self.cursor() as cur:
             cur.execute(
                 "SELECT country_code, city_name FROM city WHERE city_name IS NOT NULL;"
             )
@@ -179,23 +177,21 @@ class DB:
                 for (country_code, city_name) in cur
             ]
 
-    @classmethod
-    def country_json(cls) -> CountryJSON:
+    def country_json(self) -> CountryJSON:
         """
         simulate a request to
         https://eeadmz1-downloads-api-appservice.azurewebsites.net/Country
         """
-        with cls.cursor() as cur:
+        with self.cursor() as cur:
             cur.execute("SELECT country_code FROM countries;")
             return [dict(countryCode=country_code) for (country_code,) in cur]
 
-    @classmethod
-    def property_json(cls) -> PropertyJSON:
+    def property_json(self) -> PropertyJSON:
         """
         simulate a request to
         https://eeadmz1-downloads-api-appservice.azurewebsites.net/Property
         """
-        with cls.cursor() as cur:
+        with self.cursor() as cur:
             cur.execute("SELECT pollutant, definition_url FROM property;")
             return [
                 dict(notation=pollutant, id=definition_url)
@@ -203,4 +199,4 @@ class DB:
             ]
 
 
-COUNTRY_CODES = frozenset(DB.countries())
+DB = SummaryDB()
