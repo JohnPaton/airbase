@@ -39,14 +39,18 @@ Documentation = "https://airbase.readthedocs.io"
 [project.scripts]
 airbase = "airbase.cli:main"
 
+[project.optional-dependencies]
+docs = [
+    "sphinx>=4.2.0",
+    "sphinx_rtd_theme",
+]
+
 [build-system]
 requires = ["hatchling", "hatch-vcs"]
 build-backend = "hatchling.build"
 
 [tool.uv]
 dev-dependencies = [
-    "sphinx>=4.2.0",
-    "sphinx_rtd_theme",
     "importlib_metadata; python_version < '3.8'",
     "pytest>=6.0",
     "aioresponses",
