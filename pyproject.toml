@@ -5,7 +5,7 @@ requires-python = ">=3.8,<4"
 description = "An easy downloader for the AirBase air quality data."
 readme = {file = "README.md", content-type = "text/markdown"}
 authors = [{name="John Paton", email="john@johnpaton.net"}]
-maintainers = [{name="Alvaro Valdebenito"}]
+maintainers = [{name="John Paton", email="john@johnpaton.net"}, {name="Alvaro Valdebenito"}]
 license = {file = "LICENSE"}
 classifiers = [
     "License :: OSI Approved :: MIT License",
@@ -24,10 +24,12 @@ classifiers = [
 dependencies = [
     "aiohttp; python_version < '3.12'",
     "aiohttp >= 3.9.0; python_version >= '3.12'",
-    "aiofiles",
+    "async_property >=0.2.2",
+    "aiofiles >=24.1.0",
     "importlib_resources; python_version < '3.11'",
     "tqdm",
     "typer >=0.9.1",
+    "typing_extensions >=4.12.2; python_version < '3.11'",
 ]
 
 [project.urls]
@@ -43,11 +45,13 @@ build-backend = "hatchling.build"
 
 [tool.uv]
 dev-dependencies = [
-    "pytest>=6.0",
-    "aioresponses>=0.7.6",
-    "pytest-cov>=5.0.0",
     "sphinx>=4.2.0",
-    "sphinx-rtd-theme>=2.0.0",
+    "sphinx_rtd_theme",
+    "importlib_metadata; python_version < '3.8'",
+    "pytest>=6.0",
+    "aioresponses",
+    "pytest-asyncio",
+    "pytest-cov",
 ]
 
 [tool.hatch.version]
