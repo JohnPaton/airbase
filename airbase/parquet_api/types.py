@@ -44,7 +44,7 @@ class ParquetDataJSON(TypedDict):
     countries: list[str]
     cities: list[str]
     properties: list[str]
-    datasets: list[Literal[0, 1, 2] | Dataset]
+    datasets: Literal[0, 1, 2] | Dataset
     source: str
 
 

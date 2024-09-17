@@ -47,7 +47,7 @@ class ParquetData(NamedTuple):
             properties=[]
             if self.pollutant is None
             else DB.properties(*self.pollutant),
-            datasets=[self.dataset],
+            datasets=self.dataset,
             source=self.source,
         )
 
