@@ -17,7 +17,7 @@ if TYPE_CHECKING:
     from airbase.parquet_api.types import (
         CityJSON,
         CountryJSON,
-        PropertyJSON,
+        PollutantJSON,
     )
 
 
@@ -105,7 +105,7 @@ class SummaryDB:
         with self.cursor() as cur:
             cur.execute(
                 f"""
-                SELECT definition_url FROM property
+                SELECT definition_url FROM pollutant
                 WHERE pollutant in ({",".join("?"*len(pollutants))});
                 """,
                 pollutants,
@@ -195,16 +195,19 @@ class SummaryDB:
         https://eeadmz1-downloads-api-appservice.azurewebsites.net/Country
         """
         with self.cursor() as cur:
-            cur.execute("SELECT country_code FROM countries;")
-            return [dict(countryCode=country_code) for (country_code,) in cur]
+            cur.execute("SELECT country_code, country_name FROM country;")
+            return [
+                dict(countryCode=country_code, countryName=country_name)
+                for (country_code, country_name) in cur
+            ]
 
-    def property_json(self) -> PropertyJSON:
+    def pollutant_json(self) -> PollutantJSON:
         """
         simulate a request to
-        https://eeadmz1-downloads-api-appservice.azurewebsites.net/Property
+        https://eeadmz1-downloads-api-appservice.azurewebsites.net/Pollutant
         """
         with self.cursor() as cur:
-            cur.execute("SELECT pollutant, definition_url FROM property;")
+            cur.execute("SELECT pollutant, definition_url FROM pollutant;")
             return [
                 dict(notation=pollutant, id=definition_url)
                 for (pollutant, definition_url) in cur

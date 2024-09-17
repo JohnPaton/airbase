@@ -37,6 +37,7 @@ class CountryData(TypedDict):
     """part of `/Country` response"""
 
     countryCode: str
+    countryName: str
 
 
 """full `/Country` response"""
@@ -70,12 +71,12 @@ class DownloadSummaryJSON(TypedDict):
     size: int
 
 
-class PropertyDict(TypedDict):
-    """part of `Property` response"""
+class PollutantDict(TypedDict):
+    """part of `Pollutant` response"""
 
     notation: str
     id: str
 
 
-"""full `Property` response"""
-PropertyJSON: TypeAlias = "list[PropertyDict]"
+"""full `Pollutant` response"""
+PollutantJSON: TypeAlias = "list[PollutantDict]"

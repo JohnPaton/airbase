@@ -24,8 +24,8 @@ def mock_parquet_api(response: aioresponses):
         payload=DB.country_json(),
     )
     response.get(
-        "https://eeadmz1-downloads-api-appservice.azurewebsites.net/Property",
-        payload=DB.property_json(),
+        "https://eeadmz1-downloads-api-appservice.azurewebsites.net/Pollutant",
+        payload=DB.pollutant_json(),
     )
     response.post(
         "https://eeadmz1-downloads-api-appservice.azurewebsites.net/City",

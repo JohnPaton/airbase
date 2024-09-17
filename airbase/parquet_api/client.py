@@ -26,7 +26,7 @@ from .types import (
     CountryJSON,
     DownloadSummaryJSON,
     ParquetDataJSON,
-    PropertyJSON,
+    PollutantJSON,
 )
 
 API_BASE_URL = "https://eeadmz1-downloads-api-appservice.azurewebsites.net"
@@ -94,9 +94,9 @@ class Client(AbstractAsyncContextManager):
             r.raise_for_status()
             return await r.json(encoding="UTF-8")  # type:ignore[no-any-return]
 
-    async def property(self) -> PropertyJSON:
+    async def pollutant(self) -> PollutantJSON:
         """get request to /Property"""
-        async with self._session.get(f"{API_BASE_URL}/Property") as r:
+        async with self._session.get(f"{API_BASE_URL}/Pollutant") as r:
             r.raise_for_status()
             return await r.json(encoding="UTF-8")  # type:ignore[no-any-return]
 

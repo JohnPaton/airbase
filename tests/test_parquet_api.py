@@ -169,9 +169,9 @@ async def test_Client_country(client: Client):
 
 
 @pytest.mark.asyncio
-async def test_Client_property(client: Client):
+async def test_Client_pollutant(client: Client):
     async with client:
-        payload = await client.property()
+        payload = await client.pollutant()
 
     # some pollutants have more than one ID
     assert len(payload) >= len(DB.POLLUTANTS)

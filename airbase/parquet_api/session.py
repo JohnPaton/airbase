@@ -131,7 +131,7 @@ class Session(AbstractAsyncContextManager):
     async def pollutants(self) -> defaultdict[str, set[int]]:
         """requests pollutants id and notation from API"""
 
-        payload = await self.client.property()
+        payload = await self.client.pollutant()
         ids: defaultdict[str, set[int]] = defaultdict(set)
         for poll in payload:
             key, val = poll["notation"], pollutant_id_from_url(poll["id"])
