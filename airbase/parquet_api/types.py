@@ -8,6 +8,11 @@ from __future__ import annotations
 import sys
 from typing import TYPE_CHECKING, Literal, TypedDict
 
+if sys.version_info >= (3, 11):  # pragma:no cover
+    from typing import NotRequired
+else:
+    from typing_extensions import NotRequired  # pragma:no cover
+
 if sys.version_info >= (3, 10):  # pragma:no cover
     from typing import TypeAlias
 else:
@@ -39,13 +44,23 @@ CountryJSON: TypeAlias = "list[CountryData]"
 
 
 class ParquetDataJSON(TypedDict):
-    """request payload to `/DownloadSummary`, `/ParquetFile` and `/ParquetFile/urls`"""
+    """
+    request payload to `/DownloadSummary`, `/ParquetFile` and `/ParquetFile/urls`
+
+    dateTimeStart and dateTimeEnd in yyyy-mm-ddTHH:MM:SSZ format
+    aggregationType only for unverified data (dataset: 1)
+    """
 
     countries: list[str]
     cities: list[str]
     properties: list[str]
-    datasets: Literal[0, 1, 2] | Dataset
+    dataset: Literal[0, 1, 2] | Dataset
     source: str
+    dateTimeStart: NotRequired[str]  #  yyyy-mm-ddTHH:MM:SSZ
+    dateTimeEnd: NotRequired[str]  #  yyyy-mm-ddTHH:MM:SSZ
+    aggregationType: NotRequired[
+        Literal["Hourly data", "Daily data", "Variable intervals"]
+    ]
 
 
 class DownloadSummaryJSON(TypedDict):
