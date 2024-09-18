@@ -19,7 +19,7 @@ else:
     from typing_extensions import TypeAlias  # pragma:no cover
 
 if TYPE_CHECKING:
-    from .dataset import Dataset
+    from .dataset import AggregationType, Dataset
 
 
 class CityData(TypedDict):
@@ -45,22 +45,19 @@ CountryJSON: TypeAlias = "list[CountryData]"
 
 
 class ParquetDataJSON(TypedDict):
-    """
-    request payload to `/DownloadSummary`, `/ParquetFile` and `/ParquetFile/urls`
-
-    dateTimeStart and dateTimeEnd in yyyy-mm-ddTHH:MM:SSZ format
-    aggregationType only for unverified data (dataset: 1)
-    """
+    """request payload to `/DownloadSummary`, `/ParquetFile` and `/ParquetFile/urls`"""
 
     countries: list[str]
     cities: list[str]
     pollutants: list[str]
     dataset: Literal[0, 1, 2] | Dataset
-    source: str
+
+    # Optional
+    source: NotRequired[str]
     dateTimeStart: NotRequired[str]  #  yyyy-mm-ddTHH:MM:SSZ
     dateTimeEnd: NotRequired[str]  #  yyyy-mm-ddTHH:MM:SSZ
     aggregationType: NotRequired[
-        Literal["Hourly data", "Daily data", "Variable intervals"]
+        Literal["hour", "day", "var"] | AggregationType
     ]
 
 

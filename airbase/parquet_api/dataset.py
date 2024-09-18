@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from enum import IntEnum
+from enum import Enum, IntEnum
 from typing import NamedTuple
 from warnings import warn
 
@@ -28,20 +28,41 @@ class Dataset(IntEnum):
         return self.name
 
 
+class AggregationType(str, Enum):
+    """
+    represents whether the data collected is obtaining the values:
+    1. Hourly data.
+    2. Daily data.
+    3. Variable intervals (different than the previous observations such as weekly, monthly, etc.)
+
+    https://eeadmz1-downloads-webapp.azurewebsites.net/content/documentation/How_To_Downloads.pdf
+    """
+
+    Hourly = "hour"
+    Daily = "day"
+    Other = VariableIntervals = "var"
+
+    def __str__(self) -> str:
+        return self.value
+
+
 class ParquetData(NamedTuple):
     """
     info needed for requesting the URLs for country and dataset
-    the request can be further restricted with the `pollutant` and `city` param
+    the request can be further restricted with the `pollutant`, `city` and `frequency`
     """
 
     country: str
     dataset: Dataset
     pollutant: frozenset[str] | None = None
     city: str | None = None
+
+    # Optional
+    frequency: AggregationType | None = None
     source: str = "API"  # for EEA internal use
 
     def payload(self) -> ParquetDataJSON:
-        return dict(
+        payload: ParquetDataJSON = dict(
             countries=[self.country],
             cities=[] if self.city is None else [self.city],
             pollutants=[]
@@ -51,11 +72,18 @@ class ParquetData(NamedTuple):
             source=self.source,
         )
 
+        # Optional
+        if self.frequency is not None:
+            payload["aggregationType"] = self.frequency
+
+        return payload
+
 
 def request_info_by_city(
     dataset: Dataset,
     *cities,
     pollutants: frozenset[str] | set[str] | None = None,
+    frequency: AggregationType | None = None,
 ) -> set[ParquetData]:
     """download info one city at the time"""
     if not pollutants:
@@ -69,7 +97,7 @@ def request_info_by_city(
             warn(f"Unknown {city=}, skip", UserWarning, stacklevel=-2)
             continue
 
-        info.add(ParquetData(country, dataset, pollutants, city))
+        info.add(ParquetData(country, dataset, pollutants, city, frequency))
 
     return info
 
@@ -78,6 +106,7 @@ def request_info_by_country(
     dataset: Dataset,
     *countries,
     pollutants: frozenset[str] | set[str] | None = None,
+    frequency: AggregationType | None = None,
 ) -> set[ParquetData]:
     """download info one country at the time"""
     if not pollutants:
@@ -91,6 +120,6 @@ def request_info_by_country(
             warn(f"Unknown {country=}, skip", UserWarning, stacklevel=-2)
             continue
 
-        info.add(ParquetData(country, dataset, pollutants))
+        info.add(ParquetData(country, dataset, pollutants, frequency=frequency))
 
     return info
