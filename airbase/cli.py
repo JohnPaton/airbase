@@ -10,7 +10,7 @@ import typer
 from . import __version__
 from .csv_api import Source
 from .csv_api import download as download_csv
-from .parquet_api import Dataset
+from .parquet_api import AggregationType, Dataset
 from .parquet_api import download as download_parquet
 from .summary import DB
 
@@ -39,6 +39,21 @@ class Pollutant(str, Enum):
         return self.name
 
 
+class Frequency(str, Enum):
+    _ignore_ = "agg Frequency"  # type:ignore[misc]
+
+    Frequency = vars()
+    for agg in AggregationType:
+        Frequency[agg.name.casefold()] = agg.name.casefold()
+
+    def __str__(self) -> str:
+        return self.name
+
+    @property
+    def aggregation_type(self) -> AggregationType:
+        return AggregationType[self.name.capitalize()]
+
+
 def version_callback(value: bool):
     if not value:
         return
@@ -59,6 +74,13 @@ def callback(
 COUNTRIES = typer.Option([], "-c", "--country")
 POLLUTANTS = typer.Option([], "-p", "--pollutant")
 CITIES = typer.Option([], "-C", "--city", help="only from selected <cities>")
+FREQUENCY = typer.Option(
+    None,
+    "--aggregation-type",
+    "--frequency",
+    "-F",
+    help="only hourly data, daily data or other aggregation frequency",
+)
 METADATA = typer.Option(
     False, "-M", "--metadata", help="download station metadata"
 )
@@ -141,6 +163,7 @@ async def download(
     metadata: bool,
     overwrite: bool,
     quiet: bool,
+    frequency: Frequency | None = None,
     summary_only: bool | None = None,
     year: int | None = None,
 ) -> None:
@@ -155,6 +178,7 @@ async def download(
             countries=frozenset(map(str, countries)),
             pollutants=frozenset(map(str, pollutants)),
             cities=frozenset(cities),
+            frequency=None if frequency is None else frequency.aggregation_type,
             metadata=metadata,
             summary_only=summary_only,
             overwrite=overwrite,
@@ -190,6 +214,7 @@ def historical(
     countries: List[Country] = COUNTRIES,
     pollutants: List[Pollutant] = POLLUTANTS,
     cities: List[str] = CITIES,
+    frequency: Optional[Frequency] = FREQUENCY,
     metadata: bool = METADATA,
     path: Path = typer.Option(
         "data/historical", "--path", exists=True, dir_okay=True, writable=True
@@ -220,6 +245,7 @@ def historical(
             countries=countries,
             pollutants=pollutants,
             cities=cities,
+            frequency=frequency,
             metadata=metadata,
             summary_only=summary_only,
             overwrite=overwrite,
@@ -233,6 +259,7 @@ def verified(
     countries: List[Country] = COUNTRIES,
     pollutants: List[Pollutant] = POLLUTANTS,
     cities: List[str] = CITIES,
+    frequency: Optional[Frequency] = FREQUENCY,
     metadata: bool = METADATA,
     path: Path = typer.Option(
         "data/verified", "--path", exists=True, dir_okay=True, writable=True
@@ -263,6 +290,7 @@ def verified(
             countries=countries,
             pollutants=pollutants,
             cities=cities,
+            frequency=frequency,
             metadata=metadata,
             summary_only=summary_only,
             overwrite=overwrite,
@@ -276,6 +304,7 @@ def unverified(
     countries: List[Country] = COUNTRIES,
     pollutants: List[Pollutant] = POLLUTANTS,
     cities: List[str] = CITIES,
+    frequency: Optional[Frequency] = FREQUENCY,
     metadata: bool = METADATA,
     path: Path = typer.Option(
         "data/unverified", "--path", exists=True, dir_okay=True, writable=True
@@ -306,6 +335,7 @@ def unverified(
             countries=countries,
             pollutants=pollutants,
             cities=cities,
+            frequency=frequency,
             metadata=metadata,
             summary_only=summary_only,
             overwrite=overwrite,
