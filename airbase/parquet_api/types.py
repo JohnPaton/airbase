@@ -54,7 +54,7 @@ class ParquetDataJSON(TypedDict):
 
     countries: list[str]
     cities: list[str]
-    properties: list[str]
+    pollutants: list[str]
     dataset: Literal[0, 1, 2] | Dataset
     source: str
     dateTimeStart: NotRequired[str]  #  yyyy-mm-ddTHH:MM:SSZ

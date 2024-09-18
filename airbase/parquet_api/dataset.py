@@ -44,7 +44,7 @@ class ParquetData(NamedTuple):
         return dict(
             countries=[self.country],
             cities=[] if self.city is None else [self.city],
-            properties=[]
+            pollutants=[]
             if self.pollutant is None
             else DB.properties(*self.pollutant),
             dataset=self.dataset,
