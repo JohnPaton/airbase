@@ -5,9 +5,13 @@ import sys
 from pathlib import Path
 from typing import Iterable, Literal, TypedDict
 
+if sys.version_info >= (3, 11):
+    from typing import assert_never
+else:
+    from typing_extensions import assert_never
+
 from .parquet_api import Dataset, Session, download
 from .summary import DB
-from .util import string_safe_list
 
 
 class PollutantDict(TypedDict):
@@ -94,7 +98,6 @@ class AirbaseClient:
         if not countries:
             countries = tuple(self.countries)
         else:
-            countries = string_safe_list(countries)
             unknown = sorted(set(countries) - self.countries)
             if unknown:
                 raise ValueError(
@@ -102,9 +105,10 @@ class AirbaseClient:
                 )
 
         # poll validation
-        if isinstance(poll, str) and poll not in self.pollutants:
-            raise ValueError(f"'{poll}' is not a valid pollutant name")
-        if isinstance(poll, list):
+        if isinstance(poll, str):
+            if poll not in self.pollutants:
+                raise ValueError(f"'{poll}' is not a valid pollutant name")
+        elif isinstance(poll, Iterable):
             unknown = sorted(set(poll) - self.pollutants)
             if unknown:
                 raise ValueError(
@@ -196,7 +200,17 @@ class AirbaseRequest:
         """
         self.source = source
         self.counties = set(country)
-        self.pollutants = set(string_safe_list(poll))
+
+        self.pollutants: set[str]
+        if poll is None:
+            self.pollutants = set()
+        elif isinstance(poll, str):
+            self.pollutants = {poll}
+        elif isinstance(poll, Iterable):
+            self.pollutants = set(poll)
+        else:
+            assert_never(poll)
+
         self.verbose = verbose
 
     def download(
