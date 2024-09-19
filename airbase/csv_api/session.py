@@ -270,9 +270,9 @@ async def download(
         await session.url_to_files(*info)
         if session.number_of_urls == 0:
             warn(
-                "Found not data matching tour selection, please try different cites/pollutants"
+                "Found no data matching tour selection, please try different cites/pollutants"
                 if cities
-                else "Found not data matching tour selection, please try different pollutants",
+                else "Found no data matching tour selection, please try different pollutants",
                 UserWarning,
             )
             return
