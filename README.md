@@ -47,7 +47,7 @@ frozenset({'Co', 'sum-PCB', 'PCB-26', 'HNO3', ...})
 
 ```pycon
 >>> r = client.request("Verified", "NL", "DE", poll=["NO3", "NO3- in PM2.5", "NO3- in PM10"])
->>> r.download_to_directory(dir="data", skip_existing=True)
+>>> r.download(dir="data", skip_existing=True)
 summary : 100%|█████| 2/2 [00:00<00:00,  4.48requests/s]
 URLs    : 100%|█████| 29.0/29.0 [00:00<00:00, 490URL/s]
 download: 386kb [00:00, 570kb/s]  
@@ -58,18 +58,16 @@ download: 386kb [00:00, 570kb/s]
 ```pycon
 >>> r = client.request()
 >>> r.download_to_directory("data")
-Generating CSV download links...
-100%|██████████| 40/40 [03:38<00:00,  2.29s/it]
-Generated 146,993 CSV links ready for downloading
-Downloading CSVs to data...
-  0%|          | 299/146993 [01:50<17:15:06,  2.36it/s]
+summary : 100%|█████| 39/39 [00:15<00:00,  2.54requests/s]
+URLs    : 100%|█████| 47.0k/47.0k [00:00<00:00, 77.7kURL/s]
+download: 20.6Gb [54:36, 6.74Mb/s]    
 ```
 
 🌡 Don't forget to get the metadata about the measurement stations:
 
 ```pycon
->>> client.download_metadata("data/metadata.tsv")
-Writing metadata to data/metadata.tsv...
+>>> client.download_metadata("data/metadata.csv")
+Writing metadata to data/metadata.csv...
 ```
 
 ## 🚆 Command line interface
