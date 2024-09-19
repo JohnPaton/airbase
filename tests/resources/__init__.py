@@ -23,20 +23,16 @@ def __getattr__(name: str):
         CSV_PARQUET_URLS_RESPONSE="MT_Historical_Valletta.csv",
     )
     if name in text_response:
-        return (
-            resources.files(__package__)
-            .joinpath(text_response[name])
-            .read_text()
-        )
+        res = resources.files(__package__).joinpath(text_response[name])
+        assert res.is_file(), f"{res} is missing"
+        return res.read_text()
 
     binary_response = dict(
         ZIP_CSV_METADATA_RESPONSE="MT_metadata.csv.zip",
     )
     if name in binary_response:
-        return (
-            resources.files(__package__)
-            .joinpath(binary_response[name])
-            .read_bytes()
-        )
+        res = resources.files(__package__).joinpath(binary_response[name])
+        assert res.is_file(), f"{res} is missing"
+        return res.read_bytes()
 
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

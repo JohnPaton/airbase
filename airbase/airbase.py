@@ -5,9 +5,7 @@ import sys
 from pathlib import Path
 from typing import Iterable, Literal, TypedDict
 
-from .fetch import fetch_text
 from .parquet_api import Dataset, Session, download
-from .resources import METADATA_URL
 from .summary import DB
 from .util import string_safe_list
 
@@ -147,9 +145,9 @@ class AirbaseClient:
     @staticmethod
     def download_metadata(filepath: str | Path, verbose: bool = True) -> None:
         """
-        Download the metadata file.
+        Download the metadata CSV file.
 
-        See http://discomap.eea.europa.eu/map/fme/AirQualityExport.htm.
+        See https://discomap.eea.europa.eu/App/AQViewer/index.html?fqn=Airquality_Dissem.b2g.measurements
 
         :param filepath:
         :param verbose:
@@ -234,16 +232,17 @@ class AirbaseRequest:
                 overwrite=not skip_existing,
                 quiet=not self.verbose,
                 raise_for_status=raise_for_status,
+                session=self.session,
             )
         )
 
     def download_metadata(self, filepath: str | Path) -> None:
         """
-        Download the metadata TSV file.
+        Download the metadata CSV file.
 
-        See http://discomap.eea.europa.eu/map/fme/AirQualityExport.htm.
+        See https://discomap.eea.europa.eu/App/AQViewer/index.html?fqn=Airquality_Dissem.b2g.measurements
 
-        :param filepath: Where to save the TSV
+        :param filepath: Where to save the CSV
         """
         # ensure the path is valid
         filepath = Path(filepath)
@@ -252,7 +251,10 @@ class AirbaseRequest:
                 f"{filepath.parent.resolve()} does not exist."
             )
 
+        async def fetch_metadata():
+            async with self.session:
+                await self.session.download_metadata(filepath)
+
         if self.verbose:
             print(f"Writing metadata to {filepath}...", file=sys.stderr)
-        text = fetch_text(METADATA_URL)
-        filepath.write_text(text)
+        asyncio.run(fetch_metadata())

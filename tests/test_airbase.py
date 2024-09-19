@@ -5,7 +5,6 @@ from pathlib import Path
 import pytest
 
 import airbase
-from tests.resources import LEGACY_METADATA_RESPONSE
 
 
 @pytest.fixture
@@ -25,7 +24,12 @@ class TestAirbaseClient:
         path = tmp_path / "meta.csv"
         client.download_metadata(path)
         assert path.exists()
-        assert path.read_text() == LEGACY_METADATA_RESPONSE
+
+        metadata = path.read_text().splitlines()
+        assert len(metadata) == 276
+
+        header = metadata[0].split(",")
+        assert len(header) == 70
 
     def test_request_raises_bad_country(self, client: airbase.AirbaseClient):
         with pytest.raises(ValueError):

@@ -216,7 +216,9 @@ async def test_Session_download_metadata(tmp_path: Path, session: Session):
     assert not path.is_file()
     async with session:
         await session.download_metadata(path)
-        assert path.is_file()
+
+    assert path.is_file(), "missing metadata"
+    assert path.stat().st_size > 0, "empty metadata"
 
     with path.open() as file:
         assert len(file.readlines()) == 58_687
@@ -240,4 +242,7 @@ async def test_download(tmp_path: Path, session: Session):
 
     assert session.number_of_urls == 0
     assert len(tuple(tmp_path.glob("MT/*.csv"))) == 5
-    assert tmp_path.joinpath("metadata.tsv").is_file()
+
+    metadata = tmp_path.joinpath("metadata.tsv")
+    assert metadata.is_file(), "missing metadata"
+    assert metadata.stat().st_size > 0, "empty metadata"
