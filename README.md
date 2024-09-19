@@ -72,22 +72,140 @@ Writing metadata to data/metadata.csv...
 
 ## 🚆 Command line interface
 
+### Air quality data in in CSV format
+
 ``` console
 $ airbase download --help
 Usage: airbase download [OPTIONS]
-  Download all pollutants for all countries
 
-  The -c/--country and -p/--pollutant allow to specify which data to download, e.g.
+  Air quality data in in CSV format. **End of life 2024**.
+
+  The service providing air quality data in CSV format will cease operations by the end of 2024.
+  Until then it will provide only **unverified** data (E2a) for 2024.
+
+  Use -c/--country and -p/--pollutant to restrict the download specific countries and pollutants, e.g.
   - download only Norwegian, Danish and Finish sites
     airbase download -c NO -c DK -c FI
   - download only SO2, PM10 and PM2.5 observations
     airbase download -p SO2 -p PM10 -p PM2.5
 
+  Use -C/--city to further restrict the download to specific cities, e.g.
+  - download only PM10 and PM2.5 from Valletta, the Capital of Malta
+    airbase download -C Valletta -c MT -p PM10 -p PM2.5
+
 Options:
   -c, --country [AD|AL|AT|...]
-  -p, --pollutant [k|CO|NO|...]
+  -p, --pollutant [k|V|TI|...]
+  -C, --city TEXT                 only from selected <cities>
+  -M, --metadata                  download station metadata
   --path PATH                     [default: data]
-  --year INTEGER                  [default: 2022]
+  --year INTEGER RANGE            The service providing air quality data in CSV format will cease operations by the end of 2024.
+                                  Until then it will provide only **unverified** data (E2a) for 2024.  [default: 2024; 2024<=x<=2024]
+  -O, --overwrite                 Re-download existing files.
+  -q, --quiet                     No progress-bar.
+  --help                          Show this message and exit.
+```
+
+### Historical data delivered between 2002 and 2012
+
+``` console
+$ airbase historical --help
+Usage: airbase historical [OPTIONS]
+
+  Historical Airbase data delivered between 2002 and 2012 before Air Quality
+  Directive 2008/50/EC entered into force.
+
+  Use -c/--country and -p/--pollutant to restrict the download specific countries and pollutants, e.g.
+  - download only Norwegian, Danish and Finish sites
+    airbase download -c NO -c DK -c FI
+  - download only SO2, PM10 and PM2.5 observations
+    airbase download -p SO2 -p PM10 -p PM2.5
+
+  Use -C/--city to further restrict the download to specific cities, e.g.
+  - download only PM10 and PM2.5 from Valletta, the Capital of Malta
+    airbase download -C Valletta -c MT -p PM10 -p PM2.5
+
+Options:
+  -c, --country [AD|AL|AT|...]
+  -p, --pollutant [k|V|NT|...]
+  -C, --city TEXT                 only from selected <cities>
+  -F, --aggregation-type, --frequency [hourly|daily|other]
+                                  only hourly data, daily data or other
+                                  aggregation frequency
+  -M, --metadata                  download station metadata
+  --path PATH                     [default: data/historical]
+  -n, --dry-run, --summary        Total download files/size, nothing will be
+                                  downloaded.
+  -O, --overwrite                 Re-download existing files.
+  -q, --quiet                     No progress-bar.
+  --help                          Show this message and exit.
+```
+
+### Verified data from 2013 to 2023
+
+``` console
+$ airbase verified --help
+Usage: airbase verified [OPTIONS]
+
+  Verified data (E1a) from 2013 to 2023 reported by countries by 30 September
+  each year for the previous year.
+
+  Use -c/--country and -p/--pollutant to restrict the download specific countries and pollutants, e.g.
+  - download only Norwegian, Danish and Finish sites
+    airbase download -c NO -c DK -c FI
+  - download only SO2, PM10 and PM2.5 observations
+    airbase download -p SO2 -p PM10 -p PM2.5
+
+  Use -C/--city to further restrict the download to specific cities, e.g.
+  - download only PM10 and PM2.5 from Valletta, the Capital of Malta
+    airbase download -C Valletta -c MT -p PM10 -p PM2.5
+
+Options:
+  -c, --country [AD|AL|AT|...]
+  -p, --pollutant [k|V|NT|...]
+  -C, --city TEXT                 only from selected <cities>
+  -F, --aggregation-type, --frequency [hourly|daily|other]
+                                  only hourly data, daily data or other
+                                  aggregation frequency
+  -M, --metadata                  download station metadata
+  --path PATH                     [default: data/verified]
+  -n, --dry-run, --summary        Total download files/size, nothing will be
+                                  downloaded.
+  -O, --overwrite                 Re-download existing files.
+  -q, --quiet                     No progress-bar.
+  --help                          Show this message and exit.
+```
+
+### Unverified data from the beginning of 2024
+
+``` console
+$ airbase unverified --help
+Usage: airbase unverified [OPTIONS]
+
+  Unverified data transmitted continuously (Up-To-Date/UTD/E2a) data from the
+  beginning of 2024.
+
+  Use -c/--country and -p/--pollutant to restrict the download specific countries and pollutants, e.g.
+  - download only Norwegian, Danish and Finish sites
+    airbase download -c NO -c DK -c FI
+  - download only SO2, PM10 and PM2.5 observations
+    airbase download -p SO2 -p PM10 -p PM2.5
+
+  Use -C/--city to further restrict the download to specific cities, e.g.
+  - download only PM10 and PM2.5 from Valletta, the Capital of Malta
+    airbase download -C Valletta -c MT -p PM10 -p PM2.5
+
+Options:
+  -c, --country [AD|AL|AT|...]
+  -p, --pollutant [k|V|NT|...]
+  -C, --city TEXT                 only from selected <cities>
+  -F, --aggregation-type, --frequency [hourly|daily|other]
+                                  only hourly data, daily data or other
+                                  aggregation frequency
+  -M, --metadata                  download station metadata
+  --path PATH                     [default: data/unverified]
+  -n, --dry-run, --summary        Total download files/size, nothing will be
+                                  downloaded.
   -O, --overwrite                 Re-download existing files.
   -q, --quiet                     No progress-bar.
   --help                          Show this message and exit.
