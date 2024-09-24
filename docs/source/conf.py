@@ -52,6 +52,7 @@ needs_sphinx = "4.2"
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.autodoc.typehints",
+    "sphinx.ext.autosummary",
     "sphinx.ext.coverage",
     "sphinx.ext.mathjax",
     "sphinx.ext.viewcode",
