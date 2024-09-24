@@ -50,12 +50,14 @@ requires = ["hatchling", "hatch-vcs"]
 build-backend = "hatchling.build"
 
 [tool.uv]
+index-url = "https://pypi.org/simple"
 dev-dependencies = [
-    "importlib_metadata; python_version < '3.8'",
     "pytest>=6.0",
     "aioresponses",
     "pytest-asyncio",
     "pytest-cov",
+    "mypy>=1.11.2",
+    "ruff>=0.6.7",
 ]
 
 [tool.hatch.version]
