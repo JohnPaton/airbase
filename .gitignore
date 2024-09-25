@@ -111,6 +111,6 @@ activate
 .idea
 
 # custom
-data
+data/**/*.*
 !**/.gitkeep
 .vscode

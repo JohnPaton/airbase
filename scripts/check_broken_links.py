@@ -2,15 +2,15 @@
 
 """See check_broken_links.py --help  for usage"""
 
-import os
 import argparse
-from datetime import datetime
+import os
 from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime
 
 import requests
-import airbase as ab
 from tqdm import tqdm
 
+import airbase as ab
 
 REQUESTS_SESSION_CONNECTION_POOL_SIZE = 10
 
@@ -18,10 +18,10 @@ REQUESTS_SESSION_CONNECTION_POOL_SIZE = 10
 def main(output_file, retries, ignore_errors=False):
     """Check the entire AirBase database for broken links"""
 
-    print("Will output bad links to {}".format(output_file))
+    print(f"Will output bad links to {output_file}")
 
     client = ab.AirbaseClient()
-    req = client.request(preload_csv_links=True)  # get links to all files
+    req = client.request(preload_urls=True)  # get links to all files
     session = requests.Session()  # reuse HTTP connections
 
     # Define inside main to re-use Session
@@ -29,7 +29,7 @@ def main(output_file, retries, ignore_errors=False):
         try:
             response = session.head(url, timeout=1)
             return response.status_code == 404
-        except:
+        except Exception:
             if r == 0 and not ignore_errors:
                 raise
             elif r == 0 and ignore_errors:
@@ -70,7 +70,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "-o",
         "--output",
-        default="bad-links-{}.txt".format(now),
+        default=f"bad-links-{now}.txt",
         help="File to record the broken links in",
         type=argparse.FileType(),
     )

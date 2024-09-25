@@ -8,11 +8,10 @@
 
 # 🌬 AirBase
 
-An easy downloader for the AirBase air quality data.
+An easy downloader for air quality data provided by the European Environment Agency (EEA).
 
-AirBase is an air quality database provided by the European Environment Agency
-(EEA). The data is available for download at
-[the portal](http://discomap.eea.europa.eu/map/fme/AirQualityExport.htm), but
+The data is available for download at
+[the portal](https://eeadmz1-downloads-webapp.azurewebsites.net/), but
 the interface makes it a bit time consuming to do bulk downloads. Hence, an easy
 Python-based interface.
 
@@ -33,41 +32,25 @@ $ pip install airbase
 ```pycon
 >>> import airbase
 >>> client = airbase.AirbaseClient()
->>> client.all_countries
-['GR', 'ES', 'IS', 'CY', 'NL', 'AT', 'LV', 'BE', 'CH', 'EE', 'FR', 'DE', ...
+>>> client.countries
+frozenset({'LI', 'CY', 'IE', 'LV', 'BE', 'EE', ...})
 
->>> client.all_pollutants
-{'k': 412, 'CO': 10, 'NO': 38, 'O3': 7, 'As': 2018, 'Cd': 2014, ...
+>>> client.pollutants
+frozenset({'Co', 'sum-PCB', 'PCB-26', 'HNO3', ...})
 
->>> client.pollutants_per_country
-{'AD': [{'pl': 'CO', 'shortpl': 10}, {'pl': 'NO', 'shortpl': 38}, ...
 
 >>> client.search_pollutant("O3")
-[{'pl': 'O3', 'shortpl': 7}, {'pl': 'NO3', 'shortpl': 46}, ...
+[{'poll': 'O3', 'id': 7}, {'poll': 'NO3', 'id': 46}, ...]
 ```
 
-🗂 Request download links from the server and save the resulting CSVs into a directory:
+🗂 Request download links from the server and save the resulting Parquet files into a directory:
 
 ```pycon
->>> r = client.request(country=["NL", "DE"], pl="NO3", year_from=2015)
->>> r.download_to_directory(dir="data", skip_existing=True)
-Generating CSV download links...
-100%|██████████| 2/2 [00:03<00:00,  2.03s/it]
-Generated 12 CSV links ready for downloading
-Downloading CSVs to data...
-100%|██████████| 12/12 [00:01<00:00,  8.44it/s]
-```
-
-💾 Or concatenate them into one big file:
-
-```pycon
->>> r = client.request(country="FR", pl=["O3", "PM10"], year_to=2014)
->>> r.download_to_file("data/raw.csv")
-Generating CSV download links...
-100%|██████████| 2/2 [00:12<00:00,  7.40s/it]
-Generated 2,029 CSV links ready for downloading
-Writing data to data/raw.csv...
-100%|██████████| 2029/2029 [31:23<00:00,  1.04it/s]
+>>> r = client.request("Verified", "NL", "DE", poll=["NO3", "NO3- in PM2.5", "NO3- in PM10"])
+>>> r.download(dir="data", skip_existing=True)
+summary : 100%|█████| 2/2 [00:00<00:00,  4.48requests/s]
+URLs    : 100%|█████| 29.0/29.0 [00:00<00:00, 490URL/s]
+download: 386kb [00:00, 570kb/s]  
 ```
 
 📦 Download the entire dataset (not for the faint of heart):
@@ -75,38 +58,154 @@ Writing data to data/raw.csv...
 ```pycon
 >>> r = client.request()
 >>> r.download_to_directory("data")
-Generating CSV download links...
-100%|██████████| 40/40 [03:38<00:00,  2.29s/it]
-Generated 146,993 CSV links ready for downloading
-Downloading CSVs to data...
-  0%|          | 299/146993 [01:50<17:15:06,  2.36it/s]
+summary : 100%|█████| 39/39 [00:15<00:00,  2.54requests/s]
+URLs    : 100%|█████| 47.0k/47.0k [00:00<00:00, 77.7kURL/s]
+download: 20.6Gb [54:36, 6.74Mb/s]    
 ```
 
 🌡 Don't forget to get the metadata about the measurement stations:
 
 ```pycon
->>> client.download_metadata("data/metadata.tsv")
-Writing metadata to data/metadata.tsv...
+>>> client.download_metadata("data/metadata.csv")
+Writing metadata to data/metadata.csv...
 ```
 
 ## 🚆 Command line interface
 
+### Air quality data in in CSV format
+
 ``` console
 $ airbase download --help
 Usage: airbase download [OPTIONS]
-  Download all pollutants for all countries
 
-  The -c/--country and -p/--pollutant allow to specify which data to download, e.g.
+  Air quality data in in CSV format. **End of life 2024**.
+
+  The service providing air quality data in CSV format will cease operations by the end of 2024.
+  Until then it will provide only **unverified** data (E2a) for 2024.
+
+  Use -c/--country and -p/--pollutant to restrict the download specific countries and pollutants, e.g.
   - download only Norwegian, Danish and Finish sites
     airbase download -c NO -c DK -c FI
   - download only SO2, PM10 and PM2.5 observations
     airbase download -p SO2 -p PM10 -p PM2.5
 
+  Use -C/--city to further restrict the download to specific cities, e.g.
+  - download only PM10 and PM2.5 from Valletta, the Capital of Malta
+    airbase download -C Valletta -c MT -p PM10 -p PM2.5
+
 Options:
   -c, --country [AD|AL|AT|...]
-  -p, --pollutant [k|CO|NO|...]
+  -p, --pollutant [k|V|TI|...]
+  -C, --city TEXT                 only from selected <cities>
+  -M, --metadata                  download station metadata
   --path PATH                     [default: data]
-  --year INTEGER                  [default: 2022]
+  --year INTEGER RANGE            The service providing air quality data in CSV format will cease operations by the end of 2024.
+                                  Until then it will provide only **unverified** data (E2a) for 2024.  [default: 2024; 2024<=x<=2024]
+  -O, --overwrite                 Re-download existing files.
+  -q, --quiet                     No progress-bar.
+  --help                          Show this message and exit.
+```
+
+### Historical data delivered between 2002 and 2012
+
+``` console
+$ airbase historical --help
+Usage: airbase historical [OPTIONS]
+
+  Historical Airbase data delivered between 2002 and 2012 before Air Quality
+  Directive 2008/50/EC entered into force.
+
+  Use -c/--country and -p/--pollutant to restrict the download specific countries and pollutants, e.g.
+  - download only Norwegian, Danish and Finish sites
+    airbase download -c NO -c DK -c FI
+  - download only SO2, PM10 and PM2.5 observations
+    airbase download -p SO2 -p PM10 -p PM2.5
+
+  Use -C/--city to further restrict the download to specific cities, e.g.
+  - download only PM10 and PM2.5 from Valletta, the Capital of Malta
+    airbase download -C Valletta -c MT -p PM10 -p PM2.5
+
+Options:
+  -c, --country [AD|AL|AT|...]
+  -p, --pollutant [k|V|NT|...]
+  -C, --city TEXT                 only from selected <cities>
+  -F, --aggregation-type, --frequency [hourly|daily|other]
+                                  only hourly data, daily data or other
+                                  aggregation frequency
+  -M, --metadata                  download station metadata
+  --path PATH                     [default: data/historical]
+  -n, --dry-run, --summary        Total download files/size, nothing will be
+                                  downloaded.
+  -O, --overwrite                 Re-download existing files.
+  -q, --quiet                     No progress-bar.
+  --help                          Show this message and exit.
+```
+
+### Verified data from 2013 to 2023
+
+``` console
+$ airbase verified --help
+Usage: airbase verified [OPTIONS]
+
+  Verified data (E1a) from 2013 to 2023 reported by countries by 30 September
+  each year for the previous year.
+
+  Use -c/--country and -p/--pollutant to restrict the download specific countries and pollutants, e.g.
+  - download only Norwegian, Danish and Finish sites
+    airbase download -c NO -c DK -c FI
+  - download only SO2, PM10 and PM2.5 observations
+    airbase download -p SO2 -p PM10 -p PM2.5
+
+  Use -C/--city to further restrict the download to specific cities, e.g.
+  - download only PM10 and PM2.5 from Valletta, the Capital of Malta
+    airbase download -C Valletta -c MT -p PM10 -p PM2.5
+
+Options:
+  -c, --country [AD|AL|AT|...]
+  -p, --pollutant [k|V|NT|...]
+  -C, --city TEXT                 only from selected <cities>
+  -F, --aggregation-type, --frequency [hourly|daily|other]
+                                  only hourly data, daily data or other
+                                  aggregation frequency
+  -M, --metadata                  download station metadata
+  --path PATH                     [default: data/verified]
+  -n, --dry-run, --summary        Total download files/size, nothing will be
+                                  downloaded.
+  -O, --overwrite                 Re-download existing files.
+  -q, --quiet                     No progress-bar.
+  --help                          Show this message and exit.
+```
+
+### Unverified data from the beginning of 2024
+
+``` console
+$ airbase unverified --help
+Usage: airbase unverified [OPTIONS]
+
+  Unverified data transmitted continuously (Up-To-Date/UTD/E2a) data from the
+  beginning of 2024.
+
+  Use -c/--country and -p/--pollutant to restrict the download specific countries and pollutants, e.g.
+  - download only Norwegian, Danish and Finish sites
+    airbase download -c NO -c DK -c FI
+  - download only SO2, PM10 and PM2.5 observations
+    airbase download -p SO2 -p PM10 -p PM2.5
+
+  Use -C/--city to further restrict the download to specific cities, e.g.
+  - download only PM10 and PM2.5 from Valletta, the Capital of Malta
+    airbase download -C Valletta -c MT -p PM10 -p PM2.5
+
+Options:
+  -c, --country [AD|AL|AT|...]
+  -p, --pollutant [k|V|NT|...]
+  -C, --city TEXT                 only from selected <cities>
+  -F, --aggregation-type, --frequency [hourly|daily|other]
+                                  only hourly data, daily data or other
+                                  aggregation frequency
+  -M, --metadata                  download station metadata
+  --path PATH                     [default: data/unverified]
+  -n, --dry-run, --summary        Total download files/size, nothing will be
+                                  downloaded.
   -O, --overwrite                 Re-download existing files.
   -q, --quiet                     No progress-bar.
   --help                          Show this message and exit.

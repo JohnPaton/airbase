@@ -1,9 +1,11 @@
+from __future__ import annotations
+
 import re
 
 import pytest
 from aioresponses import aioresponses
 
-import airbase
+from airbase.summary import DB
 from tests import resources
 
 
@@ -14,35 +16,59 @@ def response():
         yield mocker
 
 
-@pytest.fixture()
-def csv_links_response(response: aioresponses):
-    """mock response from station data links url"""
+@pytest.fixture
+def mock_parquet_api(response: aioresponses):
+    """mock responses from Parquet downloads API"""
     response.get(
-        re.compile(
-            r"https://fme\.discomap\.eea\.europa\.eu/fmedatastreaming/"
-            r"AirQualityDownload/AQData_Extract\.fmw.*"
-        ),
-        body=resources.CSV_LINKS_RESPONSE_TEXT,
+        "https://eeadmz1-downloads-api-appservice.azurewebsites.net/Country",
+        payload=DB.country_json(),
+    )
+    response.get(
+        "https://eeadmz1-downloads-api-appservice.azurewebsites.net/Pollutant",
+        payload=DB.pollutant_json(),
+    )
+    response.post(
+        "https://eeadmz1-downloads-api-appservice.azurewebsites.net/City",
+        payload=DB.city_json(),
+    )
+    response.post(
+        "https://eeadmz1-downloads-api-appservice.azurewebsites.net/DownloadSummary",
+        body=resources.JSON_DOWNLOAD_SUMMARY_RESPONSE,
+        repeat=True,
+    )
+    response.post(
+        "https://eeadmz1-downloads-api-appservice.azurewebsites.net/ParquetFile/urls",
+        body=resources.CSV_PARQUET_URLS_RESPONSE,
+        repeat=True,
+    )
+    response.get(
+        "https://discomap.eea.europa.eu/App/AQViewer/download?fqn=Airquality_Dissem.b2g.measurements&f=csv",
+        body=resources.ZIP_CSV_METADATA_RESPONSE,
+        repeat=False,
+    )
+    response.get(
+        re.compile(r"https://.*/../.*\.parquet"),  # any parquet file
+        body=b"",
         repeat=True,
     )
 
 
 @pytest.fixture()
-def csv_response(response: aioresponses):
-    """mock response from station data url"""
+def mock_csv_api(response: aioresponses):
+    """mock response from Legacy AirQualityExport"""
     response.get(
         re.compile(
-            r"https://ereporting\.blob\.core\.windows\.net/downloadservice/.*"
+            r"https://fme\.discomap\.eea\.europa\.eu/fmedatastreaming/AirQualityDownload/AQData_Extract\.fmw?.*&Output=TEXT&.*"
         ),
-        body=resources.CSV_RESPONSE,
+        body=resources.LEGACY_CSV_URLS_RESPONSE,
         repeat=True,
     )
-
-
-@pytest.fixture()
-def metadata_response(response: aioresponses):
-    """mock response from metadata url"""
     response.get(
-        airbase.resources.METADATA_URL,
-        body=resources.METADATA_RESPONSE,
+        "http://discomap.eea.europa.eu/map/fme/metadata/PanEuropean_metadata.csv",
+        body=resources.LEGACY_METADATA_RESPONSE,
+    )
+    response.get(
+        re.compile(r"https://.*/../.*\.csv"),  # any CSV file
+        body="",
+        repeat=True,
     )

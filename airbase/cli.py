@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import date
+import asyncio
 from enum import Enum
 from pathlib import Path
 from typing import List, Optional
@@ -8,9 +8,12 @@ from typing import List, Optional
 import typer
 
 from . import __version__
-from .airbase import AirbaseClient
+from .csv_api import Source
+from .csv_api import download as download_csv
+from .parquet_api import AggregationType, Dataset
+from .parquet_api import download as download_parquet
+from .summary import DB
 
-client = AirbaseClient()
 main = typer.Typer(add_completion=False, no_args_is_help=True)
 
 
@@ -18,7 +21,7 @@ class Country(str, Enum):
     _ignore_ = "country Country"  # type:ignore[misc]
 
     Country = vars()
-    for country in client.countries:
+    for country in sorted(DB.COUNTRY_CODES):
         Country[country] = country
 
     def __str__(self) -> str:
@@ -29,11 +32,26 @@ class Pollutant(str, Enum):
     _ignore_ = "poll Pollutant"  # type:ignore[misc]
 
     Pollutant = vars()
-    for poll in client._pollutants_ids:
+    for poll in sorted(DB.POLLUTANTS, key=lambda poll: len(poll)):
         Pollutant[poll] = poll
 
     def __str__(self) -> str:
         return self.name
+
+
+class Frequency(str, Enum):
+    _ignore_ = "agg Frequency"  # type:ignore[misc]
+
+    Frequency = vars()
+    for agg in AggregationType:
+        Frequency[agg.name.casefold()] = agg.name.casefold()
+
+    def __str__(self) -> str:
+        return self.name
+
+    @property
+    def aggregation_type(self) -> AggregationType:
+        return AggregationType[self.name.capitalize()]
 
 
 def version_callback(value: bool):
@@ -55,98 +73,272 @@ def callback(
 
 COUNTRIES = typer.Option([], "-c", "--country")
 POLLUTANTS = typer.Option([], "-p", "--pollutant")
-PATH = typer.Option("data", "--path", exists=True, dir_okay=True, writable=True)
-YEAR = typer.Option(date.today().year, "--year")
+CITIES = typer.Option([], "-C", "--city", help="only from selected <cities>")
+FREQUENCY = typer.Option(
+    None,
+    "--aggregation-type",
+    "--frequency",
+    "-F",
+    help="only hourly data, daily data or other aggregation frequency",
+)
+METADATA = typer.Option(
+    False, "-M", "--metadata", help="download station metadata"
+)
+SUMMARY = typer.Option(
+    False,
+    "-n",
+    "--dry-run",
+    "--summary",
+    help="Total download files/size, nothing will be downloaded.",
+)
 OVERWRITE = typer.Option(
     False, "-O", "--overwrite", help="Re-download existing files."
 )
 QUIET = typer.Option(False, "-q", "--quiet", help="No progress-bar.")
 
 
-def _download(
-    countries: list[Country],
-    pollutants: list[Pollutant],
-    path: Path,
-    year: int,
-    overwrite: bool,
-    quiet: bool,
-):
-    request = client.request(
-        countries or None,  # type:ignore[arg-type]
-        pollutants or None,  # type:ignore[arg-type]
-        year_from=str(year),
-        year_to=str(year),
-        verbose=not quiet,
-    )
-    request.download_to_directory(path, skip_existing=not overwrite)
-
-
-@main.command(no_args_is_help=True)
-def download(
+@main.command("download", no_args_is_help=True)
+def legacy(
     countries: List[Country] = COUNTRIES,
     pollutants: List[Pollutant] = POLLUTANTS,
-    path: Path = PATH,
-    year: int = YEAR,
+    cities: List[str] = CITIES,
+    metadata: bool = METADATA,
+    path: Path = typer.Option(
+        "data", "--path", exists=True, dir_okay=True, writable=True
+    ),
+    year: int = typer.Option(
+        2024,
+        "--year",
+        min=2024,
+        max=2024,
+        help="""\b
+        The service providing air quality data in CSV format will cease operations by the end of 2024.
+        Until then it will provide only **unverified** data (E2a) for 2024.
+        """,
+    ),
     overwrite: bool = OVERWRITE,
     quiet: bool = QUIET,
 ):
-    """Download all pollutants for all countries
+    """
+    Air quality data in in CSV format. **End of life 2024**.
 
     \b
-    The -c/--country and -p/--pollutant allow to specify which data to download, e.g.
+    The service providing air quality data in CSV format will cease operations by the end of 2024.
+    Until then it will provide only **unverified** data (E2a) for 2024.
+
+    \b
+    Use -c/--country and -p/--pollutant to restrict the download specific countries and pollutants, e.g.
     - download only Norwegian, Danish and Finish sites
       airbase download -c NO -c DK -c FI
     - download only SO2, PM10 and PM2.5 observations
       airbase download -p SO2 -p PM10 -p PM2.5
+
+    \b
+    Use -C/--city to further restrict the download to specific cities, e.g.
+    - download only PM10 and PM2.5 from Valletta, the Capital of Malta
+      airbase download -C Valletta -c MT -p PM10 -p PM2.5
     """
-    _download(countries, pollutants, path, year, overwrite, quiet)
-
-
-def deprecation_message(old: str, new: str):  # pragma: no cover
-    old = typer.style(f"{__package__} {old}", fg="red", bold=True)
-    new = typer.style(f"{__package__} {new}", fg="green", bold=True)
-    typer.echo(
-        f"{old} has been deprecated and will be removed on v1. Use {new} all instead.",
+    asyncio.run(
+        download(
+            Source.ALL,
+            path,
+            year=year,
+            countries=countries,
+            pollutants=pollutants,
+            cities=cities,
+            metadata=metadata,
+            overwrite=overwrite,
+            quiet=quiet,
+        )
     )
 
 
-@main.command(name="all", no_args_is_help=True)
-def download_all(
+async def download(
+    dataset: Dataset | Source,
+    path: Path,
+    *,
+    countries: list[Country],
+    pollutants: list[Pollutant],
+    cities: list[str],
+    metadata: bool,
+    overwrite: bool,
+    quiet: bool,
+    frequency: Frequency | None = None,
+    summary_only: bool | None = None,
+    year: int | None = None,
+) -> None:
+    """download CSV or Parquet files from corresponding API"""
+    if isinstance(dataset, Dataset):
+        if summary_only is None:
+            raise typer.BadParameter("missing --dry-run/--summary option")
+
+        await download_parquet(
+            dataset,
+            path,
+            countries=frozenset(map(str, countries)),
+            pollutants=frozenset(map(str, pollutants)),
+            cities=frozenset(cities),
+            frequency=None if frequency is None else frequency.aggregation_type,
+            metadata=metadata,
+            summary_only=summary_only,
+            overwrite=overwrite,
+            quiet=quiet,
+        )
+        return
+
+    if isinstance(dataset, Source):
+        if year is None:
+            raise typer.BadParameter("missing --year option")
+
+        await download_csv(
+            dataset,
+            year,
+            path,
+            countries=frozenset(map(str, countries)),
+            pollutants=frozenset(map(str, pollutants)),
+            cities=frozenset(cities),
+            metadata=metadata,
+            overwrite=overwrite,
+            quiet=quiet,
+        )
+        return
+
+    # should never reach
+    raise ValueError(
+        f"Unsupported dataset, summary, year: {dataset}, {summary_only}, {year}."
+    )
+
+
+@main.command(no_args_is_help=True)
+def historical(
     countries: List[Country] = COUNTRIES,
     pollutants: List[Pollutant] = POLLUTANTS,
-    path: Path = PATH,
-    year: int = YEAR,
+    cities: List[str] = CITIES,
+    frequency: Optional[Frequency] = FREQUENCY,
+    metadata: bool = METADATA,
+    path: Path = typer.Option(
+        "data/historical", "--path", exists=True, dir_okay=True, writable=True
+    ),
+    summary_only: bool = SUMMARY,
     overwrite: bool = OVERWRITE,
     quiet: bool = QUIET,
-):  # pragma: no cover
-    """Download all pollutants for all countries (deprecated)"""
-    deprecation_message("all", "download")
-    _download(countries, pollutants, path, year, overwrite, quiet)
+):
+    """
+    Historical Airbase data delivered between 2002 and 2012 before Air Quality Directive 2008/50/EC entered into force.
+
+    \b
+    Use -c/--country and -p/--pollutant to restrict the download specific countries and pollutants, e.g.
+    - download only Norwegian, Danish and Finish sites
+      airbase download -c NO -c DK -c FI
+    - download only SO2, PM10 and PM2.5 observations
+      airbase download -p SO2 -p PM10 -p PM2.5
+
+    \b
+    Use -C/--city to further restrict the download to specific cities, e.g.
+    - download only PM10 and PM2.5 from Valletta, the Capital of Malta
+      airbase download -C Valletta -c MT -p PM10 -p PM2.5
+    """
+    asyncio.run(
+        download(
+            Dataset.Historical,
+            path,
+            countries=countries,
+            pollutants=pollutants,
+            cities=cities,
+            frequency=frequency,
+            metadata=metadata,
+            summary_only=summary_only,
+            overwrite=overwrite,
+            quiet=quiet,
+        )
+    )
 
 
-@main.command(name="country", no_args_is_help=True)
-def download_country(
-    country: Country = typer.Argument(),
-    pollutants: List[Pollutant] = POLLUTANTS,
-    path: Path = PATH,
-    year: int = YEAR,
-    overwrite: bool = OVERWRITE,
-    quiet: bool = QUIET,
-):  # pragma: no cover
-    """Download specific pollutants for one country (deprecated)"""
-    deprecation_message("country", "download")
-    _download([country], pollutants, path, year, overwrite, quiet)
-
-
-@main.command(name="pollutant", no_args_is_help=True)
-def download_pollutant(
-    pollutant: Pollutant = typer.Argument(),
+@main.command(no_args_is_help=True)
+def verified(
     countries: List[Country] = COUNTRIES,
-    path: Path = PATH,
-    year: int = YEAR,
+    pollutants: List[Pollutant] = POLLUTANTS,
+    cities: List[str] = CITIES,
+    frequency: Optional[Frequency] = FREQUENCY,
+    metadata: bool = METADATA,
+    path: Path = typer.Option(
+        "data/verified", "--path", exists=True, dir_okay=True, writable=True
+    ),
+    summary_only: bool = SUMMARY,
     overwrite: bool = OVERWRITE,
     quiet: bool = QUIET,
-):  # pragma: no cover
-    """Download specific countries for one pollutant (deprecated)"""
-    deprecation_message("pollutant", "download")
-    _download(countries, [pollutant], path, year, overwrite, quiet)
+):
+    """
+    Verified data (E1a) from 2013 to 2023 reported by countries by 30 September each year for the previous year.
+
+    \b
+    Use -c/--country and -p/--pollutant to restrict the download specific countries and pollutants, e.g.
+    - download only Norwegian, Danish and Finish sites
+      airbase download -c NO -c DK -c FI
+    - download only SO2, PM10 and PM2.5 observations
+      airbase download -p SO2 -p PM10 -p PM2.5
+
+    \b
+    Use -C/--city to further restrict the download to specific cities, e.g.
+    - download only PM10 and PM2.5 from Valletta, the Capital of Malta
+      airbase download -C Valletta -c MT -p PM10 -p PM2.5
+    """
+    asyncio.run(
+        download(
+            Dataset.Verified,
+            path,
+            countries=countries,
+            pollutants=pollutants,
+            cities=cities,
+            frequency=frequency,
+            metadata=metadata,
+            summary_only=summary_only,
+            overwrite=overwrite,
+            quiet=quiet,
+        )
+    )
+
+
+@main.command(no_args_is_help=True)
+def unverified(
+    countries: List[Country] = COUNTRIES,
+    pollutants: List[Pollutant] = POLLUTANTS,
+    cities: List[str] = CITIES,
+    frequency: Optional[Frequency] = FREQUENCY,
+    metadata: bool = METADATA,
+    path: Path = typer.Option(
+        "data/unverified", "--path", exists=True, dir_okay=True, writable=True
+    ),
+    summary_only: bool = SUMMARY,
+    overwrite: bool = OVERWRITE,
+    quiet: bool = QUIET,
+):
+    """
+    Unverified data transmitted continuously (Up-To-Date/UTD/E2a) data from the beginning of 2024.
+
+    \b
+    Use -c/--country and -p/--pollutant to restrict the download specific countries and pollutants, e.g.
+    - download only Norwegian, Danish and Finish sites
+      airbase download -c NO -c DK -c FI
+    - download only SO2, PM10 and PM2.5 observations
+      airbase download -p SO2 -p PM10 -p PM2.5
+
+    \b
+    Use -C/--city to further restrict the download to specific cities, e.g.
+    - download only PM10 and PM2.5 from Valletta, the Capital of Malta
+      airbase download -C Valletta -c MT -p PM10 -p PM2.5
+    """
+    asyncio.run(
+        download(
+            Dataset.Verified,
+            path,
+            countries=countries,
+            pollutants=pollutants,
+            cities=cities,
+            frequency=frequency,
+            metadata=metadata,
+            summary_only=summary_only,
+            overwrite=overwrite,
+            quiet=quiet,
+        )
+    )

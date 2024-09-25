@@ -7,6 +7,7 @@ build-backend = "setuptools.build_meta"
 [tool.pytest.ini_options]
 minversion = "6.0"
 addopts = "--showlocals"
+required_plugins = ["pytest-asyncio"]
 testpaths = ["tests"]
 filterwarnings = [
     # DeprecationWarning are errors
@@ -24,7 +25,7 @@ show_missing = true
 [tool.ruff]
 target-version = "py38"
 line-length = 80
-extend-exclude = ["docs", "scripts", "build"]
+extend-exclude = ["docs", "build"]
 
 [tool.ruff.lint]
 select = ["E", "W", "F", "I", "UP"]
@@ -51,7 +52,7 @@ sqlite_cache = true
 exclude = "docs|scripts|build"
 
 [[tool.mypy.overrides]]
-module = ["tqdm"]
+module = ["tqdm.*", "async_property"]
 ignore_missing_imports = true
 
 [tool.tox]
