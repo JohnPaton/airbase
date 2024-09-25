@@ -2,16 +2,17 @@ name: 'Setup airbase'
 description: 'Configure python, uv and airbase'
 inputs:
   python-version:
+    description: 'Python version to run on'
     required: false
     default: '3.x'
   allow-python-prereleases:
+    description: 'Allow Python prereleases'
     required: false
     default: false
 runs:
   using: "composite"
   steps:
     steps:
-      - uses: actions/checkout@v4
       # https://docs.astral.sh/uv/guides/integration/github/#installation
       - name: Install uv
         # Install latest uv version using the installer

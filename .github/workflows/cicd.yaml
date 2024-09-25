@@ -16,6 +16,7 @@ jobs:
           - python: '3.13'
             prerelease: true
     steps:
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-project
         name: Setup project
         with:
@@ -31,6 +32,7 @@ jobs:
     needs: unit-test
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-project
         name: Setup project
       - run: uv run pytest -lvk "integration"
@@ -40,6 +42,7 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-project
         name: Setup project
       - uses: pre-commit/action@v3.0.1
@@ -50,6 +53,7 @@ jobs:
     needs: [unit-test, lint, integration-test]
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-project
         name: Setup project
       - run: |
