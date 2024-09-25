@@ -1,0 +1,38 @@
+name: 'Setup airbase'
+description: 'Configure python, uv and airbase'
+inputs:
+  python-version:
+    description: 'Python version to run on'
+    required: false
+    default: '3.x'
+  allow-python-prereleases:
+    description: 'Allow Python prereleases'
+    required: false
+    default: false
+runs:
+  using: "composite"
+  steps:
+    # https://docs.astral.sh/uv/guides/integration/github/#installation
+    - name: Install uv
+      shell: bash
+      # Install latest uv version using the installer
+      run: curl -LsSf https://astral.sh/uv/install.sh | sh
+    - uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.python-version }}
+        allow-prereleases: ${{ inputs.allow-python-prereleases }}
+    - name: Configure uv cache
+      shell: bash
+      run: echo 'UV_CACHE_DIR=/tmp/.uv-cache' >> $GITHUB_ENV
+    - name: Restore uv cache
+      uses: actions/cache@v4
+      with:
+        path: /tmp/.uv-cache
+        key: uv-${{ runner.os }}-${{ hashFiles('uv.lock') }}-${{ inputs.python-version }}
+        restore-keys: |
+          uv-${{ runner.os }}-${{ hashFiles('uv.lock') }}-${{ inputs.python-version }}
+          uv-${{ runner.os }}
+    - name: Install airbase
+      continue-on-error: ${{ inputs.allow-python-prereleases }}
+      shell: bash
+      run: uv sync --all-extras --dev
