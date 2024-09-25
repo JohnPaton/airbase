@@ -48,6 +48,8 @@ jobs:
       - uses: pre-commit/action@v3.0.1
         with:
           extra_args: --all-files
+      - name: Minimize uv cache
+        run: uv cache prune --ci
 
   build-and-deploy:
     needs: [unit-test, lint, integration-test]
@@ -57,7 +59,7 @@ jobs:
       - uses: ./.github/actions/setup-project
         name: Setup project
       - run: |
-          uvx --from build pyproject-build --installer uv
+          uv build
       - uses: pypa/gh-action-pypi-publish@release/v1
         if: |
           github.repository == 'JohnPaton/airbase' &&
