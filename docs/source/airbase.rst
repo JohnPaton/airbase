@@ -1,44 +1,39 @@
 airbase package
 ===============
 
-.. automodule:: airbase
-    :members:
-    :undoc-members:
-    :show-inheritance:
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   airbase.csv_api
+   airbase.parquet_api
+   airbase.summary
 
 Submodules
 ----------
 
-airbase.resources module
-------------------------
-
-.. automodule:: airbase.resources
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-airbase.util module
--------------------
-
-.. automodule:: airbase.util
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-airbase.fetch module
---------------------
-
-.. automodule:: airbase.fetch
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-
-airbase.summary module
+airbase.airbase module
 ----------------------
 
-.. automodule:: airbase.summary
-    :members:
-    :undoc-members:
-    :show-inheritance:
+.. automodule:: airbase.airbase
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
+airbase.cli module
+------------------
+
+.. automodule:: airbase.cli
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: airbase
+   :members:
+   :undoc-members:
+   :show-inheritance:
