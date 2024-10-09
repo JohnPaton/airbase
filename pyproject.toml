@@ -1,8 +1,73 @@
-[build-system]
-requires = ["setuptools>=45", "wheel", "setuptools_scm>=6.2"]
-build-backend = "setuptools.build_meta"
+[project]
+name = "airbase"
+dynamic = ["version"]
+requires-python = ">=3.8,<4"
+description = "An easy downloader for the AirBase air quality data."
+readme = {file = "README.md", content-type = "text/markdown"}
+authors = [{name="John Paton", email="john@johnpaton.net"}]
+maintainers = [{name="John Paton", email="john@johnpaton.net"}, {name="Alvaro Valdebenito"}]
+license = {file = "LICENSE"}
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Atmospheric Science",
+]
 
-[tool.setuptools_scm]
+dependencies = [
+    "aiohttp; python_version < '3.12'",
+    "aiohttp >= 3.9.0; python_version >= '3.12'",
+    "async_property >=0.2.2",
+    "aiofiles >=24.1.0",
+    "importlib_resources; python_version < '3.11'",
+    "tqdm",
+    "typer >=0.9.1",
+    "typing_extensions >=4.12.2; python_version < '3.11'",
+]
+
+[project.urls]
+Repository = "https://github.com/johnpaton/airbase"
+Documentation = "https://airbase.readthedocs.io"
+
+[project.scripts]
+airbase = "airbase.cli:main"
+
+[project.optional-dependencies]
+docs = [
+    "sphinx>=4.2.0",
+    "sphinx_rtd_theme",
+]
+
+[build-system]
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+[tool.uv]
+index-url = "https://pypi.org/simple"
+dev-dependencies = [
+    "pytest>=6.0",
+    "aioresponses",
+    "pytest-asyncio",
+    "pytest-cov",
+    "mypy>=1.11.2",
+    "ruff>=0.6.7",
+]
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.envs.default]
+installer = "uv"
+
+[tool.hatch.build.targets.wheel]
+packages = ["airbase"]
 
 [tool.pytest.ini_options]
 minversion = "6.0"

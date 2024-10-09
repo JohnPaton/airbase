@@ -10,3 +10,7 @@ repos:
   - id: mypy
     exclude: '(docs/.*)|(setup\.py)'
     additional_dependencies: [types-aiofiles, types-requests]
+- repo: https://github.com/astral-sh/uv-pre-commit
+  rev: 0.4.9
+  hooks:
+    - id: uv-lock
