@@ -330,7 +330,7 @@ def unverified(
     """
     asyncio.run(
         download(
-            Dataset.Verified,
+            Dataset.Unverified,
             path,
             countries=countries,
             pollutants=pollutants,
