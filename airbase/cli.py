@@ -106,16 +106,7 @@ def legacy(
     path: Path = typer.Option(
         "data", "--path", exists=True, dir_okay=True, writable=True
     ),
-    year: int = typer.Option(
-        2024,
-        "--year",
-        min=2024,
-        max=2024,
-        help="""\b
-        The service providing air quality data in CSV format will cease operations by the end of 2024.
-        Until then it will provide only **unverified** data (E2a) for 2024.
-        """,
-    ),
+    year: int = typer.Option(2024, "--year", min=2013, max=2024),
     overwrite: bool = OVERWRITE,
     quiet: bool = QUIET,
 ):
