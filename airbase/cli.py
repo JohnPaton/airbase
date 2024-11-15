@@ -73,16 +73,16 @@ def callback(
 
 COUNTRIES = typer.Option([], "-c", "--country")
 POLLUTANTS = typer.Option([], "-p", "--pollutant")
-CITIES = typer.Option([], "-C", "--city", help="only from selected <cities>")
+CITIES = typer.Option([], "-C", "--city", help="Only from selected <cities>.")
 FREQUENCY = typer.Option(
     None,
     "--aggregation-type",
     "--frequency",
     "-F",
-    help="only hourly data, daily data or other aggregation frequency",
+    help="Only hourly data, daily data or other aggregation frequency.",
 )
 METADATA = typer.Option(
-    False, "-M", "--metadata", help="download station metadata"
+    False, "-M", "--metadata", help="Download station metadata."
 )
 SUMMARY = typer.Option(
     False,
@@ -90,6 +90,16 @@ SUMMARY = typer.Option(
     "--dry-run",
     "--summary",
     help="Total download files/size, nothing will be downloaded.",
+)
+FLAT_DIR = typer.Option(
+    False,
+    "--subdir/--no-subdir",
+    help="Download files for different counties to different sub directories.",
+)
+COUNTRY_SUBDIR = typer.Option(
+    True,
+    "--subdir/--no-subdir",
+    help="Download files for different counties to different sub directories.",
 )
 OVERWRITE = typer.Option(
     False, "-O", "--overwrite", help="Re-download existing files."
@@ -107,6 +117,7 @@ def legacy(
         "data", "--path", exists=True, dir_okay=True, writable=True
     ),
     year: int = typer.Option(2024, "--year", min=2013, max=2024),
+    country_subdir: bool = FLAT_DIR,
     overwrite: bool = OVERWRITE,
     quiet: bool = QUIET,
 ):
@@ -138,6 +149,7 @@ def legacy(
             pollutants=pollutants,
             cities=cities,
             metadata=metadata,
+            country_subdir=country_subdir,
             overwrite=overwrite,
             quiet=quiet,
         )
@@ -152,6 +164,7 @@ async def download(
     pollutants: list[Pollutant],
     cities: list[str],
     metadata: bool,
+    country_subdir: bool,
     overwrite: bool,
     quiet: bool,
     frequency: Frequency | None = None,
@@ -172,6 +185,7 @@ async def download(
             frequency=None if frequency is None else frequency.aggregation_type,
             metadata=metadata,
             summary_only=summary_only,
+            country_subdir=country_subdir,
             overwrite=overwrite,
             quiet=quiet,
         )
@@ -189,6 +203,7 @@ async def download(
             pollutants=frozenset(map(str, pollutants)),
             cities=frozenset(cities),
             metadata=metadata,
+            country_subdir=country_subdir,
             overwrite=overwrite,
             quiet=quiet,
         )
@@ -211,6 +226,7 @@ def historical(
         "data/historical", "--path", exists=True, dir_okay=True, writable=True
     ),
     summary_only: bool = SUMMARY,
+    country_subdir: bool = COUNTRY_SUBDIR,
     overwrite: bool = OVERWRITE,
     quiet: bool = QUIET,
 ):
@@ -239,6 +255,7 @@ def historical(
             frequency=frequency,
             metadata=metadata,
             summary_only=summary_only,
+            country_subdir=country_subdir,
             overwrite=overwrite,
             quiet=quiet,
         )
@@ -256,6 +273,7 @@ def verified(
         "data/verified", "--path", exists=True, dir_okay=True, writable=True
     ),
     summary_only: bool = SUMMARY,
+    country_subdir: bool = COUNTRY_SUBDIR,
     overwrite: bool = OVERWRITE,
     quiet: bool = QUIET,
 ):
@@ -284,6 +302,7 @@ def verified(
             frequency=frequency,
             metadata=metadata,
             summary_only=summary_only,
+            country_subdir=country_subdir,
             overwrite=overwrite,
             quiet=quiet,
         )
@@ -301,6 +320,7 @@ def unverified(
         "data/unverified", "--path", exists=True, dir_okay=True, writable=True
     ),
     summary_only: bool = SUMMARY,
+    country_subdir: bool = COUNTRY_SUBDIR,
     overwrite: bool = OVERWRITE,
     quiet: bool = QUIET,
 ):
@@ -329,6 +349,7 @@ def unverified(
             frequency=frequency,
             metadata=metadata,
             summary_only=summary_only,
+            country_subdir=country_subdir,
             overwrite=overwrite,
             quiet=quiet,
         )
