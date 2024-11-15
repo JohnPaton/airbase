@@ -234,7 +234,7 @@ async def download(
     pollutants: frozenset[str] | set[str] | None = None,
     cities: frozenset[str] | set[str] | None = None,
     metadata: bool = False,
-    country_subdir: bool = False,
+    country_subdir: bool = True,
     overwrite: bool = False,
     quiet: bool = True,
     raise_for_status: bool = False,
@@ -243,11 +243,24 @@ async def download(
     """
     request file urls by country|city/pollutant and download unique files
 
+    :param source: `Source.Verified` or `Source.Unverified`.
+    :param year: Observations year.
+    :param root_path: The directory to save files in (must exist).
+    :param countries: Request observations for these countries.
+    :param pollutants: (optional, default `None`)
+        Limit requests to these specific pollutants.
+    :param cities: (optional, default `None`)
+        Limit requests to these specific cities.
+    :param metadata: (optional, default `False`)
+        Download station metadata into `root_path/"metadata.csv"`.
+    :param country_subdir: (optional, default `True`)
+        Download files for different counties to different `root_path` sub directories.
+        If False, download all files to `root_path`.
     :param quiet: (optional, default `True`)
         Disable progress bars.
     :param raise_for_status: (optional, default `False`)
         Raise exceptions if any request return "bad" HTTP status codes.
-        If False, a :py:func:`warnings.warn` will be issued instead
+        If False, a :py:func:`warnings.warn` will be issued instead.
     """
     if cities:  # one request for each city/pollutant
         info = request_info_by_city(
@@ -288,5 +301,6 @@ async def download(
 
         await session.download_to_directory(
             root_path,
+            country_subdir=country_subdir,
             skip_existing=not overwrite,
         )

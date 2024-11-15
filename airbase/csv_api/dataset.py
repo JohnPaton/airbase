@@ -20,8 +20,8 @@ class Source(str, Enum):
     - only 2024 data available -> no E2a data
     """
 
-    Verified = "E1a"  # no longer available
-    Unverified = "E2a"  # only for 2024
+    Verified = "E1a"
+    Unverified = "E2a"
     ALL = "ALL"
 
     def __str__(self) -> str:  # pragma:no cover
