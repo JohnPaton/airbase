@@ -29,8 +29,7 @@ runner = CliRunner()
             id="verified"),
         pytest.param(
             "unverified", "MT", "Valletta", "PM10",
-            {"SPO-MT00003_00005_100.parquet", "SPO-MT00003_00005_101.parquet",
-             "SPO-MT00005_00005_100.parquet", "SPO-MT00005_00005_101.parquet"},
+            {"SPO-MT00005_00005_100.parquet", "SPO-MT00005_00005_101.parquet"},
             id="unverified"
         ),
     ),
@@ -66,7 +65,7 @@ def test_download(
             id="verified"),
         pytest.param(
             "unverified", "MT", "Valletta", "PM10",
-            "found 4 file(s), ~0 Mb in total",
+            "found 2 file(s), ~0 Mb in total",
             id="unverified"
         ),
     ),
