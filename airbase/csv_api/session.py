@@ -150,7 +150,6 @@ class Session(AbstractAsyncContextManager):
         paths: dict[Path, str] = {
             root_path.joinpath(*url.split("/")[n:]): url for url in self.urls
         }
-        print(paths)
         if skip_existing:
             existing = (
                 path
