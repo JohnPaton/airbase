@@ -203,15 +203,21 @@ class Session(AbstractAsyncContextManager):
     async def download_to_directory(
         self,
         root_path: Path,
+        *,
+        country_subdir: bool = True,
         skip_existing: bool = True,
     ) -> None:
         """
-        download into a directory, files for different counties are kept on different sub directories
+        download into a directory
 
         :param root_path: The directory to save files in (must exist)
-        :param skip_existing: (optional) Don't re-download files if they exist in `root_path`.
+        :param country_subdir: (optional, default `True`)
+            Download files for different counties to different `root_path` sub directories.
+            If False, download all files to `root_path`
+        :param skip_existing: (optional, default `True`)
+            Don't re-download files if they exist in `root_path`.
             If False, existing files in `root_path` may be overwritten.
-            Empty files will be re-downloaded regardless of this option. Default True.
+            Empty files will be re-downloaded regardless of this option.
 
         NOTE
         need to call `url_to_files` first, in order to retrieve the URLs to download, or
@@ -232,8 +238,9 @@ class Session(AbstractAsyncContextManager):
             )
             return
 
+        n = -2 if country_subdir else -1
         paths: dict[Path, str] = {
-            root_path.joinpath(*url.split("/")[-2:]): url for url in self.urls
+            root_path.joinpath(*url.split("/")[n:]): url for url in self.urls
         }
         if skip_existing:
             existing = {
@@ -335,8 +342,9 @@ async def download(
     pollutants: frozenset[str] | set[str] | None = None,
     cities: frozenset[str] | set[str] | None = None,
     frequency: AggregationType | None = None,
-    metadata: bool = False,
     summary_only: bool = False,
+    metadata: bool = False,
+    country_subdir: bool = True,
     overwrite: bool = False,
     quiet: bool = True,
     raise_for_status: bool = False,
@@ -345,11 +353,29 @@ async def download(
     """
     request file urls by country|city/pollutant and download unique files
 
+    :param dataset: `Dataset.Historical`, `Dataset.Verified` or `Dataset.Unverified`.
+    :param root_path: The directory to save files in (must exist).
+    :param countries: Request observations for these countries.
+    :param pollutants: (optional, default `None`)
+        Limit requests to these specific pollutants.
+    :param cities: (optional, default `None`)
+        Limit requests to these specific cities.
+    :param summary_only: (optional, default `False`)
+        Request total files/size, nothing will be downloaded.
+    :param metadata: (optional, default `False`)
+        Download station metadata into `root_path/"metadata.csv"`.
+    :param country_subdir: (optional, default `True`)
+        Download files for different counties to different `root_path` sub directories.
+        If False, download all files to `root_path`
+    :param overwrite: (optional, default `False`)
+        Re-download existing files in `root_path`.
+        If False, existing files will be skipped.
+        Empty files will be re-downloaded regardless of this option.
     :param quiet: (optional, default `True`)
         Disable progress bars.
     :param raise_for_status: (optional, default `False`)
         Raise exceptions if any request return "bad" HTTP status codes.
-        If False, a :py:func:`warnings.warn` will be issued instead
+        If False, a :py:func:`warnings.warn` will be issued instead.
     """
     if cities:  # one request for each city/pollutant
         info = request_info_by_city(
@@ -399,5 +425,6 @@ async def download(
 
         await session.download_to_directory(
             root_path,
+            country_subdir=country_subdir,
             skip_existing=not overwrite,
         )

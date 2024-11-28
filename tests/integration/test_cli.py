@@ -20,17 +20,16 @@ runner = CliRunner()
         ),
         pytest.param(
             "historical", "MT", "Valletta", "PM2.5",
-            {"SPO-MT00005_06001_100.parquet"},
+            {"MT/SPO-MT00005_06001_100.parquet"},
             id="historical",
         ),
         pytest.param(
             "verified", "MT", "Valletta", "O3",
-            {"SPO-MT00003_00007_100.parquet", "SPO-MT00005_00007_100.parquet"},
+            {"MT/SPO-MT00003_00007_100.parquet", "MT/SPO-MT00005_00007_100.parquet"},
             id="verified"),
         pytest.param(
             "unverified", "MT", "Valletta", "PM10",
-            {"SPO-MT00003_00005_100.parquet", "SPO-MT00003_00005_101.parquet",
-             "SPO-MT00005_00005_100.parquet", "SPO-MT00005_00005_101.parquet"},
+            {"MT/SPO-MT00005_00005_100.parquet", "MT/SPO-MT00005_00005_101.parquet"},
             id="unverified"
         ),
     ),
@@ -48,8 +47,9 @@ def test_download(
         result = runner.invoke(main, options.split())
         assert result.exit_code == 0
 
-    files = set(path.name for path in tmp_path.glob(f"{country}/*.*"))
-    assert files >= expected > set()
+    found = set(tmp_path.rglob("*.*"))
+    paths = set(tmp_path / file for file in expected)
+    assert found >= paths > set()
 
 
 @pytest.mark.parametrize(
@@ -66,7 +66,7 @@ def test_download(
             id="verified"),
         pytest.param(
             "unverified", "MT", "Valletta", "PM10",
-            "found 4 file(s), ~0 Mb in total",
+            "found 2 file(s), ~0 Mb in total",
             id="unverified"
         ),
     ),

@@ -330,18 +330,29 @@ async def test_Session_url_to_files(session: Session):
     assert session.number_of_urls == 0
 
 
+@pytest.mark.parametrize(
+    "country_subdir,pattern",
+    (
+        pytest.param(True, "??/*.parquet", id="subdir"),
+        pytest.param(False, "*.parquet", id="flat"),
+    ),
+)
 @pytest.mark.asyncio
-async def test_Session_download_to_directory(tmp_path: Path, session: Session):
+async def test_Session_download_to_directory(
+    tmp_path: Path, session: Session, country_subdir: bool, pattern: str
+):
     assert session.number_of_urls == 0
     session.add_urls(CSV_PARQUET_URLS_RESPONSE.splitlines()[-5:])
     assert session.number_of_urls == 5
 
-    assert not tuple(tmp_path.glob("??/*.parquet"))
+    assert not tuple(tmp_path.rglob("*.parquet"))
     async with session:
-        await session.download_to_directory(tmp_path)
+        await session.download_to_directory(
+            tmp_path, country_subdir=country_subdir
+        )
         assert session.number_of_urls == 0
 
-    assert len(tuple(tmp_path.glob("??/*.parquet"))) == 5
+    assert len(tuple(tmp_path.glob(pattern))) == 5
 
 
 @pytest.mark.asyncio
