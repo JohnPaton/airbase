@@ -4,7 +4,7 @@ inputs:
   python-version:
     description: 'Python version to run on'
     required: false
-    default: '3.x'
+    default: '3.13'
   allow-python-prereleases:
     description: 'Allow Python prereleases'
     required: false
