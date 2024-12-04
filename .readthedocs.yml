@@ -9,14 +9,15 @@ sphinx:
 
 formats: all
 
+# https://docs.readthedocs.io/en/stable/build-customization.html#install-dependencies-with-uv
+
 build:
-  os: ubuntu-20.04
+  os: "ubuntu-22.04"
   tools:
     python: "3.10"
-
-python:
-  install:
-  - method: pip
-    path: .
-    extra_requirements:
-    - docs
+  commands:
+    - asdf plugin add uv
+    - asdf install uv latest
+    - asdf global uv latest
+    - uv sync --dev --frozen
+    - uv run -m sphinx -T -b html -d docs/_build/doctrees -D language=en docs $READTHEDOCS_OUTPUT/html

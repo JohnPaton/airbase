@@ -18,13 +18,13 @@ clean:
 
 # automatic api docs of airbase
 apidocs:
-	sphinx-apidoc --output-dir ./source/api ../airbase --force --maxdepth 2 --module-first
+	uv run sphinx-apidoc --output-dir ./source/api ../airbase --force --maxdepth 2 --module-first
 
 # Build the Sphinx documentation.
 build: apidocs
-	$(SPHINXBUILD) "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
+	uv run $(SPHINXBUILD) "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
 # Catch-all target: route all unknown targets to Sphinx using the new
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
 %: Makefile
-	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
+	uv run @$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
