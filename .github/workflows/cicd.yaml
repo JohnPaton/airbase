@@ -6,7 +6,7 @@ on:
   pull_request:
 
 env:
-  UV_FROZEN: "true""
+  UV_FROZEN: "true"
 
 jobs:
   unit-test:
