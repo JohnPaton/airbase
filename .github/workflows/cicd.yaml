@@ -5,6 +5,9 @@ on:
     - cron:  '0 12 1 * *'  # On the first day of the month
   pull_request:
 
+env:
+  UV_FROZEN: "true""
+
 jobs:
   unit-test:
     runs-on: ubuntu-latest
@@ -55,6 +58,8 @@ jobs:
           fetch-depth: 0
       - uses: ./.github/actions/setup-project
         name: Setup project
+      - run: git diff --exit-code
+        name: Assert workdir is clean
       - run: |
           uv build
       - uses: pypa/gh-action-pypi-publish@release/v1
