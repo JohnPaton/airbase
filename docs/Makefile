@@ -11,7 +11,18 @@ BUILDDIR      = build
 help:
 	@$(SPHINXBUILD) -M help "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
-.PHONY: help Makefile
+.PHONY: help Makefile clean build apidocs
+
+clean:
+	rm -rf build/ source/api
+
+# automatic api docs of airbase
+apidocs:
+	sphinx-apidoc --output-dir ./source/api ../airbase --force --maxdepth 2 --module-first
+
+# Build the Sphinx documentation.
+build: apidocs
+	$(SPHINXBUILD) "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
 # Catch-all target: route all unknown targets to Sphinx using the new
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
