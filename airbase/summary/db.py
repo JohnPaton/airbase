@@ -2,11 +2,12 @@ from __future__ import annotations
 
 import sqlite3
 import sys
+from collections.abc import Iterator
 from contextlib import closing, contextmanager
 from functools import cached_property
 from itertools import chain
 from pathlib import Path
-from typing import TYPE_CHECKING, Iterator, NamedTuple
+from typing import TYPE_CHECKING, NamedTuple
 
 if sys.version_info >= (3, 11):  # pragma: no cover
     from importlib import resources

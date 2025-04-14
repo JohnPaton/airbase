@@ -86,7 +86,7 @@ skip_empty = true
 show_missing = true
 
 [tool.ruff]
-target-version = "py38"
+target-version = "py39"
 line-length = 80
 extend-exclude = ["docs", "build"]
 
@@ -97,13 +97,12 @@ ignore = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"cli.py" = [ # typer needs typing.Optional and typing.List
-    "UP006", # https://docs.astral.sh/ruff/rules/non-pep585-annotation/
-    "UP007", # https://docs.astral.sh/ruff/rules/non-pep604-annotation/
+"cli.py" = [ # typer needs typing.Optional
+    "UP007", # https://docs.astral.sh/ruff/rules/non-pep604-annotation-union/
 ]
 
 [tool.mypy]
-python_version = "3.8"
+python_version = "3.9"
 warn_unused_configs = true
 warn_unused_ignores = false
 warn_no_return = true

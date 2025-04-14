@@ -2,8 +2,9 @@ from __future__ import annotations
 
 import asyncio
 import sys
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Iterable, Literal, TypedDict
+from typing import Literal, TypedDict
 
 if sys.version_info >= (3, 11):
     from typing import assert_never

@@ -3,7 +3,7 @@ from __future__ import annotations
 import asyncio
 from enum import Enum
 from pathlib import Path
-from typing import List, Optional
+from typing import Optional
 
 import typer
 
@@ -106,9 +106,9 @@ QUIET = typer.Option(False, "-q", "--quiet", help="No progress-bar.")
 
 @main.command(no_args_is_help=True)
 def historical(
-    countries: List[Country] = COUNTRIES,
-    pollutants: List[Pollutant] = POLLUTANTS,
-    cities: List[str] = CITIES,
+    countries: list[Country] = COUNTRIES,
+    pollutants: list[Pollutant] = POLLUTANTS,
+    cities: list[str] = CITIES,
     frequency: Optional[Frequency] = FREQUENCY,
     metadata: bool = METADATA,
     path: Path = typer.Option(
@@ -153,9 +153,9 @@ def historical(
 
 @main.command(no_args_is_help=True)
 def verified(
-    countries: List[Country] = COUNTRIES,
-    pollutants: List[Pollutant] = POLLUTANTS,
-    cities: List[str] = CITIES,
+    countries: list[Country] = COUNTRIES,
+    pollutants: list[Pollutant] = POLLUTANTS,
+    cities: list[str] = CITIES,
     frequency: Optional[Frequency] = FREQUENCY,
     metadata: bool = METADATA,
     path: Path = typer.Option(
@@ -200,9 +200,9 @@ def verified(
 
 @main.command(no_args_is_help=True)
 def unverified(
-    countries: List[Country] = COUNTRIES,
-    pollutants: List[Pollutant] = POLLUTANTS,
-    cities: List[str] = CITIES,
+    countries: list[Country] = COUNTRIES,
+    pollutants: list[Pollutant] = POLLUTANTS,
+    cities: list[str] = CITIES,
     frequency: Optional[Frequency] = FREQUENCY,
     metadata: bool = METADATA,
     path: Path = typer.Option(
