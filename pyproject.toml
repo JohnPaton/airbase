@@ -51,6 +51,7 @@ dev-dependencies = [
     "pytest-asyncio",
     "pytest-cov",
     "mypy>=1.11.2",
+    "types-aiofiles>=24.1.0.20241221",
     "ruff>=0.6.7",
     "sphinx>=7.1.2",
     "sphinx-rtd-theme>=2.0.0",
