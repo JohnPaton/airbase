@@ -51,24 +51,3 @@ def mock_parquet_api(response: aioresponses):
         body=b"",
         repeat=True,
     )
-
-
-@pytest.fixture()
-def mock_csv_api(response: aioresponses):
-    """mock response from Legacy AirQualityExport"""
-    response.get(
-        re.compile(
-            r"https://fme\.discomap\.eea\.europa\.eu/fmedatastreaming/AirQualityDownload/AQData_Extract\.fmw?.*&Output=TEXT&.*"
-        ),
-        body=resources.LEGACY_CSV_URLS_RESPONSE,
-        repeat=True,
-    )
-    response.get(
-        "http://discomap.eea.europa.eu/map/fme/metadata/PanEuropean_metadata.csv",
-        body=resources.LEGACY_METADATA_RESPONSE,
-    )
-    response.get(
-        re.compile(r"https://.*/../.*\.csv"),  # any CSV file
-        body="",
-        repeat=True,
-    )

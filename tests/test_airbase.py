@@ -8,7 +8,7 @@ import airbase
 
 
 @pytest.fixture
-def client(mock_parquet_api, mock_csv_api) -> airbase.AirbaseClient:
+def client(mock_parquet_api) -> airbase.AirbaseClient:
     """initialized client with mocked responses"""
     return airbase.AirbaseClient()
 
@@ -75,7 +75,7 @@ class TestAirbaseClient:
         assert result[0]["poll"] == "NO3"
 
 
-@pytest.mark.usefixtures("mock_parquet_api", "mock_csv_api")
+@pytest.mark.usefixtures("mock_parquet_api")
 class TestAirbaseRequest:
     def test_verbose_produces_output(self, capsys, tmp_path: Path):
         r = airbase.AirbaseRequest(
