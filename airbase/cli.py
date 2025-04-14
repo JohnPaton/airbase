@@ -8,10 +8,7 @@ from typing import List, Optional
 import typer
 
 from . import __version__
-from .csv_api import Source
-from .csv_api import download as download_csv
-from .parquet_api import AggregationType, Dataset
-from .parquet_api import download as download_parquet
+from .parquet_api import AggregationType, Dataset, download
 from .summary import DB
 
 main = typer.Typer(add_completion=False, no_args_is_help=True)
@@ -107,114 +104,6 @@ OVERWRITE = typer.Option(
 QUIET = typer.Option(False, "-q", "--quiet", help="No progress-bar.")
 
 
-@main.command("download", no_args_is_help=True)
-def legacy(
-    countries: List[Country] = COUNTRIES,
-    pollutants: List[Pollutant] = POLLUTANTS,
-    cities: List[str] = CITIES,
-    metadata: bool = METADATA,
-    path: Path = typer.Option(
-        "data", "--path", exists=True, dir_okay=True, writable=True
-    ),
-    year: int = typer.Option(2024, "--year", min=2013, max=2024),
-    country_subdir: bool = FLAT_DIR,
-    overwrite: bool = OVERWRITE,
-    quiet: bool = QUIET,
-):
-    """
-    Air quality data in in CSV format. **End of life 2024**.
-
-    \b
-    The service providing air quality data in CSV format will cease operations by the end of 2024.
-    Until then it will provide only **unverified** data (E2a) for 2024.
-
-    \b
-    Use -c/--country and -p/--pollutant to restrict the download specific countries and pollutants, e.g.
-    - download only Norwegian, Danish and Finish sites
-      airbase download -c NO -c DK -c FI
-    - download only SO2, PM10 and PM2.5 observations
-      airbase download -p SO2 -p PM10 -p PM2.5
-
-    \b
-    Use -C/--city to further restrict the download to specific cities, e.g.
-    - download only PM10 and PM2.5 from Valletta, the Capital of Malta
-      airbase download -C Valletta -c MT -p PM10 -p PM2.5
-    """
-    asyncio.run(
-        download(
-            Source.ALL,
-            path,
-            year=year,
-            countries=countries,
-            pollutants=pollutants,
-            cities=cities,
-            metadata=metadata,
-            country_subdir=country_subdir,
-            overwrite=overwrite,
-            quiet=quiet,
-        )
-    )
-
-
-async def download(
-    dataset: Dataset | Source,
-    path: Path,
-    *,
-    countries: list[Country],
-    pollutants: list[Pollutant],
-    cities: list[str],
-    metadata: bool,
-    country_subdir: bool,
-    overwrite: bool,
-    quiet: bool,
-    frequency: Frequency | None = None,
-    summary_only: bool | None = None,
-    year: int | None = None,
-) -> None:
-    """download CSV or Parquet files from corresponding API"""
-    if isinstance(dataset, Dataset):
-        if summary_only is None:
-            raise typer.BadParameter("missing --dry-run/--summary option")
-
-        await download_parquet(
-            dataset,
-            path,
-            countries=frozenset(map(str, countries)),
-            pollutants=frozenset(map(str, pollutants)),
-            cities=frozenset(cities),
-            frequency=None if frequency is None else frequency.aggregation_type,
-            metadata=metadata,
-            summary_only=summary_only,
-            country_subdir=country_subdir,
-            overwrite=overwrite,
-            quiet=quiet,
-        )
-        return
-
-    if isinstance(dataset, Source):
-        if year is None:
-            raise typer.BadParameter("missing --year option")
-
-        await download_csv(
-            dataset,
-            year,
-            path,
-            countries=frozenset(map(str, countries)),
-            pollutants=frozenset(map(str, pollutants)),
-            cities=frozenset(cities),
-            metadata=metadata,
-            country_subdir=country_subdir,
-            overwrite=overwrite,
-            quiet=quiet,
-        )
-        return
-
-    # should never reach
-    raise ValueError(
-        f"Unsupported dataset, summary, year: {dataset}, {summary_only}, {year}."
-    )
-
-
 @main.command(no_args_is_help=True)
 def historical(
     countries: List[Country] = COUNTRIES,
@@ -249,10 +138,10 @@ def historical(
         download(
             Dataset.Historical,
             path,
-            countries=countries,
-            pollutants=pollutants,
-            cities=cities,
-            frequency=frequency,
+            countries=frozenset(map(str, countries)),
+            pollutants=frozenset(map(str, pollutants)),
+            cities=frozenset(cities),
+            frequency=None if frequency is None else frequency.aggregation_type,
             metadata=metadata,
             summary_only=summary_only,
             country_subdir=country_subdir,
@@ -296,10 +185,10 @@ def verified(
         download(
             Dataset.Verified,
             path,
-            countries=countries,
-            pollutants=pollutants,
-            cities=cities,
-            frequency=frequency,
+            countries=frozenset(map(str, countries)),
+            pollutants=frozenset(map(str, pollutants)),
+            cities=frozenset(cities),
+            frequency=None if frequency is None else frequency.aggregation_type,
             metadata=metadata,
             summary_only=summary_only,
             country_subdir=country_subdir,
@@ -343,10 +232,10 @@ def unverified(
         download(
             Dataset.Unverified,
             path,
-            countries=countries,
-            pollutants=pollutants,
-            cities=cities,
-            frequency=frequency,
+            countries=frozenset(map(str, countries)),
+            pollutants=frozenset(map(str, pollutants)),
+            cities=frozenset(cities),
+            frequency=None if frequency is None else frequency.aggregation_type,
             metadata=metadata,
             summary_only=summary_only,
             country_subdir=country_subdir,
