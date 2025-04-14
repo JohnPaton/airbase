@@ -1,7 +1,7 @@
 [project]
 name = "airbase"
 dynamic = ["version"]
-requires-python = ">=3.8,<4"
+requires-python = ">=3.9,<4"
 description = "An easy downloader for the AirBase air quality data."
 readme = {file = "README.md", content-type = "text/markdown"}
 authors = [{name="John Paton", email="john@johnpaton.net"}]
@@ -11,7 +11,6 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -120,7 +119,7 @@ ignore_missing_imports = true
 [tool.tox]
 legacy_tox_ini = """
 [tox]
-envlist = py38, py39, py310, py311, py312, lint, docs, integration
+envlist = py39, py310, py311, py312, lint, docs, integration
 skip_missing_interpreters = True
 isolated_build = True
 
