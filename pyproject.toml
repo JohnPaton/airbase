@@ -129,16 +129,17 @@ commands_pre =
     python --version
 commands =
     pytest -ra -q {posargs:--cov -k "not integration"}
-extras = 
-    test
+deps = 
+    pytest>=6.0
+    aioresponses
+    pytest-asyncio
+    pytest-cov
 
 [testenv:integration]
 commands_pre =
     python --version
 commands =
     pytest -ra -q {posargs:--cov -k integration}
-extras = 
-    test
 
 [testenv:lint]
 skipsdist=True
@@ -146,11 +147,13 @@ commands =
     pre-commit run --all-files --show-diff-on-failure
 deps =
     pre-commit
+    pre-commit-uv
 
 [testenv:docs]
 skipsdist=True
 commands =
     sphinx-build {posargs:-M html} docs/source docs/build
-extras = 
-    docs
+deps = 
+    sphinx>=7.1.2
+    sphinx-rtd-theme>=2.0.0
 """
