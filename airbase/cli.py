@@ -125,14 +125,14 @@ def historical(
     \b
     Use -c/--country and -p/--pollutant to restrict the download specific countries and pollutants, e.g.
     - download only Norwegian, Danish and Finish sites
-      airbase download -c NO -c DK -c FI
+      airbase historical -c NO -c DK -c FI
     - download only SO2, PM10 and PM2.5 observations
-      airbase download -p SO2 -p PM10 -p PM2.5
+      airbase historical -p SO2 -p PM10 -p PM2.5
 
     \b
     Use -C/--city to further restrict the download to specific cities, e.g.
     - download only PM10 and PM2.5 from Valletta, the Capital of Malta
-      airbase download -C Valletta -c MT -p PM10 -p PM2.5
+      airbase historical -C Valletta -c MT -p PM10 -p PM2.5
     """
     asyncio.run(
         download(
@@ -172,14 +172,14 @@ def verified(
     \b
     Use -c/--country and -p/--pollutant to restrict the download specific countries and pollutants, e.g.
     - download only Norwegian, Danish and Finish sites
-      airbase download -c NO -c DK -c FI
+      airbase verified -c NO -c DK -c FI
     - download only SO2, PM10 and PM2.5 observations
-      airbase download -p SO2 -p PM10 -p PM2.5
+      airbase verified -p SO2 -p PM10 -p PM2.5
 
     \b
     Use -C/--city to further restrict the download to specific cities, e.g.
     - download only PM10 and PM2.5 from Valletta, the Capital of Malta
-      airbase download -C Valletta -c MT -p PM10 -p PM2.5
+      airbase verified -C Valletta -c MT -p PM10 -p PM2.5
     """
     asyncio.run(
         download(
@@ -219,14 +219,14 @@ def unverified(
     \b
     Use -c/--country and -p/--pollutant to restrict the download specific countries and pollutants, e.g.
     - download only Norwegian, Danish and Finish sites
-      airbase download -c NO -c DK -c FI
+      airbase unverified -c NO -c DK -c FI
     - download only SO2, PM10 and PM2.5 observations
-      airbase download -p SO2 -p PM10 -p PM2.5
+      airbase unverified -p SO2 -p PM10 -p PM2.5
 
     \b
     Use -C/--city to further restrict the download to specific cities, e.g.
     - download only PM10 and PM2.5 from Valletta, the Capital of Malta
-      airbase download -C Valletta -c MT -p PM10 -p PM2.5
+      airbase unverified -C Valletta -c MT -p PM10 -p PM2.5
     """
     asyncio.run(
         download(
