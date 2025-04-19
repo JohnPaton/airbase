@@ -116,22 +116,49 @@ ignore_missing_imports = true
 [tool.tox]
 legacy_tox_ini = """
 [tox]
-envlist = py39, py310, py311, py312, py313, lint, docs, integration
+envlist = py39, py310, py311, py312, py313, integration, report, lint, docs
 skip_missing_interpreters = True
 isolated_build = True
+requires =
+    tox>=4.25
+    tox-uv>=1.25
+labels =
+    coverage = py39, py310, py311, py312, py313, integration, report
 
 [testenv]
+description = non-interation tests
+package = wheel
+wheel_build_env = {package_env}
+setenv =
+    COVERAGE_FILE = .coverage.{envname}
 commands =
-    pytest -ra -q {posargs:--cov -k "not integration"}
+    pytest -ra -q --cov --no-cov-on-fail -k "not integration"
 dependency_groups =
     test
 
 [testenv:integration]
+description = interation tests
 commands =
-    pytest -ra -q {posargs:--cov -k integration}
+    pytest -ra -q --cov --no-cov-on-fail -k integration
+
+[testenv:report]
+description = combined coverage report
+skip_install = true
+parallel_show_output = True
+setenv =
+    COVERAGE_FILE = .coverage
+commands =
+    coverage combine --keep
+    coverage report
+deps =
+    coverage
+depends =
+    py39, py310, py311, py312, py313, integration
 
 [testenv:lint]
+description = run linters
 skip_install = True
+parallel_show_output = True
 commands =
     pre-commit run --all-files --show-diff-on-failure
 deps =
@@ -139,6 +166,7 @@ deps =
     pre-commit-uv
 
 [testenv:docs]
+description = build docs
 skip_install = True
 commands =
     sphinx-build -T -b html -d docs/_build/doctrees -D language=en docs/source docs/build
