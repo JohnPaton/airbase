@@ -148,7 +148,6 @@ wheels = [
 
 [[package]]
 name = "airbase"
-version = "1.0.1.dev6+gad15f82.d20250414"
 source = { editable = "." }
 dependencies = [
     { name = "aiofiles" },
@@ -168,9 +167,22 @@ dev = [
     { name = "pytest-asyncio" },
     { name = "pytest-cov" },
     { name = "ruff" },
+    { name = "types-aiofiles" },
+]
+docs = [
     { name = "sphinx" },
     { name = "sphinx-rtd-theme" },
+]
+lint = [
+    { name = "mypy" },
+    { name = "ruff" },
     { name = "types-aiofiles" },
+]
+test = [
+    { name = "aioresponses" },
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+    { name = "pytest-cov" },
 ]
 
 [package.metadata]
@@ -193,9 +205,22 @@ dev = [
     { name = "pytest-asyncio", specifier = ">=0.24.0" },
     { name = "pytest-cov" },
     { name = "ruff", specifier = ">=0.6.7" },
+    { name = "types-aiofiles", specifier = ">=24.1.0.20241221" },
+]
+docs = [
     { name = "sphinx", specifier = ">=7.1.2" },
     { name = "sphinx-rtd-theme", specifier = ">=2.0.0" },
+]
+lint = [
+    { name = "mypy", specifier = ">=1.11.2" },
+    { name = "ruff", specifier = ">=0.6.7" },
     { name = "types-aiofiles", specifier = ">=24.1.0.20241221" },
+]
+test = [
+    { name = "aioresponses" },
+    { name = "pytest", specifier = ">=6.0" },
+    { name = "pytest-asyncio", specifier = ">=0.24.0" },
+    { name = "pytest-cov" },
 ]
 
 [[package]]
