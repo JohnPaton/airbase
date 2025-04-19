@@ -107,7 +107,7 @@ class SummaryDB:
             cur.execute(
                 f"""
                 SELECT definition_url FROM pollutant
-                WHERE pollutant in ({",".join("?"*len(pollutants))});
+                WHERE pollutant in ({",".join("?" * len(pollutants))});
                 """,
                 pollutants,
             )
@@ -152,7 +152,7 @@ class SummaryDB:
             cur.execute(
                 f"""
                 SELECT pollutant_id FROM pollutants
-                WHERE pollutant in ({",".join("?"*len(pollutants))});
+                WHERE pollutant in ({",".join("?" * len(pollutants))});
                 """,
                 pollutants,
             )
