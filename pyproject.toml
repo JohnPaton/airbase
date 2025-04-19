@@ -121,24 +121,17 @@ skip_missing_interpreters = True
 isolated_build = True
 
 [testenv]
-commands_pre =
-    python --version
 commands =
     pytest -ra -q {posargs:--cov -k "not integration"}
-deps = 
-    pytest>=6.0
-    aioresponses
-    pytest-asyncio
-    pytest-cov
+dependency_groups =
+    test
 
 [testenv:integration]
-commands_pre =
-    python --version
 commands =
     pytest -ra -q {posargs:--cov -k integration}
 
 [testenv:lint]
-skipsdist=True
+skip_install = True
 commands =
     pre-commit run --all-files --show-diff-on-failure
 deps =
@@ -146,10 +139,9 @@ deps =
     pre-commit-uv
 
 [testenv:docs]
-skipsdist=True
+skip_install = True
 commands =
     sphinx-build {posargs:-M html} docs/source docs/build
-deps = 
-    sphinx>=7.1.2
-    sphinx-rtd-theme>=2.0.0
+dependency_groups =
+    docs
 """
