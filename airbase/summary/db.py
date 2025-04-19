@@ -14,7 +14,7 @@ if sys.version_info >= (3, 11):  # pragma: no cover
 else:  # pragma: no cover
     import importlib_resources as resources
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from airbase.parquet_api.types import (
         CityJSON,
         CountryJSON,

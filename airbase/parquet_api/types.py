@@ -18,7 +18,7 @@ if sys.version_info >= (3, 10):  # pragma:no cover
 else:
     from typing_extensions import TypeAlias  # pragma:no cover
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma:no cover
     from .dataset import AggregationType, Dataset
 
 

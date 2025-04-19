@@ -209,7 +209,7 @@ class AirbaseRequest:
             self.pollutants = {poll}
         elif isinstance(poll, Iterable):
             self.pollutants = set(poll)
-        else:
+        else:  # pragma:no cover
             assert_never(poll)
 
         self.verbose = verbose
