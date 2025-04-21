@@ -9,12 +9,12 @@ from itertools import chain
 from pathlib import Path
 from typing import TYPE_CHECKING, NamedTuple
 
-if sys.version_info >= (3, 11):  # pragma: no cover
+if sys.version_info >= (3, 11):
     from importlib import resources
-else:  # pragma: no cover
+else:
     import importlib_resources as resources
 
-if TYPE_CHECKING:  # pragma: no cover
+if TYPE_CHECKING:
     from airbase.parquet_api.types import (
         CityJSON,
         CountryJSON,

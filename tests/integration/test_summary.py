@@ -8,7 +8,7 @@ import pytest_asyncio
 from airbase.parquet_api import Client
 from airbase.summary import DB
 
-if TYPE_CHECKING:  # pragma: no cover
+if TYPE_CHECKING:
     from airbase.parquet_api.types import (
         CityJSON,
         CountryJSON,
