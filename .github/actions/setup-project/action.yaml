@@ -12,7 +12,8 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - uses: actions/setup-python@v5
+    - name: Install python
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ inputs.python-version }}
         allow-prereleases: ${{ inputs.allow-python-prereleases }}
@@ -25,4 +26,4 @@ runs:
     - name: Install airbase
       continue-on-error: ${{ inputs.allow-python-prereleases }}
       shell: bash
-      run: uv sync --all-extras --dev
+      run: uv sync --all-extras --no-dev --group test
