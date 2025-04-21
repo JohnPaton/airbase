@@ -162,6 +162,7 @@ dependencies = [
 [package.dev-dependencies]
 dev = [
     { name = "aioresponses" },
+    { name = "coverage" },
     { name = "mypy" },
     { name = "pytest" },
     { name = "pytest-asyncio" },
@@ -180,6 +181,7 @@ lint = [
 ]
 test = [
     { name = "aioresponses" },
+    { name = "coverage" },
     { name = "pytest" },
     { name = "pytest-asyncio" },
     { name = "pytest-cov" },
@@ -200,6 +202,7 @@ requires-dist = [
 [package.metadata.requires-dev]
 dev = [
     { name = "aioresponses" },
+    { name = "coverage", specifier = ">=7.2.0" },
     { name = "mypy", specifier = ">=1.11.2" },
     { name = "pytest", specifier = ">=6.0" },
     { name = "pytest-asyncio", specifier = ">=0.24.0" },
@@ -218,7 +221,8 @@ lint = [
 ]
 test = [
     { name = "aioresponses" },
-    { name = "pytest", specifier = ">=6.0" },
+    { name = "coverage", specifier = ">=7.2.0" },
+    { name = "pytest", specifier = ">=6" },
     { name = "pytest-asyncio", specifier = ">=0.24.0" },
     { name = "pytest-cov" },
 ]
