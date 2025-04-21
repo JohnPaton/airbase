@@ -108,7 +108,7 @@ warn_unreachable = true
 show_error_codes = true
 pretty = true
 sqlite_cache = true
-exclude = "docs|scripts|build"
+exclude = "docs|build"
 
 [[tool.mypy.overrides]]
 module = ["tqdm.*", "async_property"]
