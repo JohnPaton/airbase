@@ -70,41 +70,6 @@ To install ``airbase``, simply run
 🚆 Command line interface
 =========================
 
-Air quality data in in CSV format
----------------------------------
-
-.. code-block:: console
-
-   $ airbase download --help
-   Usage: airbase download [OPTIONS]
-
-     Air quality data in in CSV format. **End of life 2024**.
-
-     The service providing air quality data in CSV format will cease operations by the end of 2024.
-     Until then it will provide only **unverified** data (E2a) for 2024.
-
-     Use -c/--country and -p/--pollutant to restrict the download specific countries and pollutants, e.g.
-     - download only Norwegian, Danish and Finish sites
-       airbase download -c NO -c DK -c FI
-     - download only SO2, PM10 and PM2.5 observations
-       airbase download -p SO2 -p PM10 -p PM2.5
-
-     Use -C/--city to further restrict the download to specific cities, e.g.
-     - download only PM10 and PM2.5 from Valletta, the Capital of Malta
-       airbase download -C Valletta -c MT -p PM10 -p PM2.5
-
-   Options:
-     -c, --country [AD|AL|AT|...]
-     -p, --pollutant [k|V|TI|...]
-     -C, --city TEXT                 only from selected <cities>
-     -M, --metadata                  download station metadata
-     --path PATH                     [default: data]
-     --year INTEGER RANGE            The service providing air quality data in CSV format will cease operations by the end of 2024.
-                                     Until then it will provide only **unverified** data (E2a) for 2024.  [default: 2024; 2024<=x<=2024]
-     -O, --overwrite                 Re-download existing files.
-     -q, --quiet                     No progress-bar.
-     --help                          Show this message and exit.
-
 Historical data delivered between 2002 and 2012
 -----------------------------------------------
 
@@ -118,13 +83,13 @@ Historical data delivered between 2002 and 2012
 
      Use -c/--country and -p/--pollutant to restrict the download specific countries and pollutants, e.g.
      - download only Norwegian, Danish and Finish sites
-       airbase download -c NO -c DK -c FI
+       airbase historical -c NO -c DK -c FI
      - download only SO2, PM10 and PM2.5 observations
-       airbase download -p SO2 -p PM10 -p PM2.5
+       airbase historical -p SO2 -p PM10 -p PM2.5
 
      Use -C/--city to further restrict the download to specific cities, e.g.
      - download only PM10 and PM2.5 from Valletta, the Capital of Malta
-       airbase download -C Valletta -c MT -p PM10 -p PM2.5
+       airbase historical -C Valletta -c MT -p PM10 -p PM2.5
 
    Options:
      -c, --country [AD|AL|AT|...]
@@ -153,13 +118,13 @@ Verified data from 2013 to 2023
 
      Use -c/--country and -p/--pollutant to restrict the download specific countries and pollutants, e.g.
      - download only Norwegian, Danish and Finish sites
-       airbase download -c NO -c DK -c FI
+       airbase verified -c NO -c DK -c FI
      - download only SO2, PM10 and PM2.5 observations
-       airbase download -p SO2 -p PM10 -p PM2.5
+       airbase verified -p SO2 -p PM10 -p PM2.5
 
      Use -C/--city to further restrict the download to specific cities, e.g.
      - download only PM10 and PM2.5 from Valletta, the Capital of Malta
-       airbase download -C Valletta -c MT -p PM10 -p PM2.5
+       airbase verified -C Valletta -c MT -p PM10 -p PM2.5
 
    Options:
      -c, --country [AD|AL|AT|...]
@@ -187,13 +152,13 @@ Unverified data from the beginning of 2024
 
      Use -c/--country and -p/--pollutant to restrict the download specific countries and pollutants, e.g.
      - download only Norwegian, Danish and Finish sites
-       airbase download -c NO -c DK -c FI
+       airbase unverified -c NO -c DK -c FI
      - download only SO2, PM10 and PM2.5 observations
-       airbase download -p SO2 -p PM10 -p PM2.5
+       airbase unverified -p SO2 -p PM10 -p PM2.5
 
      Use -C/--city to further restrict the download to specific cities, e.g.
      - download only PM10 and PM2.5 from Valletta, the Capital of Malta
-       airbase download -C Valletta -c MT -p PM10 -p PM2.5
+       airbase unverified -C Valletta -c MT -p PM10 -p PM2.5
 
    Options:
      -c, --country [AD|AL|AT|...]

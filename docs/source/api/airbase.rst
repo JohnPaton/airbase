@@ -12,7 +12,6 @@ Subpackages
 .. toctree::
    :maxdepth: 2
 
-   airbase.csv_api
    airbase.parquet_api
    airbase.summary
 
