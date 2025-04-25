@@ -8,15 +8,15 @@ from __future__ import annotations
 import sys
 from typing import TYPE_CHECKING, Literal, TypedDict
 
-if sys.version_info >= (3, 11):  # pragma:no cover
+if sys.version_info >= (3, 11):
     from typing import NotRequired
 else:
-    from typing_extensions import NotRequired  # pragma:no cover
+    from typing_extensions import NotRequired
 
-if sys.version_info >= (3, 10):  # pragma:no cover
+if sys.version_info >= (3, 10):
     from typing import TypeAlias
 else:
-    from typing_extensions import TypeAlias  # pragma:no cover
+    from typing_extensions import TypeAlias
 
 if TYPE_CHECKING:
     from .dataset import AggregationType, Dataset

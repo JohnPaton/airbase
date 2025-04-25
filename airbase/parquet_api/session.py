@@ -10,10 +10,10 @@ from types import TracebackType
 from typing import TypeVar
 from warnings import warn
 
-if sys.version_info >= (3, 11):  # pragma:no cover
+if sys.version_info >= (3, 11):
     from typing import Self
 else:
-    from typing_extensions import Self  # pragma:no cover
+    from typing_extensions import Self
 
 import aiohttp
 from async_property import async_cached_property

@@ -1,9 +1,14 @@
-from __future__ import annotations
-
 import asyncio
+import sys
 from enum import Enum
 from pathlib import Path
-from typing import List, Optional
+from typing import Annotated, Optional
+
+if sys.version_info >= (3, 10):
+    from typing import TypeAlias
+else:
+    from typing_extensions import TypeAlias
+
 
 import typer
 
@@ -61,63 +66,79 @@ def version_callback(value: bool):
 
 @main.callback()
 def callback(
-    version: Optional[bool] = typer.Option(
-        None, "--version", "-V", callback=version_callback
-    ),
+    version: Annotated[
+        Optional[bool],
+        typer.Option("--version", "-V", callback=version_callback),
+    ] = None,
 ):
     """Download Air Quality Data from the European Environment Agency (EEA)"""
 
 
-COUNTRIES = typer.Option([], "-c", "--country")
-POLLUTANTS = typer.Option([], "-p", "--pollutant")
-CITIES = typer.Option([], "-C", "--city", help="Only from selected <cities>.")
-FREQUENCY = typer.Option(
-    None,
-    "--aggregation-type",
-    "--frequency",
-    "-F",
-    help="Only hourly data, daily data or other aggregation frequency.",
-)
-METADATA = typer.Option(
-    False, "-M", "--metadata", help="Download station metadata."
-)
-SUMMARY = typer.Option(
-    False,
-    "-n",
-    "--dry-run",
-    "--summary",
-    help="Total download files/size, nothing will be downloaded.",
-)
-FLAT_DIR = typer.Option(
-    False,
-    "--subdir/--no-subdir",
-    help="Download files for different counties to different sub directories.",
-)
-COUNTRY_SUBDIR = typer.Option(
-    True,
-    "--subdir/--no-subdir",
-    help="Download files for different counties to different sub directories.",
-)
-OVERWRITE = typer.Option(
-    False, "-O", "--overwrite", help="Re-download existing files."
-)
-QUIET = typer.Option(False, "-q", "--quiet", help="No progress-bar.")
+CountryList: TypeAlias = Annotated[
+    list[Country],
+    typer.Option("-c", "--country"),
+]
+PollutantList: TypeAlias = Annotated[
+    list[Pollutant],
+    typer.Option("-p", "--pollutant"),
+]
+CityList: TypeAlias = Annotated[
+    list[str],
+    typer.Option("-C", "--city", help="Only from selected <cities>."),
+]
+FrequencyOption: TypeAlias = Annotated[
+    Optional[Frequency],
+    typer.Option(
+        "--aggregation-type",
+        "--frequency",
+        "-F",
+        help="Only hourly data, daily data or other aggregation frequency.",
+    ),
+]
+MetadataOption: TypeAlias = Annotated[
+    bool, typer.Option("-M", "--metadata", help="Download station metadata.")
+]
+PathOption: TypeAlias = Annotated[
+    Path, typer.Option("--path", exists=True, dir_okay=True, writable=True)
+]
+SummaryOption: TypeAlias = Annotated[
+    bool,
+    typer.Option(
+        "-n",
+        "--dry-run",
+        "--summary",
+        help="Total download files/size, nothing will be downloaded.",
+    ),
+]
+SubdirOption: TypeAlias = Annotated[
+    bool,
+    typer.Option(
+        "--subdir/--no-subdir",
+        help="Download files for different counties to different sub directories.",
+    ),
+]
+OverwriteOption: TypeAlias = Annotated[
+    bool,
+    typer.Option("-O", "--overwrite", help="Re-download existing files."),
+]
+QuietOption: TypeAlias = Annotated[
+    bool,
+    typer.Option("-q", "--quiet", help="No progress-bar."),
+]
 
 
 @main.command(no_args_is_help=True)
 def historical(
-    countries: List[Country] = COUNTRIES,
-    pollutants: List[Pollutant] = POLLUTANTS,
-    cities: List[str] = CITIES,
-    frequency: Optional[Frequency] = FREQUENCY,
-    metadata: bool = METADATA,
-    path: Path = typer.Option(
-        "data/historical", "--path", exists=True, dir_okay=True, writable=True
-    ),
-    summary_only: bool = SUMMARY,
-    country_subdir: bool = COUNTRY_SUBDIR,
-    overwrite: bool = OVERWRITE,
-    quiet: bool = QUIET,
+    countries: CountryList = [],
+    pollutants: PollutantList = [],
+    cities: CityList = [],
+    frequency: FrequencyOption = None,
+    metadata: MetadataOption = False,
+    path: PathOption = Path("data/historical"),
+    summary_only: SummaryOption = False,
+    country_subdir: SubdirOption = True,
+    overwrite: OverwriteOption = False,
+    quiet: QuietOption = False,
 ):
     """
     Historical Airbase data delivered between 2002 and 2012 before Air Quality Directive 2008/50/EC entered into force.
@@ -153,18 +174,16 @@ def historical(
 
 @main.command(no_args_is_help=True)
 def verified(
-    countries: List[Country] = COUNTRIES,
-    pollutants: List[Pollutant] = POLLUTANTS,
-    cities: List[str] = CITIES,
-    frequency: Optional[Frequency] = FREQUENCY,
-    metadata: bool = METADATA,
-    path: Path = typer.Option(
-        "data/verified", "--path", exists=True, dir_okay=True, writable=True
-    ),
-    summary_only: bool = SUMMARY,
-    country_subdir: bool = COUNTRY_SUBDIR,
-    overwrite: bool = OVERWRITE,
-    quiet: bool = QUIET,
+    countries: CountryList = [],
+    pollutants: PollutantList = [],
+    cities: CityList = [],
+    frequency: FrequencyOption = None,
+    metadata: MetadataOption = False,
+    path: PathOption = Path("data/verified"),
+    summary_only: SummaryOption = False,
+    country_subdir: SubdirOption = True,
+    overwrite: OverwriteOption = False,
+    quiet: QuietOption = False,
 ):
     """
     Verified data (E1a) from 2013 to 2023 reported by countries by 30 September each year for the previous year.
@@ -200,18 +219,16 @@ def verified(
 
 @main.command(no_args_is_help=True)
 def unverified(
-    countries: List[Country] = COUNTRIES,
-    pollutants: List[Pollutant] = POLLUTANTS,
-    cities: List[str] = CITIES,
-    frequency: Optional[Frequency] = FREQUENCY,
-    metadata: bool = METADATA,
-    path: Path = typer.Option(
-        "data/unverified", "--path", exists=True, dir_okay=True, writable=True
-    ),
-    summary_only: bool = SUMMARY,
-    country_subdir: bool = COUNTRY_SUBDIR,
-    overwrite: bool = OVERWRITE,
-    quiet: bool = QUIET,
+    countries: CountryList = [],
+    pollutants: PollutantList = [],
+    cities: CityList = [],
+    frequency: FrequencyOption = None,
+    metadata: MetadataOption = False,
+    path: PathOption = Path("data/unverified"),
+    summary_only: SummaryOption = False,
+    country_subdir: SubdirOption = True,
+    overwrite: OverwriteOption = False,
+    quiet: QuietOption = False,
 ):
     """
     Unverified data transmitted continuously (Up-To-Date/UTD/E2a) data from the beginning of 2024.

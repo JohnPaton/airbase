@@ -1,7 +1,7 @@
 [project]
 name = "airbase"
 dynamic = ["version"]
-requires-python = ">=3.8,<4"
+requires-python = ">=3.9,<4"
 description = "An easy downloader for the AirBase air quality data."
 readme = {file = "README.md", content-type = "text/markdown"}
 authors = [{name="John Paton", email="john@johnpaton.net"}]
@@ -11,11 +11,11 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Intended Audience :: Science/Research",
     "Topic :: Scientific/Engineering",
     "Topic :: Scientific/Engineering :: Atmospheric Science",
@@ -28,7 +28,7 @@ dependencies = [
     "aiofiles >=24.1.0",
     "importlib_resources; python_version < '3.11'",
     "tqdm",
-    "typer >=0.9.1",
+    "typer-slim >=0.12.0",
     "typing_extensions >=4.12.2; python_version < '3.11'",
 ]
 
@@ -43,19 +43,14 @@ airbase = "airbase.cli:main"
 requires = ["hatchling", "hatch-vcs"]
 build-backend = "hatchling.build"
 
+[dependency-groups]
+dev = [{ include-group = "test" }, { include-group = "lint" }]
+test = ["pytest>=6.0", "aioresponses", "pytest-asyncio>=0.24.0", "coverage>=7.2.0", "pytest-cov"]
+lint = ["mypy>=1.11.2", "ruff>=0.6.7", "types-aiofiles>=24.1.0.20241221"]
+docs = ["sphinx>=7.1.2", "sphinx-rtd-theme>=2.0.0"]
+
 [tool.uv]
 index-url = "https://pypi.org/simple"
-dev-dependencies = [
-    "pytest>=6.0",
-    "aioresponses",
-    "pytest-asyncio",
-    "pytest-cov",
-    "mypy>=1.11.2",
-    "types-aiofiles>=24.1.0.20241221",
-    "ruff>=0.6.7",
-    "sphinx>=7.1.2",
-    "sphinx-rtd-theme>=2.0.0",
-]
 
 [tool.hatch.version]
 source = "vcs"
@@ -70,6 +65,8 @@ packages = ["airbase"]
 minversion = "6.0"
 addopts = "--showlocals"
 required_plugins = ["pytest-asyncio"]
+asyncio_mode = "strict"
+asyncio_default_fixture_loop_scope = "module"
 testpaths = ["tests"]
 filterwarnings = [
     # DeprecationWarning are errors
@@ -80,12 +77,13 @@ filterwarnings = [
 source = ["airbase"]
 
 [tool.coverage.report]
+exclude_also = ["if TYPE_CHECKING:"]
 skip_covered = true
 skip_empty = true
 show_missing = true
 
 [tool.ruff]
-target-version = "py38"
+target-version = "py39"
 line-length = 80
 extend-exclude = ["docs", "build"]
 
@@ -96,13 +94,12 @@ ignore = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"cli.py" = [ # typer needs typing.Optional and typing.List
-    "UP006", # https://docs.astral.sh/ruff/rules/non-pep585-annotation/
-    "UP007", # https://docs.astral.sh/ruff/rules/non-pep604-annotation/
+"cli.py" = [ # typer needs typing.Optional
+    "UP007", # https://docs.astral.sh/ruff/rules/non-pep604-annotation-union/
 ]
 
 [tool.mypy]
-python_version = "3.8"
+python_version = "3.9"
 warn_unused_configs = true
 warn_unused_ignores = false
 warn_no_return = true
@@ -111,7 +108,7 @@ warn_unreachable = true
 show_error_codes = true
 pretty = true
 sqlite_cache = true
-exclude = "docs|scripts|build"
+exclude = "docs|build"
 
 [[tool.mypy.overrides]]
 module = ["tqdm.*", "async_property"]
@@ -120,37 +117,60 @@ ignore_missing_imports = true
 [tool.tox]
 legacy_tox_ini = """
 [tox]
-envlist = py38, py39, py310, py311, py312, lint, docs, integration
+envlist = py39, py310, py311, py312, py313, integration, report, lint, docs
 skip_missing_interpreters = True
 isolated_build = True
+requires =
+    tox>=4.25
+    tox-uv>=1.25
+labels =
+    coverage = py39, py310, py311, py312, py313, integration, report
 
 [testenv]
-commands_pre =
-    python --version
+description = non-interation tests
+package = wheel
+wheel_build_env = {package_env}
+setenv =
+    COVERAGE_FILE = .coverage.{envname}
 commands =
-    pytest -ra -q {posargs:--cov -k "not integration"}
-extras = 
+    pytest -ra -q --cov --no-cov-on-fail -k "not integration"
+dependency_groups =
     test
 
 [testenv:integration]
-commands_pre =
-    python --version
+description = interation tests
 commands =
-    pytest -ra -q {posargs:--cov -k integration}
-extras = 
-    test
+    pytest -ra -q --cov --no-cov-on-fail -k integration
+
+[testenv:report]
+description = combined coverage report
+skip_install = true
+parallel_show_output = True
+setenv =
+    COVERAGE_FILE = .coverage
+commands =
+    coverage combine --keep
+    coverage report
+deps =
+    coverage
+depends =
+    py39, py310, py311, py312, py313, integration
 
 [testenv:lint]
-skipsdist=True
+description = run linters
+skip_install = True
+parallel_show_output = True
 commands =
     pre-commit run --all-files --show-diff-on-failure
 deps =
     pre-commit
+    pre-commit-uv
 
 [testenv:docs]
-skipsdist=True
+description = build docs
+skip_install = True
 commands =
-    sphinx-build {posargs:-M html} docs/source docs/build
-extras = 
+    sphinx-build -T -b html -d docs/_build/doctrees -D language=en docs/source docs/build
+dependency_groups =
     docs
 """

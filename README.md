@@ -50,7 +50,7 @@ frozenset({'Co', 'sum-PCB', 'PCB-26', 'HNO3', ...})
 >>> r.download(dir="data", skip_existing=True)
 summary : 100%|█████| 2/2 [00:00<00:00,  4.48requests/s]
 URLs    : 100%|█████| 29.0/29.0 [00:00<00:00, 490URL/s]
-download: 386kb [00:00, 570kb/s]  
+download: 386kb [00:00, 570kb/s]
 ```
 
 📦 Download the entire dataset (not for the faint of heart):
@@ -60,7 +60,7 @@ download: 386kb [00:00, 570kb/s]
 >>> r.download_to_directory("data")
 summary : 100%|█████| 39/39 [00:15<00:00,  2.54requests/s]
 URLs    : 100%|█████| 47.0k/47.0k [00:00<00:00, 77.7kURL/s]
-download: 20.6Gb [54:36, 6.74Mb/s]    
+download: 20.6Gb [54:36, 6.74Mb/s]
 ```
 
 🌡 Don't forget to get the metadata about the measurement stations:

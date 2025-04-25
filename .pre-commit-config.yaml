@@ -1,16 +1,26 @@
 repos:
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+    - id: check-merge-conflict
+    - id: check-added-large-files
+    - id: check-toml
+    - id: check-yaml
+    - id: check-json
+    - id: end-of-file-fixer
+    - id: trailing-whitespace
 - repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: v0.6.2
+  rev: v0.11.6
   hooks:
     - id: ruff-format # formatter
     - id: ruff        # linter
 - repo: https://github.com/pre-commit/mirrors-mypy
-  rev: v1.11.2
+  rev: v1.15.0
   hooks:
   - id: mypy
     exclude: '(docs/.*)|(setup\.py)'
     additional_dependencies: [types-aiofiles, types-requests]
 - repo: https://github.com/astral-sh/uv-pre-commit
-  rev: 0.4.9
+  rev: 0.6.14
   hooks:
     - id: uv-lock
