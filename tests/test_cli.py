@@ -4,7 +4,7 @@ import pytest
 from typer.testing import CliRunner
 
 from airbase import __version__
-from airbase.cli import main
+from airbase.main import main
 
 runner = CliRunner()
 
