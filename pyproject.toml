@@ -62,14 +62,10 @@ docs = ["sphinx>=7.1.2", "sphinx-rtd-theme>=2.0.0"]
 [tool.uv]
 index-url = "https://pypi.org/simple"
 
-[tool.hatch.version]
-source = "vcs"
-
-[tool.hatch.envs.default]
-installer = "uv"
-
-[tool.hatch.build.targets.wheel]
-packages = ["airbase"]
+[tool.hatch]
+version.source = "vcs"
+envs.default.installer = "uv"
+build.targets.wheel.packages = ["airbase"]
 
 [tool.pytest.ini_options]
 minversion = "6.0"
