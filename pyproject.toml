@@ -54,6 +54,7 @@ test = [
     "pytest-asyncio>=0.24.0",
     "coverage>=7.2.0",
     "pytest-cov",
+    "airbase-cli-plugin",
     # click 8.2.0 CliRunner does not flush sys.stderr, fixed on 8.2.1
     # https://github.com/pallets/click/issues/2682
     "click!=8.2.0",
@@ -69,6 +70,9 @@ cache-keys = [
     { file = "airbase/parquet_api/types.py" },
 ]
 
+
+[tool.uv.sources]
+airbase-cli-plugin = { path = "airbase_cli_plugin", editable = true }
 
 [tool.hatch]
 version.source = "vcs"
@@ -146,8 +150,10 @@ setenv =
     COVERAGE_FILE = .coverage.{envname}
 commands =
     pytest -ra -q --cov --no-cov-on-fail -k "not integration"
+deps =
+    py310, py311, py312, py313, py314, integration: airbase-cli-plugin @ ./airbase_cli_plugin
 dependency_groups =
-    test
+    py310, py311, py312, py313, py314, integration: test
 
 [testenv:integration]
 description = interation tests
@@ -180,7 +186,7 @@ deps =
 
 [testenv:docs]
 description = build docs
-skip_install = True
+skip_install = False
 commands =
     sphinx-build -T -b html -d docs/_build/doctrees -D language=en docs/source docs/build
 dependency_groups =

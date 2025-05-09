@@ -15,3 +15,17 @@ def test_version(options: str):
     assert result.exit_code == 0
     assert "airbase" in result.output
     assert str(__version__) in result.output
+
+
+@pytest.mark.parametrize(
+    "options",
+    (
+        pytest.param("plugin-cmd", id="cmd"),
+        pytest.param("plugin-sub first", id="sub first"),
+        pytest.param("plugin-sub second", id="sub second"),
+    ),
+)
+def test_plugin(options: str):
+    result = runner.invoke(main, options)
+    assert result.exit_code == 0
+    assert result.output.strip() == f"{options} from plugin"
