@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 from typer.testing import CliRunner
 
-from airbase.cli import main
+from airbase.main import main
 
 runner = CliRunner()
 

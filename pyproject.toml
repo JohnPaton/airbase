@@ -38,7 +38,7 @@ Repository = "https://github.com/johnpaton/airbase"
 Documentation = "https://airbase.readthedocs.io"
 
 [project.scripts]
-airbase = "airbase.cli:main"
+airbase = "airbase.main:main"
 
 [build-system]
 requires = ["hatchling", "hatch-vcs", "hatch-build-scripts"]
