@@ -40,6 +40,8 @@ Documentation = "https://airbase.readthedocs.io"
 [project.scripts]
 airbase = "airbase.main:main"
 
+[project.entry-points."airbase.cli"]
+
 [build-system]
 requires = ["hatchling", "hatch-vcs", "hatch-build-scripts"]
 build-backend = "hatchling.build"
