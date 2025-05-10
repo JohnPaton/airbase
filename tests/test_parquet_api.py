@@ -57,18 +57,15 @@ def test_request_info_by_city(
     frequency: AggregationType | None,
     dataset: Dataset = Dataset.Historical,
 ):
+    info = request_info_by_city(
+        dataset, city, pollutants=pollutants, frequency=frequency
+    )
     if not pollutants:
-        assert (
-            request_info_by_city(dataset, city, frequency=frequency)
-            == request_info_by_city(
-                dataset, city, pollutants=set(), frequency=frequency
-            )
-            == {ParquetData(country, dataset, city=city, frequency=frequency)}
-        )
+        assert set(info) == {
+            ParquetData(country, dataset, None, city, frequency)
+        }
     else:
-        assert request_info_by_city(
-            dataset, city, pollutants=pollutants, frequency=frequency
-        ) == {
+        assert set(info) == {
             ParquetData(
                 country, dataset, frozenset(pollutants), city, frequency
             )
@@ -80,7 +77,7 @@ def test_request_info_by_city_warning(
     dataset: Dataset = Dataset.Historical,
 ):
     with pytest.warns(UserWarning, match=rf"Unknown city='{city}'"):
-        assert not request_info_by_city(dataset, city)
+        assert not set(request_info_by_city(dataset, city))
 
 
 @pytest.mark.parametrize(
@@ -97,20 +94,18 @@ def test_request_info_by_country(
     frequency: AggregationType | None,
     dataset: Dataset = Dataset.Historical,
 ):
+    info = request_info_by_country(
+        dataset, country, pollutants=pollutants, frequency=frequency
+    )
     if not pollutants:
-        assert (
-            request_info_by_country(dataset, country, frequency=frequency)
-            == request_info_by_country(
-                dataset, country, pollutants=set(), frequency=frequency
-            )
-            == {ParquetData(country, dataset, frequency=frequency)}
-        )
+        assert set(info) == {
+            ParquetData(country, dataset, None, None, frequency)
+        }
+
     else:
-        assert request_info_by_country(
-            dataset, country, pollutants=pollutants, frequency=frequency
-        ) == {
+        assert set(info) == {
             ParquetData(
-                country, dataset, frozenset(pollutants), frequency=frequency
+                country, dataset, frozenset(pollutants), None, frequency
             )
         }
 
@@ -120,7 +115,7 @@ def test_request_info_by_country_warning(
     dataset: Dataset = Dataset.Historical,
 ):
     with pytest.warns(UserWarning, match=rf"Unknown country='{country}'"):
-        assert not request_info_by_country(dataset, country)
+        assert not set(request_info_by_country(dataset, country))
 
 
 @pytest.mark.parametrize(
