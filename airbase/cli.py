@@ -13,7 +13,13 @@ else:
 import typer
 
 from . import __version__
-from .parquet_api import AggregationType, Dataset, download, request_info
+from .parquet_api import (
+    AggregationType,
+    Dataset,
+    Session,
+    download,
+    request_info,
+)
 from .summary import DB
 
 main = typer.Typer(add_completion=False, no_args_is_help=True)
@@ -60,7 +66,7 @@ class SharedOptions(NamedTuple):
     summary_only: bool
     country_subdir: bool
     overwrite: bool
-    quiet: bool
+    session: Session
 
 
 def version_callback(value: bool):
@@ -104,7 +110,15 @@ def callback(
     ] = False,
 ):
     """Download Air Quality Data from the European Environment Agency (EEA)"""
-    ctx.obj = SharedOptions(summary_only, country_subdir, overwrite, quiet)
+    ctx.obj = SharedOptions(
+        summary_only,
+        country_subdir,
+        overwrite,
+        Session(
+            progress=not quiet,
+            raise_for_status=False,
+        ),
+    )
 
 
 CountryList: TypeAlias = Annotated[
@@ -178,7 +192,7 @@ def historical(
             summary_only=ctx.obj.summary_only,
             country_subdir=ctx.obj.country_subdir,
             overwrite=ctx.obj.overwrite,
-            quiet=ctx.obj.quiet,
+            session=ctx.obj.session,
         )
     )
 
@@ -221,7 +235,7 @@ def verified(
             summary_only=ctx.obj.summary_only,
             country_subdir=ctx.obj.country_subdir,
             overwrite=ctx.obj.overwrite,
-            quiet=ctx.obj.quiet,
+            session=ctx.obj.session,
         )
     )
 
@@ -264,6 +278,6 @@ def unverified(
             summary_only=ctx.obj.summary_only,
             country_subdir=ctx.obj.country_subdir,
             overwrite=ctx.obj.overwrite,
-            quiet=ctx.obj.quiet,
+            session=ctx.obj.session,
         )
     )

@@ -212,7 +212,7 @@ class AirbaseRequest:
         else:  # pragma:no cover
             assert_never(poll)
 
-        self.verbose = verbose
+        self.session.progress = self.verbose = verbose
 
     def download(
         self,
@@ -243,13 +243,12 @@ class AirbaseRequest:
             countries=self.counties,
             pollutants=self.pollutants,
         )
+        self.session.raise_for_status = raise_for_status
         asyncio.run(
             download(
                 info,
                 dir,
                 overwrite=not skip_existing,
-                quiet=not self.verbose,
-                raise_for_status=raise_for_status,
                 session=self.session,
             )
         )

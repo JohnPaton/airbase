@@ -27,6 +27,8 @@ _T = TypeVar("_T")
 
 
 class Session(AbstractAsyncContextManager):
+    """Parquet downloads API session"""
+
     client: Client = Client()
 
     def __init__(
@@ -332,19 +334,18 @@ async def download(
     info: Iterable[ParquetData],
     root_path: Path,
     *,
+    session: Session,
     summary_only: bool = False,
     metadata: bool = False,
     country_subdir: bool = True,
     overwrite: bool = False,
-    quiet: bool = True,
-    raise_for_status: bool = False,
-    session: Session = Session(),
 ):
     """
     request file urls and download unique files
 
     :param info: requests by country|city/pollutant.
     :param root_path: The directory to save files in (must exist).
+    :param session: Parquet downloads API session.
     :param summary_only: (optional, default `False`)
         Request total files/size, nothing will be downloaded.
     :param metadata: (optional, default `False`)
@@ -356,14 +357,7 @@ async def download(
         Re-download existing files in `root_path`.
         If False, existing files will be skipped.
         Empty files will be re-downloaded regardless of this option.
-    :param quiet: (optional, default `True`)
-        Disable progress bars.
-    :param raise_for_status: (optional, default `False`)
-        Raise exceptions if any request return "bad" HTTP status codes.
-        If False, a :py:func:`warnings.warn` will be issued instead.
     """
-    session.progress = not quiet
-    session.raise_for_status = raise_for_status
     if summary_only:
         async with session:
             await session.summary(*info)
