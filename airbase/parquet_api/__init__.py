@@ -1,18 +1,12 @@
 from .client import Client
-from .dataset import (
-    Dataset,
-    ParquetData,
-    request_info_by_city,
-    request_info_by_country,
-)
+from .dataset import Dataset, ParquetData, request_info
 from .session import Session, download
 
 __all__ = [
     "Client",
     "Dataset",
     "ParquetData",
-    "request_info_by_city",
-    "request_info_by_country",
+    "request_info",
     "Session",
     "download",
 ]

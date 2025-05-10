@@ -53,17 +53,12 @@ class ParquetData(NamedTuple):
         )
 
 
-def request_info_by_city(
+def __by_city(
     dataset: Dataset,
-    *cities: str,
-    pollutants: Collection[str] | None = None,
+    cities: set[str],
+    pollutants: frozenset[str] | None,
 ) -> Iterator[ParquetData]:
     """download info one city at the time"""
-    if not pollutants:
-        pollutants = None
-    else:
-        pollutants = frozenset(pollutants)
-
     for city in cities:
         if (country := DB.search_city(city)) is None:
             warn(f"Unknown {city=}, skip", UserWarning, stacklevel=-2)
@@ -72,20 +67,40 @@ def request_info_by_city(
         yield ParquetData(country, dataset, pollutants, city)
 
 
-def request_info_by_country(
+def __by_country(
     dataset: Dataset,
-    *countries: str,
-    pollutants: Collection[str] | None = None,
+    countries: set[str],
+    pollutants: frozenset[str] | None,
 ) -> Iterator[ParquetData]:
     """download info one country at the time"""
-    if not pollutants:
-        pollutants = None
-    else:
-        pollutants = frozenset(pollutants)
-
     for country in countries:
         if country not in DB.COUNTRY_CODES:
             warn(f"Unknown {country=}, skip", UserWarning, stacklevel=-2)
             continue
 
         yield ParquetData(country, dataset, pollutants)
+
+
+def request_info(
+    dataset: Dataset,
+    *,
+    cities: Collection[str] | None = None,
+    countries: Collection[str] | None = None,
+    pollutants: Collection[str] | None = None,
+) -> Iterator[ParquetData]:
+    """
+    one download info for each city/pollutant xor country/pollutant
+    - cities take precednece over countries
+    - countries is None or empty container means all countries
+    """
+    if not pollutants:
+        pollutants = None
+    else:
+        pollutants = frozenset(pollutants)
+
+    if cities:
+        yield from __by_city(dataset, set(cities), pollutants)
+    else:
+        if not countries:
+            countries = DB.COUNTRY_CODES
+        yield from __by_country(dataset, set(countries), pollutants)
