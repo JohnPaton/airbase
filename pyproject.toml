@@ -131,11 +131,11 @@ description = non-interation tests
 package = wheel
 wheel_build_env = {package_env}
 setenv =
-    COVERAGE_FILE = .coverage.{envname}
+    py39,py310,py311,py312,py313,integration: COVERAGE_FILE = .coverage.{envname}
 commands =
     pytest -ra -q --cov --no-cov-on-fail -k "not integration"
 dependency_groups =
-    test
+    py39,py310,py311,py312,py313,integration: test
 
 [testenv:integration]
 description = interation tests
@@ -146,8 +146,6 @@ commands =
 description = combined coverage report
 skip_install = true
 parallel_show_output = True
-setenv =
-    COVERAGE_FILE = .coverage
 commands =
     coverage combine --keep
     coverage report
@@ -168,7 +166,7 @@ deps =
 
 [testenv:docs]
 description = build docs
-skip_install = True
+skip_install = False
 commands =
     sphinx-build -T -b html -d docs/_build/doctrees -D language=en docs/source docs/build
 dependency_groups =
