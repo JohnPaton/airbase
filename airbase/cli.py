@@ -24,7 +24,7 @@ from .parquet_api import (
 )
 from .summary import DB
 
-main = typer.Typer(add_completion=False, no_args_is_help=True)
+main = typer.Typer(add_completion=False, no_args_is_help=True, chain=True)
 
 
 class Country(str, Enum):
@@ -65,6 +65,7 @@ class Frequency(str, Enum):
 
 
 class Request(NamedTuple):
+    name: str
     info: frozenset[ParquetData]
     path: Path
     metadata: bool
@@ -72,17 +73,16 @@ class Request(NamedTuple):
 
 @contextmanager
 def downloader(
+    session: Session,
     *,
     summary_only: bool,
     country_subdir: bool,
     overwrite: bool,
-    session: Session,
 ):
-    reqests: set[Request] = set()
-    yield reqests
-    for req in reqests:
-        asyncio.run(
-            download(
+    async def download_(reqests: set[Request]):
+        for req in reqests:
+            typer.echo(req.name)
+            await download(
                 req.info,
                 req.path,
                 metadata=req.metadata,
@@ -91,7 +91,10 @@ def downloader(
                 overwrite=overwrite,
                 session=session,
             )
-        )
+
+    reqests: set[Request] = set()
+    yield reqests
+    asyncio.run(download_(reqests))
 
 
 def version_callback(value: bool):
@@ -134,14 +137,33 @@ def callback(
         typer.Option("-q", "--quiet", help="No progress-bar."),
     ] = False,
 ):
-    """Download Air Quality Data from the European Environment Agency (EEA)"""
+    """
+    Download Air Quality Data from the European Environment Agency (EEA)
+
+    \b
+    Use -n/--dry-run/--summary and -q/--quiet to request the number of files and
+    estimated download size without downloading the observations, e.g
+    - total download files/size for hourly verified and unverified observations
+      airbase --quiet --summary \\
+        verified -F hourly \\
+        unverified -F hourly
+
+    \b
+    Use -c/--country and -p/--pollutant to restrict the download specific countries and pollutants,
+    or -C/--city and -p/--pollutant to restrict the download specific cities and pollutants, e.g.
+    - download verified hourly and daily PM10 and PM2.5 observations from sites in Oslo
+      to different (existing) paths in order to avoid filename collisions
+      airbase --no-subdir \\
+        verified -p PM10 -p PM2.5 -C Oslo -F daily  --path data/daily \\
+        verified -p PM10 -p PM2.5 -C Oslo -F hourly --path data/hourly
+    """
 
     ctx.obj = ctx.with_resource(
         downloader(
+            Session(progress=not quiet, raise_for_status=False),
             summary_only=summary_only,
             country_subdir=country_subdir,
             overwrite=overwrite,
-            session=Session(progress=not quiet, raise_for_status=False),
         )
     )
 
@@ -199,8 +221,8 @@ def historical(
       airbase historical -c NO -c DK -c FI
     - download only SO2, PM10 and PM2.5 observations
       airbase historical -p SO2 -p PM10 -p PM2.5
-    - download only PM10 and PM2.5 from Valletta, the Capital of Malta
-      airbase historical -C Valletta -p PM10 -p PM2.5
+    - download only PM10 and PM2.5 observations from sites in Oslo
+      airbase historical -p PM10 -p PM2.5 -C Oslo
     """
     info = request_info(
         Dataset.Historical,
@@ -209,8 +231,9 @@ def historical(
         cities=set(cities),
         frequency=None if frequency is None else frequency.aggregation_type,
     )
+    name = f"{ctx.command_path} {frequency or ''}"
     obj: set[Request] = ctx.ensure_object(set)
-    obj.add(Request(frozenset(info), path, metadata))
+    obj.add(Request(name, frozenset(info), path, metadata))
 
 
 @main.command(no_args_is_help=True)
@@ -233,8 +256,8 @@ def verified(
       airbase verified -c NO -c DK -c FI
     - download only SO2, PM10 and PM2.5 observations
       airbase verified -p SO2 -p PM10 -p PM2.5
-    - download only PM10 and PM2.5 from Valletta, the Capital of Malta
-      airbase verified -C Valletta -p PM10 -p PM2.5
+    - download only PM10 and PM2.5 observations from sites in Oslo
+      airbase verified -p PM10 -p PM2.5 -C Oslo
     """
     info = request_info(
         Dataset.Verified,
@@ -243,8 +266,9 @@ def verified(
         cities=set(cities),
         frequency=None if frequency is None else frequency.aggregation_type,
     )
+    name = f"{ctx.command_path} {frequency or ''}"
     obj: set[Request] = ctx.ensure_object(set)
-    obj.add(Request(frozenset(info), path, metadata))
+    obj.add(Request(name, frozenset(info), path, metadata))
 
 
 @main.command(no_args_is_help=True)
@@ -267,8 +291,8 @@ def unverified(
       airbase unverified -c NO -c DK -c FI
     - download only SO2, PM10 and PM2.5 observations
       airbase unverified -p SO2 -p PM10 -p PM2.5
-    - download only PM10 and PM2.5 from Valletta, the Capital of Malta
-      airbase unverified -C Valletta -p PM10 -p PM2.5
+    - download only PM10 and PM2.5 observations from sites in Oslo
+      airbase unverified -p PM10 -p PM2.5 -C Oslo
     """
     info = request_info(
         Dataset.Unverified,
@@ -277,5 +301,6 @@ def unverified(
         cities=set(cities),
         frequency=None if frequency is None else frequency.aggregation_type,
     )
+    name = f"{ctx.command_path} {frequency or ''}"
     obj: set[Request] = ctx.ensure_object(set)
-    obj.add(Request(frozenset(info), path, metadata))
+    obj.add(Request(name, frozenset(info), path, metadata))

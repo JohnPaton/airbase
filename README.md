@@ -74,9 +74,24 @@ Writing metadata to data/metadata.csv...
 
 ``` console
 $ airbase --help
-Usage: airbase [OPTIONS] COMMAND [ARGS]...
+Usage: airbase [OPTIONS] COMMAND1 [ARGS]... [COMMAND2 [ARGS]...]...
 
   Download Air Quality Data from the European Environment Agency (EEA)
+
+  Use -n/--dry-run/--summary and -q/--quiet to request the number of files and
+  estimated download size without downloading the observations, e.g
+  - total download files/size for hourly verified and unverified observations
+    airbase --quiet --summary \
+      verified -F hourly \
+      unverified -F hourly
+
+  Use -c/--country and -p/--pollutant to restrict the download specific countries and pollutants,
+  or -C/--city and -p/--pollutant to restrict the download specific cities and pollutants, e.g.
+  - download verified hourly and daily PM10 and PM2.5 observations from sites in Oslo
+    to different (existing) paths in order to avoid filename collisions
+    airbase --no-subdir \
+      verified -p PM10 -p PM2.5 -C Oslo -F daily  --path data/daily \
+      verified -p PM10 -p PM2.5 -C Oslo -F hourly --path data/hourly
 
 Options:
   -V, --version
@@ -109,8 +124,8 @@ Usage: airbase historical [OPTIONS]
     airbase historical -c NO -c DK -c FI
   - download only SO2, PM10 and PM2.5 observations
     airbase historical -p SO2 -p PM10 -p PM2.5
-  - download only PM10 and PM2.5 from Valletta, the Capital of Malta
-    airbase historical -C Valletta -p PM10 -p PM2.5
+  - download only PM10 and PM2.5 observations from sites in Oslo
+    airbase historical -p PM10 -p PM2.5 -C Oslo
 
 Options:
   -c, --country [AD|AL|AT|...]
@@ -144,8 +159,8 @@ Usage: airbase verified [OPTIONS]
     airbase verified -c NO -c DK -c FI
   - download only SO2, PM10 and PM2.5 observations
     airbase verified -p SO2 -p PM10 -p PM2.5
-  - download only PM10 and PM2.5 from Valletta, the Capital of Malta
-    airbase verified -C Valletta -p PM10 -p PM2.5
+  - download only PM10 and PM2.5 observations from sites in Oslo
+    airbase verified -p PM10 -p PM2.5 -C Oslo
 
 Options:
   -c, --country [AD|AL|AT|...]
@@ -175,8 +190,8 @@ Usage: airbase unverified [OPTIONS]
     airbase unverified -c NO -c DK -c FI
   - download only SO2, PM10 and PM2.5 observations
     airbase unverified -p SO2 -p PM10 -p PM2.5
-  - download only PM10 and PM2.5 from Valletta, the Capital of Malta
-    airbase unverified -C Valletta -p PM10 -p PM2.5
+  - download only PM10 and PM2.5 observations from sites in Oslo
+    airbase unverified -p PM10 -p PM2.5 -C Oslo
 
 Options:
   -c, --country [AD|AL|AT|...]
