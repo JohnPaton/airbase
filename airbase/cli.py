@@ -46,7 +46,11 @@ PollutantList: TypeAlias = Annotated[
 ]
 CityList: TypeAlias = Annotated[
     list[str],
-    typer.Option("-C", "--city", help="Only from selected <cities>."),
+    typer.Option(
+        "-C",
+        "--city",
+        help="Only from selected <cities> (--country option will be ignored).",
+    ),
 ]
 MetadataOption: TypeAlias = Annotated[
     bool, typer.Option("-M", "--metadata", help="Download station metadata.")
@@ -96,16 +100,14 @@ def historical(
     Historical Airbase data delivered between 2002 and 2012 before Air Quality Directive 2008/50/EC entered into force.
 
     \b
-    Use -c/--country and -p/--pollutant to restrict the download specific countries and pollutants, e.g.
+    Use -c/--country and -p/--pollutant to restrict the download specific countries and pollutants,
+    or -C/--city and -p/--pollutant to restrict the download specific cities and pollutants, e.g.
     - download only Norwegian, Danish and Finish sites
       airbase historical -c NO -c DK -c FI
     - download only SO2, PM10 and PM2.5 observations
       airbase historical -p SO2 -p PM10 -p PM2.5
-
-    \b
-    Use -C/--city to further restrict the download to specific cities, e.g.
     - download only PM10 and PM2.5 from Valletta, the Capital of Malta
-      airbase historical -C Valletta -c MT -p PM10 -p PM2.5
+      airbase historical -C Valletta -p PM10 -p PM2.5
     """
     asyncio.run(
         download(
@@ -139,16 +141,14 @@ def verified(
     Verified data (E1a) from 2013 to 2024 reported by countries by 30 September each year for the previous year.
 
     \b
-    Use -c/--country and -p/--pollutant to restrict the download specific countries and pollutants, e.g.
+    Use -c/--country and -p/--pollutant to restrict the download specific countries and pollutants,
+    or -C/--city and -p/--pollutant to restrict the download specific cities and pollutants, e.g.
     - download only Norwegian, Danish and Finish sites
       airbase verified -c NO -c DK -c FI
     - download only SO2, PM10 and PM2.5 observations
       airbase verified -p SO2 -p PM10 -p PM2.5
-
-    \b
-    Use -C/--city to further restrict the download to specific cities, e.g.
     - download only PM10 and PM2.5 from Valletta, the Capital of Malta
-      airbase verified -C Valletta -c MT -p PM10 -p PM2.5
+      airbase verified -C Valletta -p PM10 -p PM2.5
     """
     asyncio.run(
         download(
@@ -182,16 +182,14 @@ def unverified(
     Unverified data transmitted continuously (Up-To-Date/UTD/E2a) data from the beginning of 2025.
 
     \b
-    Use -c/--country and -p/--pollutant to restrict the download specific countries and pollutants, e.g.
+    Use -c/--country and -p/--pollutant to restrict the download specific countries and pollutants,
+    or -C/--city and -p/--pollutant to restrict the download specific cities and pollutants, e.g.
     - download only Norwegian, Danish and Finish sites
       airbase unverified -c NO -c DK -c FI
     - download only SO2, PM10 and PM2.5 observations
       airbase unverified -p SO2 -p PM10 -p PM2.5
-
-    \b
-    Use -C/--city to further restrict the download to specific cities, e.g.
     - download only PM10 and PM2.5 from Valletta, the Capital of Malta
-      airbase unverified -C Valletta -c MT -p PM10 -p PM2.5
+      airbase unverified -C Valletta -p PM10 -p PM2.5
     """
     asyncio.run(
         download(
