@@ -1,9 +1,9 @@
 import asyncio
 import sys
-from collections.abc import Iterable
+from contextlib import contextmanager
 from enum import Enum
 from pathlib import Path
-from typing import Annotated, Optional
+from typing import Annotated, NamedTuple, Optional
 
 if sys.version_info >= (3, 10):
     from typing import TypeAlias
@@ -64,6 +64,36 @@ class Frequency(str, Enum):
         return AggregationType[self.name.capitalize()]
 
 
+class Request(NamedTuple):
+    info: frozenset[ParquetData]
+    path: Path
+    metadata: bool
+
+
+@contextmanager
+def downloader(
+    *,
+    summary_only: bool,
+    country_subdir: bool,
+    overwrite: bool,
+    session: Session,
+):
+    reqests: set[Request] = set()
+    yield reqests
+    for req in reqests:
+        asyncio.run(
+            download(
+                req.info,
+                req.path,
+                metadata=req.metadata,
+                summary_only=summary_only,
+                country_subdir=country_subdir,
+                overwrite=overwrite,
+                session=session,
+            )
+        )
+
+
 def version_callback(value: bool):
     if not value:
         return
@@ -106,23 +136,14 @@ def callback(
 ):
     """Download Air Quality Data from the European Environment Agency (EEA)"""
 
-    def run_download(info: Iterable[ParquetData], path: Path, metadata: bool):
-        asyncio.run(
-            download(
-                info,
-                path,
-                metadata=metadata,
-                summary_only=summary_only,
-                country_subdir=country_subdir,
-                overwrite=overwrite,
-                session=Session(
-                    progress=not quiet,
-                    raise_for_status=False,
-                ),
-            )
+    ctx.obj = ctx.with_resource(
+        downloader(
+            summary_only=summary_only,
+            country_subdir=country_subdir,
+            overwrite=overwrite,
+            session=Session(progress=not quiet, raise_for_status=False),
         )
-
-    ctx.obj = run_download
+    )
 
 
 CountryList: TypeAlias = Annotated[
@@ -188,7 +209,8 @@ def historical(
         cities=set(cities),
         frequency=None if frequency is None else frequency.aggregation_type,
     )
-    ctx.obj(info, path, metadata)
+    obj: set[Request] = ctx.ensure_object(set)
+    obj.add(Request(frozenset(info), path, metadata))
 
 
 @main.command(no_args_is_help=True)
@@ -221,7 +243,8 @@ def verified(
         cities=set(cities),
         frequency=None if frequency is None else frequency.aggregation_type,
     )
-    ctx.obj(info, path, metadata)
+    obj: set[Request] = ctx.ensure_object(set)
+    obj.add(Request(frozenset(info), path, metadata))
 
 
 @main.command(no_args_is_help=True)
@@ -254,4 +277,5 @@ def unverified(
         cities=set(cities),
         frequency=None if frequency is None else frequency.aggregation_type,
     )
-    ctx.obj(info, path, metadata)
+    obj: set[Request] = ctx.ensure_object(set)
+    obj.add(Request(frozenset(info), path, metadata))
