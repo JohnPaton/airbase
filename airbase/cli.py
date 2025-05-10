@@ -2,7 +2,7 @@ import asyncio
 import sys
 from enum import Enum
 from pathlib import Path
-from typing import Annotated, Optional
+from typing import Annotated, NamedTuple, Optional
 
 if sys.version_info >= (3, 10):
     from typing import TypeAlias
@@ -56,6 +56,13 @@ class Frequency(str, Enum):
         return AggregationType[self.name.capitalize()]
 
 
+class SharedOptions(NamedTuple):
+    summary_only: bool
+    country_subdir: bool
+    overwrite: bool
+    quiet: bool
+
+
 def version_callback(value: bool):
     if not value:
         return
@@ -66,12 +73,38 @@ def version_callback(value: bool):
 
 @main.callback()
 def callback(
+    ctx: typer.Context,
     version: Annotated[
         Optional[bool],
         typer.Option("--version", "-V", callback=version_callback),
     ] = None,
+    summary_only: Annotated[
+        bool,
+        typer.Option(
+            "-n",
+            "--dry-run",
+            "--summary",
+            help="Total download files/size, nothing will be downloaded.",
+        ),
+    ] = False,
+    country_subdir: Annotated[
+        bool,
+        typer.Option(
+            "--subdir/--no-subdir",
+            help="Download files for different counties to different sub directories.",
+        ),
+    ] = True,
+    overwrite: Annotated[
+        bool,
+        typer.Option("-O", "--overwrite", help="Re-download existing files."),
+    ] = False,
+    quiet: Annotated[
+        bool,
+        typer.Option("-q", "--quiet", help="No progress-bar."),
+    ] = False,
 ):
     """Download Air Quality Data from the European Environment Agency (EEA)"""
+    ctx.obj = SharedOptions(summary_only, country_subdir, overwrite, quiet)
 
 
 CountryList: TypeAlias = Annotated[
@@ -105,52 +138,25 @@ MetadataOption: TypeAlias = Annotated[
 PathOption: TypeAlias = Annotated[
     Path, typer.Option("--path", exists=True, dir_okay=True, writable=True)
 ]
-SummaryOption: TypeAlias = Annotated[
-    bool,
-    typer.Option(
-        "-n",
-        "--dry-run",
-        "--summary",
-        help="Total download files/size, nothing will be downloaded.",
-    ),
-]
-SubdirOption: TypeAlias = Annotated[
-    bool,
-    typer.Option(
-        "--subdir/--no-subdir",
-        help="Download files for different counties to different sub directories.",
-    ),
-]
-OverwriteOption: TypeAlias = Annotated[
-    bool,
-    typer.Option("-O", "--overwrite", help="Re-download existing files."),
-]
-QuietOption: TypeAlias = Annotated[
-    bool,
-    typer.Option("-q", "--quiet", help="No progress-bar."),
-]
 
 
 @main.command(no_args_is_help=True)
 def historical(
+    ctx: typer.Context,
     countries: CountryList = [],
     pollutants: PollutantList = [],
     cities: CityList = [],
     frequency: FrequencyOption = None,
     metadata: MetadataOption = False,
     path: PathOption = Path("data/historical"),
-    summary_only: SummaryOption = False,
-    country_subdir: SubdirOption = True,
-    overwrite: OverwriteOption = False,
-    quiet: QuietOption = False,
-):
+) -> None:
     """
     Historical Airbase data delivered between 2002 and 2012 before Air Quality Directive 2008/50/EC entered into force.
 
     \b
     Use -c/--country and -p/--pollutant to restrict the download specific countries and pollutants,
     or -C/--city and -p/--pollutant to restrict the download specific cities and pollutants, e.g.
-    - download only Norwegian, Danish and Finish sites
+    - download only from Norwegian, Danish and Finish sites
       airbase historical -c NO -c DK -c FI
     - download only SO2, PM10 and PM2.5 observations
       airbase historical -p SO2 -p PM10 -p PM2.5
@@ -169,26 +175,23 @@ def historical(
             info,
             path,
             metadata=metadata,
-            summary_only=summary_only,
-            country_subdir=country_subdir,
-            overwrite=overwrite,
-            quiet=quiet,
+            summary_only=ctx.obj.summary_only,
+            country_subdir=ctx.obj.country_subdir,
+            overwrite=ctx.obj.overwrite,
+            quiet=ctx.obj.quiet,
         )
     )
 
 
 @main.command(no_args_is_help=True)
 def verified(
+    ctx: typer.Context,
     countries: CountryList = [],
     pollutants: PollutantList = [],
     cities: CityList = [],
     frequency: FrequencyOption = None,
     metadata: MetadataOption = False,
     path: PathOption = Path("data/verified"),
-    summary_only: SummaryOption = False,
-    country_subdir: SubdirOption = True,
-    overwrite: OverwriteOption = False,
-    quiet: QuietOption = False,
 ):
     """
     Verified data (E1a) from 2013 to 2023 reported by countries by 30 September each year for the previous year.
@@ -196,7 +199,7 @@ def verified(
     \b
     Use -c/--country and -p/--pollutant to restrict the download specific countries and pollutants,
     or -C/--city and -p/--pollutant to restrict the download specific cities and pollutants, e.g.
-    - download only Norwegian, Danish and Finish sites
+    - download only from Norwegian, Danish and Finish sites
       airbase verified -c NO -c DK -c FI
     - download only SO2, PM10 and PM2.5 observations
       airbase verified -p SO2 -p PM10 -p PM2.5
@@ -215,26 +218,23 @@ def verified(
             info,
             path,
             metadata=metadata,
-            summary_only=summary_only,
-            country_subdir=country_subdir,
-            overwrite=overwrite,
-            quiet=quiet,
+            summary_only=ctx.obj.summary_only,
+            country_subdir=ctx.obj.country_subdir,
+            overwrite=ctx.obj.overwrite,
+            quiet=ctx.obj.quiet,
         )
     )
 
 
 @main.command(no_args_is_help=True)
 def unverified(
+    ctx: typer.Context,
     countries: CountryList = [],
     pollutants: PollutantList = [],
     cities: CityList = [],
     frequency: FrequencyOption = None,
     metadata: MetadataOption = False,
     path: PathOption = Path("data/unverified"),
-    summary_only: SummaryOption = False,
-    country_subdir: SubdirOption = True,
-    overwrite: OverwriteOption = False,
-    quiet: QuietOption = False,
 ):
     """
     Unverified data transmitted continuously (Up-To-Date/UTD/E2a) data from the beginning of 2024.
@@ -242,7 +242,7 @@ def unverified(
     \b
     Use -c/--country and -p/--pollutant to restrict the download specific countries and pollutants,
     or -C/--city and -p/--pollutant to restrict the download specific cities and pollutants, e.g.
-    - download only Norwegian, Danish and Finish sites
+    - download only from Norwegian, Danish and Finish sites
       airbase unverified -c NO -c DK -c FI
     - download only SO2, PM10 and PM2.5 observations
       airbase unverified -p SO2 -p PM10 -p PM2.5
@@ -261,9 +261,9 @@ def unverified(
             info,
             path,
             metadata=metadata,
-            summary_only=summary_only,
-            country_subdir=country_subdir,
-            overwrite=overwrite,
-            quiet=quiet,
+            summary_only=ctx.obj.summary_only,
+            country_subdir=ctx.obj.country_subdir,
+            overwrite=ctx.obj.overwrite,
+            quiet=ctx.obj.quiet,
         )
     )

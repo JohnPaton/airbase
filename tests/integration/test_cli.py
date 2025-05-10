@@ -36,9 +36,9 @@ def test_download(
     expected: set[str],
     tmp_path: Path,
 ):
-    options = f"{cmd} --quiet --city {city} --pollutant {pollutant}"
+    options = f"{cmd} --city {city} --pollutant {pollutant}"
     with runner.isolated_filesystem(temp_dir=tmp_path):
-        result = runner.invoke(main, f"{options} --path {tmp_path}")
+        result = runner.invoke(main, f"--quiet {options} --path {tmp_path}")
     assert result.exit_code == 0
 
     found = set(tmp_path.glob("MT/*.parquet"))
@@ -72,10 +72,10 @@ def test_summary(
     expected: str,
     tmp_path: Path,
 ):
-    options = f"{cmd} --quiet --summary --city {city} --pollutant {pollutant}"
+    options = f"--summary {cmd} --city {city} --pollutant {pollutant}"
     with runner.isolated_filesystem(temp_dir=tmp_path):
         result = runner.invoke(
-            main, f"{options} --path {tmp_path} --frequency hourly"
+            main, f"--quiet {options} --path {tmp_path} --frequency hourly"
         )
     assert result.exit_code == 0
     assert expected in result.stdout

@@ -70,6 +70,29 @@ To install ``airbase``, simply run
 🚆 Command line interface
 =========================
 
+.. code-block:: console
+
+   $ airbase --help
+   Usage: airbase [OPTIONS] COMMAND [ARGS]...
+
+      Download Air Quality Data from the European Environment Agency (EEA)
+
+   Options:
+      -V, --version
+      -n, --dry-run, --summary  Total download files/size, nothing will be
+                                 downloaded.
+      --subdir / --no-subdir    Download files for different counties to different
+                                 sub directories.  [default: subdir]
+      -O, --overwrite           Re-download existing files.
+      -q, --quiet               No progress-bar.
+      --help                    Show this message and exit.
+
+   Commands:
+      historical  Historical Airbase data delivered between 2002 and 2012...
+      verified    Verified data (E1a) from 2013 to 2023 reported by countries...
+      unverified  Unverified data transmitted continuously...
+
+
 Historical data delivered between 2002 and 2012
 -----------------------------------------------
 
@@ -83,7 +106,7 @@ Historical data delivered between 2002 and 2012
 
      Use -c/--country and -p/--pollutant to restrict the download specific countries and pollutants,
      or -C/--city and -p/--pollutant to restrict the download specific cities and pollutants, e.g.
-     - download only Norwegian, Danish and Finish sites
+     - download only from Norwegian, Danish and Finish sites
        airbase historical -c NO -c DK -c FI
      - download only SO2, PM10 and PM2.5 observations
        airbase historical -p SO2 -p PM10 -p PM2.5
@@ -100,16 +123,13 @@ Historical data delivered between 2002 and 2012
                                      aggregation frequency.
      -M, --metadata                  Download station metadata.
      --path PATH                     [default: data/historical]
-     -n, --dry-run, --summary        Total download files/size, nothing will be
-                                     downloaded.
-     -O, --overwrite                 Re-download existing files.
-     -q, --quiet                     No progress-bar.
      --help                          Show this message and exit.
 
 
 Verified data from 2013 to 2023
 -------------------------------
 .. code-block:: console
+
    $ airbase verified --help
    Usage: airbase verified [OPTIONS]
 
@@ -118,7 +138,7 @@ Verified data from 2013 to 2023
 
      Use -c/--country and -p/--pollutant to restrict the download specific countries and pollutants,
      or -C/--city and -p/--pollutant to restrict the download specific cities and pollutants, e.g.
-     - download only Norwegian, Danish and Finish sites
+     - download only from Norwegian, Danish and Finish sites
        airbase verified -c NO -c DK -c FI
      - download only SO2, PM10 and PM2.5 observations
        airbase verified -p SO2 -p PM10 -p PM2.5
@@ -135,15 +155,12 @@ Verified data from 2013 to 2023
                                      aggregation frequency.
      -M, --metadata                  Download station metadata.
      --path PATH                     [default: data/verified]
-     -n, --dry-run, --summary        Total download files/size, nothing will be
-                                     downloaded.
-     -O, --overwrite                 Re-download existing files.
-     -q, --quiet                     No progress-bar.
      --help                          Show this message and exit.
 
 Unverified data from the beginning of 2024
 ------------------------------------------
 .. code-block:: console
+
    $ airbase unverified --help
    Usage: airbase unverified [OPTIONS]
 
@@ -152,7 +169,7 @@ Unverified data from the beginning of 2024
 
      Use -c/--country and -p/--pollutant to restrict the download specific countries and pollutants,
      or -C/--city and -p/--pollutant to restrict the download specific cities and pollutants, e.g.
-     - download only Norwegian, Danish and Finish sites
+     - download only from Norwegian, Danish and Finish sites
        airbase unverified -c NO -c DK -c FI
      - download only SO2, PM10 and PM2.5 observations
        airbase unverified -p SO2 -p PM10 -p PM2.5
@@ -169,10 +186,6 @@ Unverified data from the beginning of 2024
                                      aggregation frequency.
      -M, --metadata                  Download station metadata.
      --path PATH                     [default: data/unverified]
-     -n, --dry-run, --summary        Total download files/size, nothing will be
-                                     downloaded.
-     -O, --overwrite                 Re-download existing files.
-     -q, --quiet                     No progress-bar.
      --help                          Show this message and exit.
 
 Key Concepts
