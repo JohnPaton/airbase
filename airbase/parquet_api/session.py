@@ -415,12 +415,11 @@ async def download(
 
         await session.url_to_files(*info)
         if session.number_of_urls == 0:
-            warn(
-                "Found no data matching your selection, please try different cites/pollutants"
-                if cities
-                else "Found no data matching your selection, please try different pollutants",
-                UserWarning,
-            )
+            if cities:
+                hint = "please try different cites/pollutants"
+            else:
+                hint = "please try different countries/pollutants"
+            warn(f"Found no data matching your selection, {hint}", UserWarning)
             return
 
         await session.download_to_directory(

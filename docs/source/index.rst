@@ -81,24 +81,24 @@ Historical data delivered between 2002 and 2012
      Historical Airbase data delivered between 2002 and 2012 before Air Quality
      Directive 2008/50/EC entered into force.
 
-     Use -c/--country and -p/--pollutant to restrict the download specific countries and pollutants, e.g.
+     Use -c/--country and -p/--pollutant to restrict the download specific countries and pollutants,
+     or -C/--city and -p/--pollutant to restrict the download specific cities and pollutants, e.g.
      - download only Norwegian, Danish and Finish sites
        airbase historical -c NO -c DK -c FI
      - download only SO2, PM10 and PM2.5 observations
        airbase historical -p SO2 -p PM10 -p PM2.5
-
-     Use -C/--city to further restrict the download to specific cities, e.g.
      - download only PM10 and PM2.5 from Valletta, the Capital of Malta
-       airbase historical -C Valletta -c MT -p PM10 -p PM2.5
+       airbase historical -C Valletta -p PM10 -p PM2.5
 
    Options:
      -c, --country [AD|AL|AT|...]
      -p, --pollutant [k|V|NT|...]
-     -C, --city TEXT                 only from selected <cities>
+     -C, --city TEXT                 Only from selected <cities> (--country
+                                     option will be ignored).
      -F, --aggregation-type, --frequency [hourly|daily|other]
-                                     only hourly data, daily data or other
-                                     aggregation frequency
-     -M, --metadata                  download station metadata
+                                     Only hourly data, daily data or other
+                                     aggregation frequency.
+     -M, --metadata                  Download station metadata.
      --path PATH                     [default: data/historical]
      -n, --dry-run, --summary        Total download files/size, nothing will be
                                      downloaded.
@@ -116,24 +116,24 @@ Verified data from 2013 to 2023
      Verified data (E1a) from 2013 to 2023 reported by countries by 30 September
      each year for the previous year.
 
-     Use -c/--country and -p/--pollutant to restrict the download specific countries and pollutants, e.g.
+     Use -c/--country and -p/--pollutant to restrict the download specific countries and pollutants,
+     or -C/--city and -p/--pollutant to restrict the download specific cities and pollutants, e.g.
      - download only Norwegian, Danish and Finish sites
        airbase verified -c NO -c DK -c FI
      - download only SO2, PM10 and PM2.5 observations
        airbase verified -p SO2 -p PM10 -p PM2.5
-
-     Use -C/--city to further restrict the download to specific cities, e.g.
      - download only PM10 and PM2.5 from Valletta, the Capital of Malta
-       airbase verified -C Valletta -c MT -p PM10 -p PM2.5
+       airbase verified -C Valletta -p PM10 -p PM2.5
 
    Options:
      -c, --country [AD|AL|AT|...]
      -p, --pollutant [k|V|NT|...]
-     -C, --city TEXT                 only from selected <cities>
+     -C, --city TEXT                 Only from selected <cities> (--country
+                                     option will be ignored).
      -F, --aggregation-type, --frequency [hourly|daily|other]
-                                     only hourly data, daily data or other
-                                     aggregation frequency
-     -M, --metadata                  download station metadata
+                                     Only hourly data, daily data or other
+                                     aggregation frequency.
+     -M, --metadata                  Download station metadata.
      --path PATH                     [default: data/verified]
      -n, --dry-run, --summary        Total download files/size, nothing will be
                                      downloaded.
@@ -150,24 +150,24 @@ Unverified data from the beginning of 2024
      Unverified data transmitted continuously (Up-To-Date/UTD/E2a) data from the
      beginning of 2024.
 
-     Use -c/--country and -p/--pollutant to restrict the download specific countries and pollutants, e.g.
+     Use -c/--country and -p/--pollutant to restrict the download specific countries and pollutants,
+     or -C/--city and -p/--pollutant to restrict the download specific cities and pollutants, e.g.
      - download only Norwegian, Danish and Finish sites
        airbase unverified -c NO -c DK -c FI
      - download only SO2, PM10 and PM2.5 observations
        airbase unverified -p SO2 -p PM10 -p PM2.5
-
-     Use -C/--city to further restrict the download to specific cities, e.g.
      - download only PM10 and PM2.5 from Valletta, the Capital of Malta
-       airbase unverified -C Valletta -c MT -p PM10 -p PM2.5
+       airbase unverified -C Valletta -p PM10 -p PM2.5
 
    Options:
      -c, --country [AD|AL|AT|...]
      -p, --pollutant [k|V|NT|...]
-     -C, --city TEXT                 only from selected <cities>
+     -C, --city TEXT                 Only from selected <cities> (--country
+                                     option will be ignored).
      -F, --aggregation-type, --frequency [hourly|daily|other]
-                                     only hourly data, daily data or other
-                                     aggregation frequency
-     -M, --metadata                  download station metadata
+                                     Only hourly data, daily data or other
+                                     aggregation frequency.
+     -M, --metadata                  Download station metadata.
      --path PATH                     [default: data/unverified]
      -n, --dry-run, --summary        Total download files/size, nothing will be
                                      downloaded.
