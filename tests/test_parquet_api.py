@@ -53,14 +53,11 @@ def test_request_info_by_city(
     pollutants: set[str] | None,
     dataset: Dataset = Dataset.Historical,
 ):
+    info = request_info_by_city(dataset, city, pollutants=pollutants)
     if not pollutants:
-        assert (
-            request_info_by_city(dataset, city)
-            == request_info_by_city(dataset, city, pollutants=set())
-            == {ParquetData(country, dataset, city=city)}
-        )
+        assert set(info) == {ParquetData(country, dataset, city=city)}
     else:
-        assert request_info_by_city(dataset, city, pollutants=pollutants) == {
+        assert set(info) == {
             ParquetData(country, dataset, frozenset(pollutants), city)
         }
 
@@ -70,7 +67,7 @@ def test_request_info_by_city_warning(
     dataset: Dataset = Dataset.Historical,
 ):
     with pytest.warns(UserWarning, match=rf"Unknown city='{city}'"):
-        assert not request_info_by_city(dataset, city)
+        assert not set(request_info_by_city(dataset, city))
 
 
 @pytest.mark.parametrize(
@@ -86,16 +83,13 @@ def test_request_info_by_country(
     pollutants: set[str] | None,
     dataset: Dataset = Dataset.Historical,
 ):
+    info = request_info_by_country(dataset, country, pollutants=pollutants)
     if not pollutants:
-        assert (
-            request_info_by_country(dataset, country)
-            == request_info_by_country(dataset, country, pollutants=set())
-            == {ParquetData(country, dataset)}
-        )
+        assert set(info) == {ParquetData(country, dataset)}
     else:
-        assert request_info_by_country(
-            dataset, country, pollutants=pollutants
-        ) == {ParquetData(country, dataset, frozenset(pollutants))}
+        assert set(info) == {
+            ParquetData(country, dataset, frozenset(pollutants))
+        }
 
 
 def test_request_info_by_country_warning(
@@ -103,7 +97,7 @@ def test_request_info_by_country_warning(
     dataset: Dataset = Dataset.Historical,
 ):
     with pytest.warns(UserWarning, match=rf"Unknown country='{country}'"):
-        assert not request_info_by_country(dataset, country)
+        assert not set(request_info_by_country(dataset, country))
 
 
 @pytest.mark.parametrize(
