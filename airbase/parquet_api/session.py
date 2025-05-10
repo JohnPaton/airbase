@@ -3,7 +3,13 @@ from __future__ import annotations
 import asyncio
 import sys
 from collections import defaultdict
-from collections.abc import AsyncIterator, Awaitable, Iterable, Iterator
+from collections.abc import (
+    AsyncIterator,
+    Awaitable,
+    Collection,
+    Iterable,
+    Iterator,
+)
 from contextlib import AbstractAsyncContextManager
 from pathlib import Path
 from types import TracebackType
@@ -21,13 +27,7 @@ from tqdm import tqdm
 
 from ..summary import DB
 from .client import Client
-from .dataset import (
-    AggregationType,
-    Dataset,
-    ParquetData,
-    request_info_by_city,
-    request_info_by_country,
-)
+from .dataset import AggregationType, Dataset, ParquetData, request_info
 
 _T = TypeVar("_T")
 
@@ -338,9 +338,9 @@ async def download(
     dataset: Dataset,
     root_path: Path,
     *,
-    countries: frozenset[str] | set[str],
-    pollutants: frozenset[str] | set[str] | None = None,
-    cities: frozenset[str] | set[str] | None = None,
+    countries: Collection[str] | None = None,
+    pollutants: Collection[str] | None = None,
+    cities: Collection[str] | None = None,
     frequency: AggregationType | None = None,
     summary_only: bool = False,
     metadata: bool = False,
@@ -355,7 +355,9 @@ async def download(
 
     :param dataset: `Dataset.Historical`, `Dataset.Verified` or `Dataset.Unverified`.
     :param root_path: The directory to save files in (must exist).
-    :param countries: Request observations for these countries.
+    :param countries: (optional, default `None`)
+        Request observations for these countries.
+        `None` or an empy container means all countries.
     :param pollutants: (optional, default `None`)
         Limit requests to these specific pollutants.
     :param cities: (optional, default `None`)
@@ -377,16 +379,13 @@ async def download(
         Raise exceptions if any request return "bad" HTTP status codes.
         If False, a :py:func:`warnings.warn` will be issued instead.
     """
-    if cities:  # one request for each city/pollutant
-        info = request_info_by_city(
-            dataset, *cities, pollutants=pollutants, frequency=frequency
-        )
-    else:  # one request for each country/pollutant
-        if not countries:
-            countries = DB.COUNTRY_CODES
-        info = request_info_by_country(
-            dataset, *countries, pollutants=pollutants, frequency=frequency
-        )
+    info = request_info(
+        dataset,
+        cities=cities,
+        countries=countries,
+        pollutants=pollutants,
+        frequency=frequency,
+    )
 
     session.progress = not quiet
     session.raise_for_status = raise_for_status
