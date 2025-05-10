@@ -1,8 +1,9 @@
 import asyncio
 import sys
+from collections.abc import Iterable
 from enum import Enum
 from pathlib import Path
-from typing import Annotated, NamedTuple, Optional
+from typing import Annotated, Optional
 
 if sys.version_info >= (3, 10):
     from typing import TypeAlias
@@ -16,6 +17,7 @@ from . import __version__
 from .parquet_api import (
     AggregationType,
     Dataset,
+    ParquetData,
     Session,
     download,
     request_info,
@@ -62,13 +64,6 @@ class Frequency(str, Enum):
         return AggregationType[self.name.capitalize()]
 
 
-class SharedOptions(NamedTuple):
-    summary_only: bool
-    country_subdir: bool
-    overwrite: bool
-    session: Session
-
-
 def version_callback(value: bool):
     if not value:
         return
@@ -110,15 +105,24 @@ def callback(
     ] = False,
 ):
     """Download Air Quality Data from the European Environment Agency (EEA)"""
-    ctx.obj = SharedOptions(
-        summary_only,
-        country_subdir,
-        overwrite,
-        Session(
-            progress=not quiet,
-            raise_for_status=False,
-        ),
-    )
+
+    def run_download(info: Iterable[ParquetData], path: Path, metadata: bool):
+        asyncio.run(
+            download(
+                info,
+                path,
+                metadata=metadata,
+                summary_only=summary_only,
+                country_subdir=country_subdir,
+                overwrite=overwrite,
+                session=Session(
+                    progress=not quiet,
+                    raise_for_status=False,
+                ),
+            )
+        )
+
+    ctx.obj = run_download
 
 
 CountryList: TypeAlias = Annotated[
@@ -184,17 +188,7 @@ def historical(
         cities=set(cities),
         frequency=None if frequency is None else frequency.aggregation_type,
     )
-    asyncio.run(
-        download(
-            info,
-            path,
-            metadata=metadata,
-            summary_only=ctx.obj.summary_only,
-            country_subdir=ctx.obj.country_subdir,
-            overwrite=ctx.obj.overwrite,
-            session=ctx.obj.session,
-        )
-    )
+    ctx.obj(info, path, metadata)
 
 
 @main.command(no_args_is_help=True)
@@ -227,17 +221,7 @@ def verified(
         cities=set(cities),
         frequency=None if frequency is None else frequency.aggregation_type,
     )
-    asyncio.run(
-        download(
-            info,
-            path,
-            metadata=metadata,
-            summary_only=ctx.obj.summary_only,
-            country_subdir=ctx.obj.country_subdir,
-            overwrite=ctx.obj.overwrite,
-            session=ctx.obj.session,
-        )
-    )
+    ctx.obj(info, path, metadata)
 
 
 @main.command(no_args_is_help=True)
@@ -270,14 +254,4 @@ def unverified(
         cities=set(cities),
         frequency=None if frequency is None else frequency.aggregation_type,
     )
-    asyncio.run(
-        download(
-            info,
-            path,
-            metadata=metadata,
-            summary_only=ctx.obj.summary_only,
-            country_subdir=ctx.obj.country_subdir,
-            overwrite=ctx.obj.overwrite,
-            session=ctx.obj.session,
-        )
-    )
+    ctx.obj(info, path, metadata)
