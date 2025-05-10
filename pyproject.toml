@@ -39,6 +39,9 @@ Documentation = "https://airbase.readthedocs.io"
 [project.scripts]
 airbase = "airbase.cli:main"
 
+[project.optional-dependencies]
+typer = ["typer-slim[standard] >=0.12.0"]
+
 [build-system]
 requires = ["hatchling", "hatch-vcs"]
 build-backend = "hatchling.build"
