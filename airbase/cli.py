@@ -13,7 +13,7 @@ else:
 import typer
 
 from . import __version__
-from .parquet_api import AggregationType, Dataset, download
+from .parquet_api import AggregationType, Dataset, download, request_info
 from .summary import DB
 
 main = typer.Typer(add_completion=False, no_args_is_help=True)
@@ -157,14 +157,17 @@ def historical(
     - download only PM10 and PM2.5 from Valletta, the Capital of Malta
       airbase historical -C Valletta -p PM10 -p PM2.5
     """
+    info = request_info(
+        Dataset.Historical,
+        countries=set(map(str, countries)),
+        pollutants=set(map(str, pollutants)),
+        cities=set(cities),
+        frequency=None if frequency is None else frequency.aggregation_type,
+    )
     asyncio.run(
         download(
-            Dataset.Historical,
+            info,
             path,
-            countries=frozenset(map(str, countries)),
-            pollutants=frozenset(map(str, pollutants)),
-            cities=frozenset(cities),
-            frequency=None if frequency is None else frequency.aggregation_type,
             metadata=metadata,
             summary_only=summary_only,
             country_subdir=country_subdir,
@@ -200,14 +203,17 @@ def verified(
     - download only PM10 and PM2.5 from Valletta, the Capital of Malta
       airbase verified -C Valletta -p PM10 -p PM2.5
     """
+    info = request_info(
+        Dataset.Verified,
+        countries=set(map(str, countries)),
+        pollutants=set(map(str, pollutants)),
+        cities=set(cities),
+        frequency=None if frequency is None else frequency.aggregation_type,
+    )
     asyncio.run(
         download(
-            Dataset.Verified,
+            info,
             path,
-            countries=frozenset(map(str, countries)),
-            pollutants=frozenset(map(str, pollutants)),
-            cities=frozenset(cities),
-            frequency=None if frequency is None else frequency.aggregation_type,
             metadata=metadata,
             summary_only=summary_only,
             country_subdir=country_subdir,
@@ -243,14 +249,17 @@ def unverified(
     - download only PM10 and PM2.5 from Valletta, the Capital of Malta
       airbase unverified -C Valletta -p PM10 -p PM2.5
     """
+    info = request_info(
+        Dataset.Unverified,
+        countries=set(map(str, countries)),
+        pollutants=set(map(str, pollutants)),
+        cities=set(cities),
+        frequency=None if frequency is None else frequency.aggregation_type,
+    )
     asyncio.run(
         download(
-            Dataset.Unverified,
+            info,
             path,
-            countries=frozenset(map(str, countries)),
-            pollutants=frozenset(map(str, pollutants)),
-            cities=frozenset(cities),
-            frequency=None if frequency is None else frequency.aggregation_type,
             metadata=metadata,
             summary_only=summary_only,
             country_subdir=country_subdir,

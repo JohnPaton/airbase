@@ -11,7 +11,7 @@ if sys.version_info >= (3, 11):
 else:
     from typing_extensions import assert_never
 
-from .parquet_api import Dataset, Session, download
+from .parquet_api import Dataset, Session, download, request_info
 from .summary import DB
 
 
@@ -238,12 +238,15 @@ class AirbaseRequest:
         if not dir.is_dir():
             raise NotADirectoryError(f"{dir.resolve()} is not a directory.")
 
+        info = request_info(
+            self.source,
+            countries=self.counties,
+            pollutants=self.pollutants,
+        )
         asyncio.run(
             download(
-                self.source,
+                info,
                 dir,
-                countries=self.counties,
-                pollutants=self.pollutants,
                 overwrite=not skip_existing,
                 quiet=not self.verbose,
                 raise_for_status=raise_for_status,
