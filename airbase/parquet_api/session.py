@@ -3,13 +3,7 @@ from __future__ import annotations
 import asyncio
 import sys
 from collections import defaultdict
-from collections.abc import (
-    AsyncIterator,
-    Awaitable,
-    Collection,
-    Iterable,
-    Iterator,
-)
+from collections.abc import AsyncIterator, Awaitable, Iterable, Iterator
 from contextlib import AbstractAsyncContextManager
 from pathlib import Path
 from types import TracebackType
@@ -27,7 +21,7 @@ from tqdm import tqdm
 
 from ..summary import DB
 from .client import Client
-from .dataset import Dataset, ParquetData, request_info
+from .dataset import ParquetData
 
 _T = TypeVar("_T")
 
@@ -325,12 +319,9 @@ class Session(AbstractAsyncContextManager):
 
 
 async def download(
-    dataset: Dataset,
+    info: Iterable[ParquetData],
     root_path: Path,
     *,
-    countries: Collection[str] | None = None,
-    pollutants: Collection[str] | None = None,
-    cities: Collection[str] | None = None,
     summary_only: bool = False,
     metadata: bool = False,
     country_subdir: bool = True,
@@ -340,17 +331,10 @@ async def download(
     session: Session = Session(),
 ):
     """
-    request file urls by country|city/pollutant and download unique files
+    request file urls and download unique files
 
-    :param dataset: `Dataset.Historical`, `Dataset.Verified` or `Dataset.Unverified`.
+    :param info: requests by country|city/pollutant.
     :param root_path: The directory to save files in (must exist).
-    :param countries: (optional, default `None`)
-        Request observations for these countries.
-        `None` or an empy container means all countries.
-    :param pollutants: (optional, default `None`)
-        Limit requests to these specific pollutants.
-    :param cities: (optional, default `None`)
-        Limit requests to these specific cities.
     :param summary_only: (optional, default `False`)
         Request total files/size, nothing will be downloaded.
     :param metadata: (optional, default `False`)
@@ -368,10 +352,6 @@ async def download(
         Raise exceptions if any request return "bad" HTTP status codes.
         If False, a :py:func:`warnings.warn` will be issued instead.
     """
-    info = request_info(
-        dataset, cities=cities, countries=countries, pollutants=pollutants
-    )
-
     session.progress = not quiet
     session.raise_for_status = raise_for_status
     if summary_only:
@@ -392,10 +372,7 @@ async def download(
 
         await session.url_to_files(*info)
         if session.number_of_urls == 0:
-            if cities:
-                hint = "please try different cites/pollutants"
-            else:
-                hint = "please try different countries/pollutants"
+            hint = "please try different countries|cites/pollutants"
             warn(f"Found no data matching your selection, {hint}", UserWarning)
             return
 

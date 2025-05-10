@@ -6,7 +6,7 @@ import typer
 from click import Choice
 
 from . import __version__
-from .parquet_api import Dataset, download
+from .parquet_api import Dataset, download, request_info
 from .summary import DB
 
 main = typer.Typer(add_completion=False, no_args_is_help=True)
@@ -109,13 +109,16 @@ def historical(
     - download only PM10 and PM2.5 from Valletta, the Capital of Malta
       airbase historical -C Valletta -p PM10 -p PM2.5
     """
+    info = request_info(
+        Dataset.Historical,
+        countries=countries,
+        pollutants=pollutants,
+        cities=cities,
+    )
     asyncio.run(
         download(
-            Dataset.Historical,
+            info,
             path,
-            countries=frozenset(countries),
-            pollutants=frozenset(pollutants),
-            cities=frozenset(cities),
             metadata=metadata,
             summary_only=summary_only,
             country_subdir=country_subdir,
@@ -150,13 +153,16 @@ def verified(
     - download only PM10 and PM2.5 from Valletta, the Capital of Malta
       airbase verified -C Valletta -p PM10 -p PM2.5
     """
+    info = request_info(
+        Dataset.Verified,
+        countries=countries,
+        pollutants=pollutants,
+        cities=cities,
+    )
     asyncio.run(
         download(
-            Dataset.Verified,
+            info,
             path,
-            countries=frozenset(countries),
-            pollutants=frozenset(pollutants),
-            cities=frozenset(cities),
             metadata=metadata,
             summary_only=summary_only,
             country_subdir=country_subdir,
@@ -191,13 +197,16 @@ def unverified(
     - download only PM10 and PM2.5 from Valletta, the Capital of Malta
       airbase unverified -C Valletta -p PM10 -p PM2.5
     """
+    info = request_info(
+        Dataset.Unverified,
+        countries=countries,
+        pollutants=pollutants,
+        cities=cities,
+    )
     asyncio.run(
         download(
-            Dataset.Unverified,
+            info,
             path,
-            countries=frozenset(countries),
-            pollutants=frozenset(pollutants),
-            cities=frozenset(cities),
             metadata=metadata,
             summary_only=summary_only,
             country_subdir=country_subdir,
