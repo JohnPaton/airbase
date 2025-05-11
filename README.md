@@ -88,7 +88,7 @@ Usage: airbase [OPTIONS] COMMAND1 [ARGS]... [COMMAND2 [ARGS]...]...
   Use -c/--country and -p/--pollutant to restrict the download specific countries and pollutants,
   or -C/--city and -p/--pollutant to restrict the download specific cities and pollutants, e.g.
   - download verified hourly and daily PM10 and PM2.5 observations from sites in Oslo
-    to different (existing) paths in order to avoid filename collisions
+    into different paths in order to avoid filename collisions
     airbase --no-subdir \
       verified -p PM10 -p PM2.5 -C Oslo -F daily  --path data/daily \
       verified -p PM10 -p PM2.5 -C Oslo -F hourly --path data/hourly
@@ -107,7 +107,7 @@ Commands:
   historical  Historical Airbase data delivered between 2002 and 2012...
   verified    Verified data (E1a) from 2013 to 2023 reported by countries...
   unverified  Unverified data transmitted continuously...
-  metadata    Download station metadata.
+  metadata    Download station metadata into `PATH/metadata.csv`.
 ```
 
 ### Historical data delivered between 2002 and 2012
@@ -204,15 +204,22 @@ Options:
 
 ``` console
 $ airbase metadata --help
-Usage: airbase metadata [OPTIONS] [PATH]
+Usage: airbase metadata [OPTIONS]
 
-  Download station metadata.
+  Download station metadata into `PATH/metadata.csv`.
 
-Arguments:
-  [PATH]  [default: data/metadata.csv]
+  Use chan notation to donwload metadata and observations, e.g.
+  - donwload station metadata and hourly PM10 and PM2.5 observations
+    from sites in Oslo into into different paths
+      airbase --quiet --no-subdir \
+        historical --path data/historical -F hourly -p PM10 -p PM2.5 -C Oslo \
+        verified   --path data/verified   -F hourly -p PM10 -p PM2.5 -C Oslo \
+        unverified --path data/unverified -F hourly -p PM10 -p PM2.5 -C Oslo \
+        metadata   --path data/
 
 Options:
-  --help  Show this message and exit.
+  --path PATH  [default: data]
+  --help       Show this message and exit.
 ```
 
 ## 🛣 Roadmap

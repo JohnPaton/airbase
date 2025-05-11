@@ -171,7 +171,7 @@ def callback(
     Use -c/--country and -p/--pollutant to restrict the download specific countries and pollutants,
     or -C/--city and -p/--pollutant to restrict the download specific cities and pollutants, e.g.
     - download verified hourly and daily PM10 and PM2.5 observations from sites in Oslo
-      to different (existing) paths in order to avoid filename collisions
+      into different paths in order to avoid filename collisions
       airbase --no-subdir \\
         verified -p PM10 -p PM2.5 -C Oslo -F daily  --path data/daily \\
         verified -p PM10 -p PM2.5 -C Oslo -F hourly --path data/hourly
@@ -310,13 +310,22 @@ def unverified(
     return Request(name, frozenset(info), path)
 
 
-@main.command(no_args_is_help=True)
+@main.command(no_args_is_help=False)
 def metadata(
     ctx: typer.Context,
-    path: Annotated[
-        Path,
-        typer.Argument(dir_okay=True, writable=True),
-    ],
+    path: PathOption = Path("data"),
 ):
-    """Download station metadata into `PATH/metadata.csv`."""
+    """
+    Download station metadata into `PATH/metadata.csv`.
+
+    \b
+    Use chan notation to donwload metadata and observations, e.g.
+    - donwload station metadata and hourly PM10 and PM2.5 observations
+      from sites in Oslo into into different paths
+        airbase --no-subdir \\
+          historical --path data/historical -F hourly -p PM10 -p PM2.5 -C Oslo \\
+          verified   --path data/verified   -F hourly -p PM10 -p PM2.5 -C Oslo \\
+          unverified --path data/unverified -F hourly -p PM10 -p PM2.5 -C Oslo \\
+          metadata   --path data/
+    """
     return Request(ctx.command_path, frozenset(), path / "metadata.csv")
