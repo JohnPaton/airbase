@@ -319,8 +319,8 @@ def metadata(
     Download station metadata into `PATH/metadata.csv`.
 
     \b
-    Use chan notation to donwload metadata and observations, e.g.
-    - donwload station metadata and hourly PM10 and PM2.5 observations
+    Use chan notation to download metadata and observations, e.g.
+    - download station metadata and hourly PM10 and PM2.5 observations
       from sites in Oslo into into different paths
         airbase --no-subdir \\
           historical --path data/historical -F hourly -p PM10 -p PM2.5 -C Oslo \\
