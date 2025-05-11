@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import pytest
 from typer.testing import CliRunner
 
 from airbase.cli import main
@@ -10,75 +9,55 @@ from airbase.cli import main
 runner = CliRunner()
 
 
-@pytest.mark.parametrize(
-    "cmd,city,pollutant,expected",
-    (
-        pytest.param(
-            "historical", "Valletta", "PM2.5",
-            {"MT/SPO-MT00005_06001_100.parquet"},
-            id="historical",
-        ),
-        pytest.param(
-            "verified", "Valletta", "O3",
-            {"MT/SPO-MT00003_00007_100.parquet", "MT/SPO-MT00005_00007_100.parquet"},
-            id="verified"),
-        pytest.param(
-            "unverified", "Valletta", "PM10",
-            {"MT/SPO-MT00005_00005_100.parquet", "MT/SPO-MT00005_00005_101.parquet"},
-            id="unverified"
-        ),
-    ),
-)  # fmt:skip
-def test_download(
-    cmd: str,
-    city: str,
-    pollutant: str,
-    expected: set[str],
-    tmp_path: Path,
-):
-    options = f"{cmd} --city {city} --pollutant {pollutant}"
-    with runner.isolated_filesystem(temp_dir=tmp_path):
-        result = runner.invoke(main, f"--quiet {options} --path {tmp_path}")
+def test_download(tmp_path: Path):
+    commands = (
+        "--quiet",
+        f"historical --city Valletta --path {tmp_path} --pollutant PM2.5",
+        f"  verified --city Valletta --path {tmp_path} --pollutant O3",
+        f"unverified --city Valletta --path {tmp_path} --pollutant PM10",
+    )
+
+    result = runner.invoke(main, " ".join(commands))
     assert result.exit_code == 0
 
+    tmp_path.relative_to
     found = set(tmp_path.glob("MT/*.parquet"))
-    paths = set(tmp_path / file for file in expected)
-    assert found >= paths > set()
+    paths = {
+        "historical PM2.5": {
+            tmp_path / "MT/SPO-MT00005_06001_100.parquet",
+        },
+        "verified O3": {
+            tmp_path / "MT/SPO-MT00003_00007_100.parquet",
+            tmp_path / "MT/SPO-MT00005_00007_100.parquet",
+        },
+        "unverified PM10": {
+            tmp_path / "MT/SPO-MT00005_00005_100.parquet",
+            tmp_path / "MT/SPO-MT00005_00005_101.parquet",
+        },
+    }
+    assert len(found) == sum(len(val) for val in paths.values())
+    for key, val in paths.items():
+        assert found > val > set(), key
 
 
-@pytest.mark.parametrize(
-    "cmd,city,pollutant,expected",
-    (
-        pytest.param(
-            "historical", "Valletta", "PM2.5",
-            "found 1 file(s), ~0 Mb in total",
-            id="historical",
-        ),
-        pytest.param(
-            "verified", "Valletta", "O3",
-            "found 2 file(s), ~1 Mb in total",
-            id="verified"),
-        pytest.param(
-            "unverified", "Valletta", "PM10",
-            "found 2 file(s), ~0 Mb in total",
-            id="unverified"
-        ),
-    ),
-)  # fmt:skip
-def test_summary(
-    cmd: str,
-    city: str,
-    pollutant: str,
-    expected: str,
-    tmp_path: Path,
-):
-    options = f"--summary {cmd} --city {city} --pollutant {pollutant}"
-    with runner.isolated_filesystem(temp_dir=tmp_path):
-        result = runner.invoke(
-            main, f"--quiet {options} --path {tmp_path} --frequency hourly"
-        )
+def test_summary(tmp_path: Path):
+    commands = (
+        "--quiet --summary",
+        f"historical -F hourly -C Valletta --path {tmp_path} -p PM2.5",
+        f"  verified -F hourly -C Valletta --path {tmp_path} -p O3",
+        f"unverified -F hourly -C Valletta --path {tmp_path} -p PM10",
+    )
+
+    result = runner.invoke(main, " ".join(commands))
     assert result.exit_code == 0
-    assert expected in result.stdout
 
-    files = tuple(tmp_path.glob("MT/*.parquet"))
+    summary = {
+        "historical hourly": "found 1 file(s), ~0 Mb in total",
+        "verified hourly": "found 2 file(s), ~1 Mb in total",
+        "unverified hourly": "found 2 file(s), ~0 Mb in total",
+    }
+    for key, val in summary.items():
+        assert f"{key}\n{val}\n" in result.stdout, key
+
+    files = tuple(tmp_path.rglob("*.*"))
     assert not files
