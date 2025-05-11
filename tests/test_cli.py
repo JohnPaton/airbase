@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import sys
 from collections import Counter
 from pathlib import Path
 from typing import Literal
@@ -9,6 +10,20 @@ from typer.testing import CliRunner
 
 from airbase import __version__
 from airbase.cli import Country, Pollutant, main
+
+if sys.version_info >= (3, 11):
+    from contextlib import chdir
+else:
+    import os
+    from contextlib import contextmanager
+
+    @contextmanager
+    def chdir(path: Path):
+        old_cwd = Path.cwd()
+        os.chdir(path)
+        yield
+        os.chdir(old_cwd)
+
 
 runner = CliRunner()
 
@@ -42,48 +57,54 @@ def test_download(
 
 
 @pytest.mark.parametrize(
-    "metadata",
+    "path",
     (
         pytest.param(None, id="dir"),
-        pytest.param("meta.csv", id="csv"),
+        pytest.param("data", id="csv"),
     ),
 )
 @pytest.mark.usefixtures("mock_parquet_api")
-def test_metadata(tmp_path: Path, metadata: str | None):
-    result = runner.invoke(main, f"metadata {tmp_path}/{metadata or ''}")
+def test_metadata(tmp_path: Path, path: str | None):
+    metadata = tmp_path.joinpath(path or "", "metadata.csv")
+    result = runner.invoke(main, f"metadata {metadata.parent}")
     assert result.exit_code == 0
-    assert tmp_path.joinpath(metadata or "metadata.csv").is_file()
+    assert metadata.is_file()
 
 
 @pytest.mark.usefixtures("mock_parquet_api")
-def test_download_chain(tmp_path):
+def test_download_chain(tmp_path: Path):
     commands = (
         "--quiet --no-subdir",
-        f"historical --city Valletta --path {tmp_path}/historical",
-        f"  verified --city Valletta --path {tmp_path}/verified",
-        f"unverified --city Valletta --path {tmp_path}/unverified",
-        f"metadata {tmp_path}",
+        "historical --city Valletta",
+        "  verified --city Valletta",
+        "unverified --city Valletta",
+        "metadata data",
     )
-    tmp_path.joinpath("historical").mkdir()
-    tmp_path.joinpath("verified").mkdir()
-    tmp_path.joinpath("unverified").mkdir()
-    result = runner.invoke(main, " ".join(commands))
+    with chdir(tmp_path):
+        result = runner.invoke(main, " ".join(commands))
     assert result.exit_code == 0
 
-    counter = Counter(path.parts[-2] for path in tmp_path.rglob("*.parquet"))
-    assert counter == {"historical": 22, "verified": 22, "unverified": 22}
-    assert tmp_path.joinpath("metadata.csv").is_file()
+    counter = Counter(path.parent for path in tmp_path.rglob("*.parquet"))
+    assert counter == {
+        tmp_path / "data/historical": 22,
+        tmp_path / "data/verified": 22,
+        tmp_path / "data/unverified": 22,
+    }
+    metadata = tmp_path / "data/metadata.csv"
+    assert metadata.is_file()
 
 
 @pytest.mark.usefixtures("mock_parquet_api")
-def test_summary_chain(tmp_path):
+def test_summary_chain(tmp_path: Path):
     commands = (
         "--quiet --summary",
-        f"historical --city Valletta --path {tmp_path}",
-        f"  verified --city Valletta --path {tmp_path}",
-        f"unverified --city Valletta --path {tmp_path}",
+        "historical --city Valletta",
+        "  verified --city Valletta",
+        "unverified --city Valletta",
     )
-    result = runner.invoke(main, " ".join(commands))
+    with chdir(tmp_path):
+        result = runner.invoke(main, " ".join(commands))
+        counter = Counter(path.parent for path in Path.cwd().rglob("*.parquet"))
     assert result.exit_code == 0
 
     summary = "found 22 file(s), ~11 Mb in total"
@@ -91,5 +112,4 @@ def test_summary_chain(tmp_path):
     assert f"verified\n{summary}\n" in result.stdout, "verified"
     assert f"unverified\n{summary}\n" in result.stdout, "unverified"
 
-    files = tuple(tmp_path.rglob("*.*"))
-    assert not files
+    assert counter == {}

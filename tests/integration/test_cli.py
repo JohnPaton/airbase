@@ -1,10 +1,26 @@
 from __future__ import annotations
 
+import sys
+from collections import defaultdict
 from pathlib import Path
 
 from typer.testing import CliRunner
 
 from airbase.cli import main
+
+if sys.version_info >= (3, 11):
+    from contextlib import chdir
+else:
+    import os
+    from contextlib import contextmanager
+
+    @contextmanager
+    def chdir(path: Path):
+        old_cwd = Path.cwd()
+        os.chdir(path)
+        yield
+        os.chdir(old_cwd)
+
 
 runner = CliRunner()
 
@@ -12,43 +28,34 @@ runner = CliRunner()
 def test_download(tmp_path: Path):
     commands = (
         "--quiet",
-        f"historical --city Valletta --path {tmp_path} --pollutant PM2.5",
-        f"  verified --city Valletta --path {tmp_path} --pollutant O3",
-        f"unverified --city Valletta --path {tmp_path} --pollutant PM10",
+        "historical --city Valletta --pollutant PM2.5",
+        "  verified --city Valletta --pollutant O3",
+        "unverified --city Valletta --pollutant PM10",
     )
-
-    result = runner.invoke(main, " ".join(commands))
+    with chdir(tmp_path):
+        result = runner.invoke(main, " ".join(commands))
     assert result.exit_code == 0
 
-    tmp_path.relative_to
-    found = set(tmp_path.glob("MT/*.parquet"))
-    paths = {
-        "historical PM2.5": {
-            tmp_path / "MT/SPO-MT00005_06001_100.parquet",
-        },
-        "verified O3": {
-            tmp_path / "MT/SPO-MT00003_00007_100.parquet",
-            tmp_path / "MT/SPO-MT00005_00007_100.parquet",
-        },
-        "unverified PM10": {
-            tmp_path / "MT/SPO-MT00005_00005_100.parquet",
-            tmp_path / "MT/SPO-MT00005_00005_101.parquet",
-        },
+    found: dict[str, set[str]] = defaultdict(set)
+    for path in tmp_path.rglob("*.parquet"):
+        found[path.parts[-3]].add(path.stem)
+
+    assert found == {
+        "historical": {"SPO-MT00005_06001_100"},
+        "verified": {"SPO-MT00003_00007_100", "SPO-MT00005_00007_100"},
+        "unverified": {"SPO-MT00005_00005_100", "SPO-MT00005_00005_101"},
     }
-    assert len(found) == sum(len(val) for val in paths.values())
-    for key, val in paths.items():
-        assert found > val > set(), key
 
 
 def test_summary(tmp_path: Path):
     commands = (
         "--quiet --summary",
-        f"historical -F hourly -C Valletta --path {tmp_path} -p PM2.5",
-        f"  verified -F hourly -C Valletta --path {tmp_path} -p O3",
-        f"unverified -F hourly -C Valletta --path {tmp_path} -p PM10",
+        "historical -F hourly -C Valletta -p PM2.5",
+        "  verified -F hourly -C Valletta -p O3",
+        "unverified -F hourly -C Valletta -p PM10",
     )
-
-    result = runner.invoke(main, " ".join(commands))
+    with chdir(tmp_path):
+        result = runner.invoke(main, " ".join(commands))
     assert result.exit_code == 0
 
     summary = {

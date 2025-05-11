@@ -375,6 +375,7 @@ async def test_download_metadata(tmp_path: Path, session: Session):
     assert not tuple(tmp_path.rglob("*.parquet"))
     assert not tuple(tmp_path.rglob("*.csv"))
     info = request_info(Dataset.Historical, cities={"Valletta"})
-    await download(session, info, tmp_path, metadata_only=True)
+    metadata = tmp_path / "meta.csv"
+    await download(session, info, metadata, metadata_only=True)
     assert not tuple(tmp_path.rglob("*.parquet"))
-    assert tmp_path.joinpath("metadata.csv").is_file()
+    assert tuple(tmp_path.rglob("*.csv")) == (metadata,)

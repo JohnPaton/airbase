@@ -82,6 +82,10 @@ def downloader(
     async def download_(reqests: set[Request]):
         for req in reqests:
             typer.echo(req.name)
+            if req.metadata:
+                req.path.parent.mkdir(parents=True, exist_ok=True)
+            elif not summary_only:
+                req.path.mkdir(parents=True, exist_ok=True)
             await download(
                 session,
                 req.info,
@@ -197,7 +201,7 @@ MetadataOption: TypeAlias = Annotated[
     bool, typer.Option("-M", "--metadata", help="Download station metadata.")
 ]
 PathOption: TypeAlias = Annotated[
-    Path, typer.Option("--path", exists=True, dir_okay=True, writable=True)
+    Path, typer.Option("--path", dir_okay=True, writable=True)
 ]
 
 
@@ -308,9 +312,9 @@ def metadata(
     ctx: typer.Context,
     path: Annotated[
         Path,
-        typer.Argument(file_okay=True, dir_okay=True, writable=True),
+        typer.Argument(dir_okay=True, writable=True),
     ],
 ):
     """Download station metadata."""
     obj: set[Request] = ctx.ensure_object(set)
-    obj.add(Request(ctx.command_path, frozenset(), path, True))
+    obj.add(Request(ctx.command_path, frozenset(), path / "metadata.csv", True))

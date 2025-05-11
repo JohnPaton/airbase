@@ -344,12 +344,15 @@ async def download(
     request file urls and download unique files
 
     :param info: requests by country|city/pollutant.
-    :param root_path: The directory to save files in (must exist).
+    :param root_path:
+        The directory to save files in (must exist)
+        or file path to write station metadata into,
+        depending on the value of `metadata_only`.
     :param session: Parquet downloads API session.
     :param metadata_only: (optional, default `False`)
-        Only download station metadata into `root_path/"metadata.csv"`
-        if `root_path/` is an (existing) directory
-        or into `root_path` is a file with ".csv" or ".tsv "suffix.
+        Only download station metadata into `root_path`,
+        it assumes that `root_path` is a file path
+        instad of a directory.
     :param summary_only: (optional, default `False`)
         Request total files/size, nothing will be downloaded.
     :param country_subdir: (optional, default `True`)
@@ -361,12 +364,10 @@ async def download(
         Empty files will be re-downloaded regardless of this option.
     """
     if metadata_only:
-        if root_path.suffix in {".csv", ".tsv"}:
-            path = root_path
-        else:
-            path = root_path / "metadata.csv"
         async with session:
-            await session.download_metadata(path, skip_existing=not overwrite)
+            await session.download_metadata(
+                root_path, skip_existing=not overwrite
+            )
         return
 
     if summary_only:
