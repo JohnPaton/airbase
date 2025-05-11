@@ -1,6 +1,5 @@
 import asyncio
 import sys
-from contextlib import contextmanager
 from enum import Enum
 from pathlib import Path
 from typing import Annotated, NamedTuple, Optional
@@ -24,7 +23,7 @@ from .parquet_api import (
 )
 from .summary import DB
 
-main = typer.Typer(add_completion=False, no_args_is_help=True, chain=True)
+main = typer.Typer(add_completion=False, no_args_is_help=True)
 
 
 class Country(str, Enum):
@@ -59,46 +58,30 @@ class Frequency(str, Enum):
     def __str__(self) -> str:
         return self.name
 
-    @property
-    def aggregation_type(self) -> AggregationType:
-        return AggregationType[self.name.capitalize()]
+
+def aggregation_type(freq: Optional[Frequency]) -> Optional[AggregationType]:
+    if freq is None:
+        return None
+    return AggregationType[freq.capitalize()]
 
 
 class Request(NamedTuple):
     name: str
     info: frozenset[ParquetData]
     path: Path
-    metadata: bool = False
 
+    def __str__(self):
+        return f"{self.name} #{len(self.info)} {self.path}"
 
-@contextmanager
-def downloader(
-    session: Session,
-    *,
-    summary_only: bool,
-    country_subdir: bool,
-    overwrite: bool,
-):
-    async def download_(reqests: set[Request]):
-        for req in reqests:
-            typer.echo(req.name)
-            if req.metadata:
-                req.path.parent.mkdir(parents=True, exist_ok=True)
-            elif not summary_only:
-                req.path.mkdir(parents=True, exist_ok=True)
-            await download(
-                session,
-                req.info,
-                req.path,
-                metadata_only=req.metadata,
-                summary_only=summary_only,
-                country_subdir=country_subdir,
-                overwrite=overwrite,
-            )
+    @property
+    def metadata(self) -> bool:
+        return self.path.name == "metadata.csv"
 
-    reqests: set[Request] = set()
-    yield reqests
-    asyncio.run(download_(reqests))
+    @property
+    def root_path(self) -> Path:
+        if self.metadata:
+            return self.path.parent
+        return self.path
 
 
 def print_version(value: bool):
@@ -109,7 +92,39 @@ def print_version(value: bool):
     raise typer.Exit()
 
 
-@main.callback()
+def result_callback(
+    requests: list[Request],
+    *,
+    summary_only: bool,
+    country_subdir: bool,
+    overwrite: bool,
+    quiet: bool,
+    **extra,
+):
+    async def downloader(requests: set[Request], session: Session):
+        for req in requests:
+            typer.echo(req.name)
+            if not summary_only:
+                req.root_path.mkdir(parents=True, exist_ok=True)
+            await download(
+                session,
+                req.info,
+                req.path,
+                metadata_only=req.metadata,
+                summary_only=summary_only,
+                country_subdir=country_subdir,
+                overwrite=overwrite,
+            )
+
+    asyncio.run(
+        downloader(
+            set(requests),
+            Session(progress=not quiet, raise_for_status=False),
+        )
+    )
+
+
+@main.callback(chain=True, result_callback=result_callback)
 def callback(
     ctx: typer.Context,
     version: Annotated[
@@ -162,15 +177,6 @@ def callback(
         verified -p PM10 -p PM2.5 -C Oslo -F hourly --path data/hourly
     """
 
-    ctx.obj = ctx.with_resource(
-        downloader(
-            Session(progress=not quiet, raise_for_status=False),
-            summary_only=summary_only,
-            country_subdir=country_subdir,
-            overwrite=overwrite,
-        )
-    )
-
 
 CountryList: TypeAlias = Annotated[
     list[Country],
@@ -213,7 +219,7 @@ def historical(
     cities: CityList = [],
     frequency: FrequencyOption = None,
     path: PathOption = Path("data/historical"),
-) -> None:
+) -> Request:
     """
     Historical Airbase data delivered between 2002 and 2012 before Air Quality Directive 2008/50/EC entered into force.
 
@@ -227,16 +233,15 @@ def historical(
     - download only PM10 and PM2.5 observations from sites in Oslo
       airbase historical -p PM10 -p PM2.5 -C Oslo
     """
+    name = f"{ctx.command_path} {frequency}" if frequency else ctx.command_path
     info = request_info(
         Dataset.Historical,
         countries=set(map(str, countries)),
         pollutants=set(map(str, pollutants)),
         cities=set(cities),
-        frequency=None if frequency is None else frequency.aggregation_type,
+        frequency=aggregation_type(frequency),
     )
-    name = f"{ctx.command_path} {frequency}" if frequency else ctx.command_path
-    obj: set[Request] = ctx.ensure_object(set)
-    obj.add(Request(name, frozenset(info), path))
+    return Request(name, frozenset(info), path)
 
 
 @main.command(no_args_is_help=True)
@@ -247,7 +252,7 @@ def verified(
     cities: CityList = [],
     frequency: FrequencyOption = None,
     path: PathOption = Path("data/verified"),
-):
+) -> Request:
     """
     Verified data (E1a) from 2013 to 2023 reported by countries by 30 September each year for the previous year.
 
@@ -261,16 +266,15 @@ def verified(
     - download only PM10 and PM2.5 observations from sites in Oslo
       airbase verified -p PM10 -p PM2.5 -C Oslo
     """
+    name = f"{ctx.command_path} {frequency}" if frequency else ctx.command_path
     info = request_info(
         Dataset.Verified,
         countries=set(map(str, countries)),
         pollutants=set(map(str, pollutants)),
         cities=set(cities),
-        frequency=None if frequency is None else frequency.aggregation_type,
+        frequency=aggregation_type(frequency),
     )
-    name = f"{ctx.command_path} {frequency}" if frequency else ctx.command_path
-    obj: set[Request] = ctx.ensure_object(set)
-    obj.add(Request(name, frozenset(info), path))
+    return Request(name, frozenset(info), path)
 
 
 @main.command(no_args_is_help=True)
@@ -281,7 +285,7 @@ def unverified(
     cities: CityList = [],
     frequency: FrequencyOption = None,
     path: PathOption = Path("data/unverified"),
-):
+) -> Request:
     """
     Unverified data transmitted continuously (Up-To-Date/UTD/E2a) data from the beginning of 2024.
 
@@ -295,16 +299,15 @@ def unverified(
     - download only PM10 and PM2.5 observations from sites in Oslo
       airbase unverified -p PM10 -p PM2.5 -C Oslo
     """
+    name = f"{ctx.command_path} {frequency}" if frequency else ctx.command_path
     info = request_info(
         Dataset.Unverified,
         countries=set(map(str, countries)),
         pollutants=set(map(str, pollutants)),
         cities=set(cities),
-        frequency=None if frequency is None else frequency.aggregation_type,
+        frequency=aggregation_type(frequency),
     )
-    name = f"{ctx.command_path} {frequency}" if frequency else ctx.command_path
-    obj: set[Request] = ctx.ensure_object(set)
-    obj.add(Request(name, frozenset(info), path))
+    return Request(name, frozenset(info), path)
 
 
 @main.command(no_args_is_help=True)
@@ -315,6 +318,5 @@ def metadata(
         typer.Argument(dir_okay=True, writable=True),
     ],
 ):
-    """Download station metadata."""
-    obj: set[Request] = ctx.ensure_object(set)
-    obj.add(Request(ctx.command_path, frozenset(), path / "metadata.csv", True))
+    """Download station metadata into `PATH/metadata.csv`."""
+    return Request(ctx.command_path, frozenset(), path / "metadata.csv")
