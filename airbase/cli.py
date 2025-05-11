@@ -68,7 +68,7 @@ class Request(NamedTuple):
     name: str
     info: frozenset[ParquetData]
     path: Path
-    metadata: bool
+    metadata: bool = False
 
 
 @contextmanager
@@ -83,13 +83,13 @@ def downloader(
         for req in reqests:
             typer.echo(req.name)
             await download(
+                session,
                 req.info,
                 req.path,
-                metadata=req.metadata,
+                metadata_only=req.metadata,
                 summary_only=summary_only,
                 country_subdir=country_subdir,
                 overwrite=overwrite,
-                session=session,
             )
 
     reqests: set[Request] = set()
@@ -208,7 +208,6 @@ def historical(
     pollutants: PollutantList = [],
     cities: CityList = [],
     frequency: FrequencyOption = None,
-    metadata: MetadataOption = False,
     path: PathOption = Path("data/historical"),
 ) -> None:
     """
@@ -231,9 +230,9 @@ def historical(
         cities=set(cities),
         frequency=None if frequency is None else frequency.aggregation_type,
     )
-    name = f"{ctx.command_path} {frequency or ''}"
+    name = f"{ctx.command_path} {frequency}" if frequency else ctx.command_path
     obj: set[Request] = ctx.ensure_object(set)
-    obj.add(Request(name, frozenset(info), path, metadata))
+    obj.add(Request(name, frozenset(info), path))
 
 
 @main.command(no_args_is_help=True)
@@ -243,7 +242,6 @@ def verified(
     pollutants: PollutantList = [],
     cities: CityList = [],
     frequency: FrequencyOption = None,
-    metadata: MetadataOption = False,
     path: PathOption = Path("data/verified"),
 ):
     """
@@ -266,9 +264,9 @@ def verified(
         cities=set(cities),
         frequency=None if frequency is None else frequency.aggregation_type,
     )
-    name = f"{ctx.command_path} {frequency or ''}"
+    name = f"{ctx.command_path} {frequency}" if frequency else ctx.command_path
     obj: set[Request] = ctx.ensure_object(set)
-    obj.add(Request(name, frozenset(info), path, metadata))
+    obj.add(Request(name, frozenset(info), path))
 
 
 @main.command(no_args_is_help=True)
@@ -278,7 +276,6 @@ def unverified(
     pollutants: PollutantList = [],
     cities: CityList = [],
     frequency: FrequencyOption = None,
-    metadata: MetadataOption = False,
     path: PathOption = Path("data/unverified"),
 ):
     """
@@ -301,6 +298,19 @@ def unverified(
         cities=set(cities),
         frequency=None if frequency is None else frequency.aggregation_type,
     )
-    name = f"{ctx.command_path} {frequency or ''}"
+    name = f"{ctx.command_path} {frequency}" if frequency else ctx.command_path
     obj: set[Request] = ctx.ensure_object(set)
-    obj.add(Request(name, frozenset(info), path, metadata))
+    obj.add(Request(name, frozenset(info), path))
+
+
+@main.command(no_args_is_help=True)
+def metadata(
+    ctx: typer.Context,
+    path: Annotated[
+        Path,
+        typer.Argument(file_okay=True, dir_okay=True, writable=True),
+    ],
+):
+    """Download station metadata."""
+    obj: set[Request] = ctx.ensure_object(set)
+    obj.add(Request(ctx.command_path, frozenset(), path, True))

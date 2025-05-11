@@ -331,12 +331,12 @@ def pollutant_id_from_url(url: str) -> int:
 
 
 async def download(
+    session: Session,
     info: Iterable[ParquetData],
     root_path: Path,
     *,
-    session: Session,
+    metadata_only: bool = False,
     summary_only: bool = False,
-    metadata: bool = False,
     country_subdir: bool = True,
     overwrite: bool = False,
 ):
@@ -346,10 +346,12 @@ async def download(
     :param info: requests by country|city/pollutant.
     :param root_path: The directory to save files in (must exist).
     :param session: Parquet downloads API session.
+    :param metadata_only: (optional, default `False`)
+        Only download station metadata into `root_path/"metadata.csv"`
+        if `root_path/` is an (existing) directory
+        or into `root_path` is a file with ".csv" or ".tsv "suffix.
     :param summary_only: (optional, default `False`)
         Request total files/size, nothing will be downloaded.
-    :param metadata: (optional, default `False`)
-        Download station metadata into `root_path/"metadata.csv"`.
     :param country_subdir: (optional, default `True`)
         Download files for different counties to different `root_path` sub directories.
         If False, download all files to `root_path`
@@ -358,6 +360,15 @@ async def download(
         If False, existing files will be skipped.
         Empty files will be re-downloaded regardless of this option.
     """
+    if metadata_only:
+        if root_path.suffix in {".csv", ".tsv"}:
+            path = root_path
+        else:
+            path = root_path / "metadata.csv"
+        async with session:
+            await session.download_metadata(path, skip_existing=not overwrite)
+        return
+
     if summary_only:
         async with session:
             await session.summary(*info)
@@ -368,12 +379,6 @@ async def download(
         return
 
     async with session:
-        if metadata:
-            await session.download_metadata(
-                root_path / "metadata.csv",
-                skip_existing=not overwrite,
-            )
-
         await session.url_to_files(*info)
         if session.number_of_urls == 0:
             hint = "please try different countries|cites/pollutants"

@@ -80,17 +80,17 @@ To install ``airbase``, simply run
    Use -n/--dry-run/--summary and -q/--quiet to request the number of files and
    estimated download size without downloading the observations, e.g
    - total download files/size for hourly verified and unverified observations
-      airbase --quiet --summary \
-         verified -F hourly \
-         unverified -F hourly
+     airbase --quiet --summary \
+       verified -F hourly \
+       unverified -F hourly
 
    Use -c/--country and -p/--pollutant to restrict the download specific countries and pollutants,
    or -C/--city and -p/--pollutant to restrict the download specific cities and pollutants, e.g.
    - download verified hourly and daily PM10 and PM2.5 observations from sites in Oslo
-      to different (existing) paths in order to avoid filename collisions
-      airbase --no-subdir \
-         verified -p PM10 -p PM2.5 -C Oslo -F daily  --path data/daily \
-         verified -p PM10 -p PM2.5 -C Oslo -F hourly --path data/hourly
+     to different (existing) paths in order to avoid filename collisions
+     airbase --no-subdir \
+       verified -p PM10 -p PM2.5 -C Oslo -F daily  --path data/daily \
+       verified -p PM10 -p PM2.5 -C Oslo -F hourly --path data/hourly
 
    Options:
    -V, --version
@@ -136,7 +136,6 @@ Historical data delivered between 2002 and 2012
      -F, --aggregation-type, --frequency [hourly|daily|other]
                                      Only hourly data, daily data or other
                                      aggregation frequency.
-     -M, --metadata                  Download station metadata.
      --path PATH                     [default: data/historical]
      --help                          Show this message and exit.
 
@@ -168,7 +167,6 @@ Verified data from 2013 to 2023
      -F, --aggregation-type, --frequency [hourly|daily|other]
                                      Only hourly data, daily data or other
                                      aggregation frequency.
-     -M, --metadata                  Download station metadata.
      --path PATH                     [default: data/verified]
      --help                          Show this message and exit.
 
@@ -199,9 +197,23 @@ Unverified data from the beginning of 2024
      -F, --aggregation-type, --frequency [hourly|daily|other]
                                      Only hourly data, daily data or other
                                      aggregation frequency.
-     -M, --metadata                  Download station metadata.
      --path PATH                     [default: data/unverified]
      --help                          Show this message and exit.
+
+Station metadata
+----------------
+.. code-block:: console
+
+   $ airbase metadata --help
+   Usage: airbase metadata [OPTIONS] [PATH]
+
+     Download station metadata.
+
+   Arguments:
+     [PATH]  [default: data/metadata.csv]
+
+   Options:
+     --help  Show this message and exit.
 
 Key Concepts
 ============

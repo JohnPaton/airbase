@@ -107,6 +107,7 @@ Commands:
   historical  Historical Airbase data delivered between 2002 and 2012...
   verified    Verified data (E1a) from 2013 to 2023 reported by countries...
   unverified  Unverified data transmitted continuously...
+  metadata    Download station metadata.
 ```
 
 ### Historical data delivered between 2002 and 2012
@@ -135,12 +136,7 @@ Options:
   -F, --aggregation-type, --frequency [hourly|daily|other]
                                   Only hourly data, daily data or other
                                   aggregation frequency.
-  -M, --metadata                  Download station metadata.
   --path PATH                     [default: data/historical]
-  -n, --dry-run, --summary        Total download files/size, nothing will be
-                                  downloaded.
-  -O, --overwrite                 Re-download existing files.
-  -q, --quiet                     No progress-bar.
   --help                          Show this message and exit.
 ```
 
@@ -170,7 +166,6 @@ Options:
   -F, --aggregation-type, --frequency [hourly|daily|other]
                                   Only hourly data, daily data or other
                                   aggregation frequency.
-  -M, --metadata                  Download station metadata.
   --path PATH                     [default: data/verified]
   --help                          Show this message and exit.
 ```
@@ -201,9 +196,23 @@ Options:
   -F, --aggregation-type, --frequency [hourly|daily|other]
                                   Only hourly data, daily data or other
                                   aggregation frequency.
-  -M, --metadata                  Download station metadata.
   --path PATH                     [default: data/unverified]
   --help                          Show this message and exit.
+```
+
+### Station metadata
+
+``` console
+$ airbase metadata --help
+Usage: airbase metadata [OPTIONS] [PATH]
+
+  Download station metadata.
+
+Arguments:
+  [PATH]  [default: data/metadata.csv]
+
+Options:
+  --help  Show this message and exit.
 ```
 
 ## 🛣 Roadmap

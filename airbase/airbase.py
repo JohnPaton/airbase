@@ -245,12 +245,7 @@ class AirbaseRequest:
         )
         self.session.raise_for_status = raise_for_status
         asyncio.run(
-            download(
-                info,
-                dir,
-                overwrite=not skip_existing,
-                session=self.session,
-            )
+            download(self.session, info, dir, overwrite=not skip_existing)
         )
 
     def download_metadata(self, filepath: str | Path) -> None:
@@ -268,10 +263,8 @@ class AirbaseRequest:
                 f"{filepath.parent.resolve()} does not exist."
             )
 
-        async def fetch_metadata():
-            async with self.session:
-                await self.session.download_metadata(filepath)
-
         if self.verbose:
             print(f"Writing metadata to {filepath}...", file=sys.stderr)
-        asyncio.run(fetch_metadata())
+        asyncio.run(
+            download(self.session, frozenset(), filepath, metadata_only=True)
+        )
