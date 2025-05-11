@@ -97,7 +97,7 @@ def downloader(
     asyncio.run(download_(reqests))
 
 
-def version_callback(value: bool):
+def print_version(value: bool):
     if not value:
         return
 
@@ -110,7 +110,7 @@ def callback(
     ctx: typer.Context,
     version: Annotated[
         Optional[bool],
-        typer.Option("--version", "-V", callback=version_callback),
+        typer.Option("--version", "-V", callback=print_version),
     ] = None,
     summary_only: Annotated[
         bool,
