@@ -77,12 +77,6 @@ class Request(NamedTuple):
     def metadata(self) -> bool:
         return self.path.name == "metadata.csv"
 
-    @property
-    def root_path(self) -> Path:
-        if self.metadata:
-            return self.path.parent
-        return self.path
-
 
 def print_version(value: bool):
     if not value:
@@ -111,8 +105,6 @@ def result_callback(
     async def downloader(requests: set[Request], session: Session):
         for req in requests:
             typer.echo(req.name)
-            if not summary_only:
-                req.root_path.mkdir(parents=True, exist_ok=True)
             await download(
                 session,
                 req.info,
@@ -246,6 +238,9 @@ def historical(
     - download only PM10 and PM2.5 observations from sites in Oslo
       airbase historical -p PM10 -p PM2.5 -C Oslo
     """
+    if not ctx.ensure_object(SharedOptions).summary_only:
+        path.mkdir(parents=True, exist_ok=True)
+
     name = f"{ctx.command_path} {frequency}" if frequency else ctx.command_path
     info = request_info(
         Dataset.Historical,
@@ -279,6 +274,9 @@ def verified(
     - download only PM10 and PM2.5 observations from sites in Oslo
       airbase verified -p PM10 -p PM2.5 -C Oslo
     """
+    if not ctx.ensure_object(SharedOptions).summary_only:
+        path.mkdir(parents=True, exist_ok=True)
+
     name = f"{ctx.command_path} {frequency}" if frequency else ctx.command_path
     info = request_info(
         Dataset.Verified,
@@ -312,6 +310,9 @@ def unverified(
     - download only PM10 and PM2.5 observations from sites in Oslo
       airbase unverified -p PM10 -p PM2.5 -C Oslo
     """
+    if not ctx.ensure_object(SharedOptions).summary_only:
+        path.mkdir(parents=True, exist_ok=True)
+
     name = f"{ctx.command_path} {frequency}" if frequency else ctx.command_path
     info = request_info(
         Dataset.Unverified,
@@ -341,4 +342,7 @@ def metadata(
           unverified --path data/unverified -F hourly -p PM10 -p PM2.5 -C Oslo \\
           metadata   --path data/
     """
+    if not ctx.ensure_object(SharedOptions).summary_only:
+        path.mkdir(parents=True, exist_ok=True)
+
     return Request(ctx.command_path, frozenset(), path / "metadata.csv")
