@@ -2,7 +2,7 @@ import asyncio
 import sys
 from enum import Enum
 from pathlib import Path
-from typing import Annotated, NamedTuple, Optional
+from typing import Annotated, Literal, NamedTuple, Optional
 
 if sys.version_info >= (3, 10):
     from typing import TypeAlias
@@ -66,16 +66,13 @@ def aggregation_type(freq: Optional[Frequency]) -> Optional[AggregationType]:
 
 
 class Request(NamedTuple):
+    mode: Literal["SUMMARY", "METADATA", "PARQUET"]
     name: str
     info: frozenset[ParquetData]
     path: Path
 
     def __str__(self):
-        return f"{self.name} #{len(self.info)} {self.path}"
-
-    @property
-    def metadata(self) -> bool:
-        return self.path.name == "metadata.csv"
+        return f"{self.mode} {self.name} #{len(self.info)} {self.path}"
 
 
 def print_version(value: bool):
@@ -96,7 +93,6 @@ class SharedOptions(NamedTuple):
 def result_callback(
     requests: list[Optional[Request]],
     *,
-    summary_only: bool,
     country_subdir: bool,
     overwrite: bool,
     quiet: bool,
@@ -106,11 +102,10 @@ def result_callback(
         for req in requests:
             typer.echo(req.name)
             await download(
+                req.mode,
                 session,
                 req.info,
                 req.path,
-                metadata_only=req.metadata,
-                summary_only=summary_only,
                 country_subdir=country_subdir,
                 overwrite=overwrite,
             )
@@ -238,9 +233,6 @@ def historical(
     - download only PM10 and PM2.5 observations from sites in Oslo
       airbase historical -p PM10 -p PM2.5 -C Oslo
     """
-    if not ctx.ensure_object(SharedOptions).summary_only:
-        path.mkdir(parents=True, exist_ok=True)
-
     name = f"{ctx.command_path} {frequency}" if frequency else ctx.command_path
     info = request_info(
         Dataset.Historical,
@@ -249,7 +241,11 @@ def historical(
         cities=set(cities),
         frequency=aggregation_type(frequency),
     )
-    return Request(name, frozenset(info), path)
+    if ctx.ensure_object(SharedOptions).summary_only:
+        return Request("SUMMARY", name, frozenset(info), path)
+    else:
+        path.mkdir(parents=True, exist_ok=True)
+        return Request("PARQUET", name, frozenset(info), path)
 
 
 @main.command(no_args_is_help=True)
@@ -274,9 +270,6 @@ def verified(
     - download only PM10 and PM2.5 observations from sites in Oslo
       airbase verified -p PM10 -p PM2.5 -C Oslo
     """
-    if not ctx.ensure_object(SharedOptions).summary_only:
-        path.mkdir(parents=True, exist_ok=True)
-
     name = f"{ctx.command_path} {frequency}" if frequency else ctx.command_path
     info = request_info(
         Dataset.Verified,
@@ -285,7 +278,11 @@ def verified(
         cities=set(cities),
         frequency=aggregation_type(frequency),
     )
-    return Request(name, frozenset(info), path)
+    if ctx.ensure_object(SharedOptions).summary_only:
+        return Request("SUMMARY", name, frozenset(info), path)
+    else:
+        path.mkdir(parents=True, exist_ok=True)
+        return Request("PARQUET", name, frozenset(info), path)
 
 
 @main.command(no_args_is_help=True)
@@ -310,9 +307,6 @@ def unverified(
     - download only PM10 and PM2.5 observations from sites in Oslo
       airbase unverified -p PM10 -p PM2.5 -C Oslo
     """
-    if not ctx.ensure_object(SharedOptions).summary_only:
-        path.mkdir(parents=True, exist_ok=True)
-
     name = f"{ctx.command_path} {frequency}" if frequency else ctx.command_path
     info = request_info(
         Dataset.Unverified,
@@ -321,7 +315,11 @@ def unverified(
         cities=set(cities),
         frequency=aggregation_type(frequency),
     )
-    return Request(name, frozenset(info), path)
+    if ctx.ensure_object(SharedOptions).summary_only:
+        return Request("SUMMARY", name, frozenset(info), path)
+    else:
+        path.mkdir(parents=True, exist_ok=True)
+        return Request("PARQUET", name, frozenset(info), path)
 
 
 @main.command(no_args_is_help=False)
@@ -345,4 +343,6 @@ def metadata(
     if not ctx.ensure_object(SharedOptions).summary_only:
         path.mkdir(parents=True, exist_ok=True)
 
-    return Request(ctx.command_path, frozenset(), path / "metadata.csv")
+    return Request(
+        "METADATA", ctx.command_path, frozenset(), path / "metadata.csv"
+    )

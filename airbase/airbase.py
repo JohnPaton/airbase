@@ -245,7 +245,9 @@ class AirbaseRequest:
         )
         self.session.raise_for_status = raise_for_status
         asyncio.run(
-            download(self.session, info, dir, overwrite=not skip_existing)
+            download(
+                "PARQUET", self.session, info, dir, overwrite=not skip_existing
+            )
         )
 
     def download_metadata(self, filepath: str | Path) -> None:
@@ -265,6 +267,4 @@ class AirbaseRequest:
 
         if self.verbose:
             print(f"Writing metadata to {filepath}...", file=sys.stderr)
-        asyncio.run(
-            download(self.session, frozenset(), filepath, metadata_only=True)
-        )
+        asyncio.run(download("METADATA", self.session, frozenset(), filepath))
