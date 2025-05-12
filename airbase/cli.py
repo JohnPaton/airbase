@@ -93,7 +93,7 @@ def print_version(value: bool):
 
 
 def result_callback(
-    requests: list[Request],
+    requests: list[Optional[Request]],
     *,
     summary_only: bool,
     country_subdir: bool,
@@ -118,7 +118,7 @@ def result_callback(
 
     asyncio.run(
         downloader(
-            set(requests),
+            set(req for req in requests if isinstance(req, Request)),
             Session(progress=not quiet, raise_for_status=False),
         )
     )
