@@ -106,7 +106,7 @@ To install ``airbase``, simply run
    historical  Historical Airbase data delivered between 2002 and 2012...
    verified    Verified data (E1a) from 2013 to 2023 reported by countries...
    unverified  Unverified data transmitted continuously...
-   metadata    Download station metadata into `PATH/metadata.csv`.
+   metadata    Download station metadata.
 
 
 Historical data delivered between 2002 and 2012
@@ -208,7 +208,7 @@ Station metadata
    $ airbase metadata --help
    Usage: airbase metadata [OPTIONS]
 
-     Download station metadata into `PATH/metadata.csv`.
+     Download station metadata.
 
    Use chan notation to download metadata and observations, e.g.
    - download station metadata and hourly PM10 and PM2.5 observations
@@ -221,6 +221,7 @@ Station metadata
 
    Options:
      --path PATH  [default: data]
+     --metadata   Station metadata. [default: PATH/metadata.csv]
      --help       Show this message and exit.
 
 Key Concepts

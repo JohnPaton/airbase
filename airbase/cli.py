@@ -203,9 +203,6 @@ FrequencyOption: TypeAlias = Annotated[
         help="Only hourly data, daily data or other aggregation frequency.",
     ),
 ]
-MetadataOption: TypeAlias = Annotated[
-    bool, typer.Option("-M", "--metadata", help="Download station metadata.")
-]
 PathOption: TypeAlias = Annotated[
     Path, typer.Option("--path", dir_okay=True, writable=True)
 ]
@@ -326,9 +323,18 @@ def unverified(
 def metadata(
     ctx: typer.Context,
     path: PathOption = Path("data"),
+    metadata: Annotated[
+        Optional[Path],
+        typer.Option(
+            file_okay=True,
+            writable=True,
+            metavar="",
+            help="Station metadata. [default: PATH/metadata.csv]",
+        ),
+    ] = None,
 ):
     """
-    Download station metadata into `PATH/metadata.csv`.
+    Download station metadata.
 
     \b
     Use chan notation to download metadata and observations, e.g.
@@ -343,6 +349,6 @@ def metadata(
     if not ctx.ensure_object(SharedOptions).summary_only:
         path.mkdir(parents=True, exist_ok=True)
 
-    return Request(
-        "METADATA", ctx.command_path, frozenset(), path / "metadata.csv"
-    )
+    if metadata is None:
+        metadata = path / "metadata.csv"
+    return Request("METADATA", ctx.command_path, frozenset(), metadata)

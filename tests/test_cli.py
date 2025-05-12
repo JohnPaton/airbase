@@ -59,16 +59,17 @@ def test_download(
 @pytest.mark.parametrize(
     "option,path",
     (
-        pytest.param(None, "data", id="default"),
-        pytest.param("--path dir", "dir", id="dir"),
+        pytest.param("", "data/metadata.csv", id="default"),
+        pytest.param("--path dir", "dir/metadata.csv", id="path"),
+        pytest.param("--metadata meta.csv", "meta.csv", id="meta"),
     ),
 )
 @pytest.mark.usefixtures("mock_parquet_api")
-def test_metadata(tmp_path: Path, option: str | None, path: str):
+def test_metadata(tmp_path: Path, option: str, path: str):
     with chdir(tmp_path):
-        result = runner.invoke(main, f"metadata {option or ''}")
+        result = runner.invoke(main, f"metadata {option}")
     assert result.exit_code == 0
-    assert tmp_path.joinpath(path, "metadata.csv").is_file()
+    assert tmp_path.joinpath(path).is_file()
 
 
 @pytest.mark.usefixtures("mock_parquet_api")
