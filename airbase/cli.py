@@ -92,6 +92,13 @@ def print_version(value: bool):
     raise typer.Exit()
 
 
+class SharedOptions(NamedTuple):
+    summary_only: bool
+    country_subdir: bool
+    overwrite: bool
+    quiet: bool
+
+
 def result_callback(
     requests: list[Optional[Request]],
     *,
@@ -176,6 +183,12 @@ def callback(
         verified -p PM10 -p PM2.5 -C Oslo -F daily  --path data/daily \\
         verified -p PM10 -p PM2.5 -C Oslo -F hourly --path data/hourly
     """
+    ctx.obj = SharedOptions(
+        summary_only=summary_only,
+        country_subdir=country_subdir,
+        overwrite=overwrite,
+        quiet=quiet,
+    )
 
 
 CountryList: TypeAlias = Annotated[
