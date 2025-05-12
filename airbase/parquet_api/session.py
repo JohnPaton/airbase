@@ -382,6 +382,9 @@ async def download(
                 f"found {session.expected_files:_} file(s), ~{session.expected_size:_} Mb in total",
                 file=sys.stderr,
             )
+        # https://github.com/pallets/click/issues/2682
+        # click CliRunner does not flush sys.stderr, so we do it here
+        sys.stderr.flush()
         return
 
     async with session:

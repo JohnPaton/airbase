@@ -108,8 +108,8 @@ def test_summary_chain(tmp_path: Path):
     assert result.exit_code == 0
 
     summary = "found 22 file(s), ~11 Mb in total"
-    assert f"historical\n{summary}\n" in result.stdout, "historical"
-    assert f"verified\n{summary}\n" in result.stdout, "verified"
-    assert f"unverified\n{summary}\n" in result.stdout, "unverified"
+    assert f"historical\n{summary}\n" in result.output, "historical"
+    assert f"verified\n{summary}\n" in result.output, "verified"
+    assert f"unverified\n{summary}\n" in result.output, "unverified"
 
     assert counter == {}

@@ -64,7 +64,7 @@ def test_summary(tmp_path: Path):
         "unverified hourly": "found 2 file(s), ~0 Mb in total",
     }
     for key, val in summary.items():
-        assert f"{key}\n{val}\n" in result.stdout, key
+        assert f"{key}\n{val}\n" in result.output, key
 
     files = tuple(tmp_path.rglob("*.*"))
     assert not files
