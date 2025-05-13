@@ -1,4 +1,5 @@
 import asyncio
+import sys
 from pathlib import Path
 from typing import Annotated, Literal, TypeAlias
 
@@ -36,7 +37,7 @@ def print_version(value: bool):
 
 @main.callback()
 def callback(
-    ctx:typer.Context,
+    ctx: typer.Context,
     version: Annotated[
         bool,
         typer.Option("--version", "-V", callback=print_version),
@@ -88,13 +89,13 @@ def callback(
         quiet=quiet,
     )
 
-    if metadata:
+    if not summary_only and metadata:
         asyncio.run(
             download(
                 "METADATA",
                 session,
                 frozenset(),
-                path,
+                path / "metadata.csv",
                 country_subdir=subdir,
                 overwrite=overwrite,
             )

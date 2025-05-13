@@ -268,6 +268,4 @@ class AirbaseRequest:
         if self.verbose:
             print(f"Writing metadata to {filepath}...", file=sys.stderr)
 
-        tmp = filepath.with_name("metadata.csv")
-        asyncio.run(download("METADATA", self.session, frozenset(), tmp.parent))
-        tmp.rename(filepath)
+        asyncio.run(download("METADATA", self.session, frozenset(), filepath))
