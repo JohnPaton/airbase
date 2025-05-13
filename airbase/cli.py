@@ -6,7 +6,7 @@ import typer
 from click import Choice
 
 from . import __version__
-from .parquet_api import Dataset, download, request_info
+from .parquet_api import Dataset, Session, download, request_info
 from .summary import DB
 
 main = typer.Typer(add_completion=False, no_args_is_help=True)
@@ -119,11 +119,11 @@ def historical(
         download(
             info,
             path,
+            session=Session(progress=not quiet, raise_for_status=False),
             metadata=metadata,
             summary_only=summary_only,
             country_subdir=country_subdir,
             overwrite=overwrite,
-            quiet=quiet,
         )
     )
 
@@ -163,11 +163,11 @@ def verified(
         download(
             info,
             path,
+            session=Session(progress=not quiet, raise_for_status=False),
             metadata=metadata,
             summary_only=summary_only,
             country_subdir=country_subdir,
             overwrite=overwrite,
-            quiet=quiet,
         )
     )
 
@@ -207,10 +207,10 @@ def unverified(
         download(
             info,
             path,
+            session=Session(progress=not quiet, raise_for_status=False),
             metadata=metadata,
             summary_only=summary_only,
             country_subdir=country_subdir,
             overwrite=overwrite,
-            quiet=quiet,
         )
     )

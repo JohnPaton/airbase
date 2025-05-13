@@ -212,7 +212,7 @@ class AirbaseRequest:
         else:  # pragma:no cover
             assert_never(poll)
 
-        self.verbose = verbose
+        self.session.progress = self.verbose = verbose
 
     def download(
         self,
@@ -243,13 +243,12 @@ class AirbaseRequest:
             countries=self.counties,
             pollutants=self.pollutants,
         )
+        self.session.raise_for_status = raise_for_status
         asyncio.run(
             download(
                 info,
                 dir,
                 overwrite=not skip_existing,
-                quiet=not self.verbose,
-                raise_for_status=raise_for_status,
                 session=self.session,
             )
         )
@@ -275,4 +274,11 @@ class AirbaseRequest:
 
         if self.verbose:
             print(f"Writing metadata to {filepath}...", file=sys.stderr)
-        asyncio.run(fetch_metadata())
+
+        tmp = filepath.with_name("metadata.csv")
+        asyncio.run(
+            download(
+                frozenset(), tmp.parent, session=self.session, metadata=True
+            )
+        )
+        tmp.rename(filepath)
