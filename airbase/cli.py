@@ -1,6 +1,12 @@
 import asyncio
 from pathlib import Path
-from typing import Annotated, Literal, TypeAlias, TypedDict
+from typing import Annotated, Literal, TypeAlias
+
+if sys.version_info >= (3, 11):
+    from typing import TypedDict
+else:
+    from typing_extensions import TypedDict
+
 
 import typer
 from click import Choice
@@ -13,7 +19,7 @@ main = typer.Typer(add_completion=False, no_args_is_help=True)
 
 
 class CtxObj(TypedDict):
-    mode: Literal["SUMMARY", "METADATA", "PARQUET"]
+    mode: Literal["SUMMARY", "PARQUET"]
     session: Session
     subdir: bool
     overwrite: bool
@@ -35,9 +41,23 @@ def callback(
         bool,
         typer.Option("--version", "-V", callback=print_version),
     ] = False,
+    path: Annotated[
+        Path, typer.Option(exists=True, dir_okay=True, writable=True)
+    ] = Path("data"),
+    subdir: Annotated[
+        bool,
+        typer.Option(
+            "--subdir/--no-subdir",
+            help="Download files for different counties to different sub directories.",
+        ),
+    ] = True,
     metadata: Annotated[
         bool,
-        typer.Option("-M", "--metadata", help="Download station metadata."),
+        typer.Option(
+            "-M",
+            "--metadata",
+            help="Download station metadata to PATH/metadata.csv.",
+        ),
     ] = False,
     summary_only: Annotated[
         bool,
@@ -48,13 +68,6 @@ def callback(
             help="Total download files/size, nothing will be downloaded.",
         ),
     ] = False,
-    subdir: Annotated[
-        bool,
-        typer.Option(
-            "--subdir/--no-subdir",
-            help="Download files for different counties to different sub directories.",
-        ),
-    ] = True,
     overwrite: Annotated[
         bool,
         typer.Option("-O", "--overwrite", help="Re-download existing files."),
@@ -66,17 +79,26 @@ def callback(
 ):
     """Download Air Quality Data from the European Environment Agency (EEA)"""
 
-    obj: CtxObj = ctx.ensure_object(dict)  # type:ignore[assignment]
-    if summary_only:
-        obj["mode"] = "SUMMARY"
-    elif metadata:
-        obj["mode"] = "METADATA"
-    else:
-        obj["mode"] = "PARQUET"
-    obj["session"] = Session(progress=not quiet, raise_for_status=False)
-    obj["subdir"] = subdir
-    obj["overwrite"] = overwrite
-    obj["quiet"] = quiet
+    session = Session(progress=not quiet, raise_for_status=False)
+    ctx.obj = CtxObj(
+        mode="SUMMARY" if summary_only else "PARQUET",
+        session=session,
+        subdir=subdir,
+        overwrite=overwrite,
+        quiet=quiet,
+    )
+
+    if metadata:
+        asyncio.run(
+            download(
+                "METADATA",
+                session,
+                frozenset(),
+                path,
+                country_subdir=subdir,
+                overwrite=overwrite,
+            )
+        )
 
 
 CountryList: TypeAlias = Annotated[
