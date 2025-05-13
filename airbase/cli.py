@@ -15,6 +15,8 @@ main = typer.Typer(add_completion=False, no_args_is_help=True)
 class CtxObj(TypedDict):
     mode: Literal["SUMMARY", "METADATA", "PARQUET"]
     session: Session
+    subdir: bool
+    overwrite: bool
     quiet: bool
 
 
@@ -46,6 +48,17 @@ def callback(
             help="Total download files/size, nothing will be downloaded.",
         ),
     ] = False,
+    subdir: Annotated[
+        bool,
+        typer.Option(
+            "--subdir/--no-subdir",
+            help="Download files for different counties to different sub directories.",
+        ),
+    ] = True,
+    overwrite: Annotated[
+        bool,
+        typer.Option("-O", "--overwrite", help="Re-download existing files."),
+    ] = False,
     quiet: Annotated[
         bool,
         typer.Option("-q", "--quiet", help="No progress-bar."),
@@ -61,6 +74,8 @@ def callback(
     else:
         obj["mode"] = "PARQUET"
     obj["session"] = Session(progress=not quiet, raise_for_status=False)
+    obj["subdir"] = subdir
+    obj["overwrite"] = overwrite
     obj["quiet"] = quiet
 
 
@@ -89,17 +104,6 @@ CityList: TypeAlias = Annotated[
 PathOption: TypeAlias = Annotated[
     Path, typer.Option("--path", exists=True, dir_okay=True, writable=True)
 ]
-SubdirOption: TypeAlias = Annotated[
-    bool,
-    typer.Option(
-        "--subdir/--no-subdir",
-        help="Download files for different counties to different sub directories.",
-    ),
-]
-OverwriteOption: TypeAlias = Annotated[
-    bool,
-    typer.Option("-O", "--overwrite", help="Re-download existing files."),
-]
 
 
 @main.command(no_args_is_help=True)
@@ -109,8 +113,6 @@ def historical(
     pollutants: PollutantList = [],
     cities: CityList = [],
     path: PathOption = Path("data/historical"),
-    country_subdir: SubdirOption = True,
-    overwrite: OverwriteOption = False,
 ):
     """
     Historical Airbase data delivered between 2002 and 2012 before Air Quality Directive 2008/50/EC entered into force.
@@ -138,8 +140,8 @@ def historical(
             obj["session"],
             info,
             path,
-            country_subdir=country_subdir,
-            overwrite=overwrite,
+            country_subdir=obj["subdir"],
+            overwrite=obj["overwrite"],
         )
     )
 
@@ -151,8 +153,6 @@ def verified(
     pollutants: PollutantList = [],
     cities: CityList = [],
     path: PathOption = Path("data/verified"),
-    country_subdir: SubdirOption = True,
-    overwrite: OverwriteOption = False,
 ):
     """
     Verified data (E1a) from 2013 to 2024 reported by countries by 30 September each year for the previous year.
@@ -180,8 +180,8 @@ def verified(
             obj["session"],
             info,
             path,
-            country_subdir=country_subdir,
-            overwrite=overwrite,
+            country_subdir=obj["subdir"],
+            overwrite=obj["overwrite"],
         )
     )
 
@@ -193,8 +193,6 @@ def unverified(
     pollutants: PollutantList = [],
     cities: CityList = [],
     path: PathOption = Path("data/unverified"),
-    country_subdir: SubdirOption = True,
-    overwrite: OverwriteOption = False,
 ):
     """
     Unverified data transmitted continuously (Up-To-Date/UTD/E2a) data from the beginning of 2025.
@@ -222,7 +220,7 @@ def unverified(
             obj["session"],
             info,
             path,
-            country_subdir=country_subdir,
-            overwrite=overwrite,
+            country_subdir=obj["subdir"],
+            overwrite=obj["overwrite"],
         )
     )
