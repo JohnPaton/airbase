@@ -147,7 +147,7 @@ description = non-interation tests
 package = wheel
 wheel_build_env = {package_env}
 setenv =
-    COVERAGE_FILE = .coverage.{envname}
+    py310, py311, py312, py313, py314, integration: COVERAGE_FILE = .coverage.{envname}
 commands =
     pytest -ra -q --cov --no-cov-on-fail -k "not integration"
 deps =
@@ -164,8 +164,6 @@ commands =
 description = combined coverage report
 skip_install = true
 parallel_show_output = True
-setenv =
-    COVERAGE_FILE = .coverage
 commands =
     coverage combine --keep
     coverage report
