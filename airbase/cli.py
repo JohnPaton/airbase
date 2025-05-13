@@ -1,4 +1,5 @@
 import asyncio
+import sys
 from pathlib import Path
 from typing import Annotated, TypeAlias
 
@@ -22,12 +23,21 @@ def version_callback(value: bool):
 
 @main.callback()
 def callback(
+    ctx: typer.Context,
     version: Annotated[
         bool,
         typer.Option("--version", "-V", callback=version_callback),
     ] = False,
+    flush_stderr: Annotated[
+        bool,
+        typer.Option(hidden=True, envvar="FLUSH_STDERR"),
+    ] = False,
 ):
     """Download Air Quality Data from the European Environment Agency (EEA)"""
+    if flush_stderr:
+        # https://github.com/pallets/click/issues/2682
+        # click CliRunner does not flush sys.stderr
+        ctx.call_on_close(sys.stderr.flush)
 
 
 CountryList: TypeAlias = Annotated[
