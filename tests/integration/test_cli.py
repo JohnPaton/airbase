@@ -71,7 +71,7 @@ def test_summary(
     expected: str,
     tmp_path: Path,
 ):
-    options = f"{cmd} --summary -C {city} -p {pollutant} --path {tmp_path}"
+    options = f"--summary {cmd} -C {city} -p {pollutant} --path {tmp_path}"
     result = runner.invoke(main, f"--quiet {options}")
     assert result.exit_code == 0
     assert expected in result.output
