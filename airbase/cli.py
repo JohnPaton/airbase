@@ -39,7 +39,7 @@ def print_version(value: bool):
     raise typer.Exit()
 
 
-@main.callback(no_args_is_help=True)
+@main.callback(no_args_is_help=True, chain=True)
 def callback(
     ctx: typer.Context,
     version: Annotated[
@@ -105,20 +105,28 @@ def callback(
         bool,
         typer.Option("-q", "--quiet", help="No progress-bar."),
     ] = False,
+    flush_stderr: Annotated[bool, typer.Option(hidden=True)] = False,
 ):
     """
     Download Air Quality Data from the European Environment Agency (EEA)
-
 
     \b
     Use -c/--country and -p/--pollutant to restrict the download specific countries and pollutants,
     or -C/--city and -p/--pollutant to restrict the download specific cities and pollutants, e.g.
     - download only Norwegian, Danish and Finish sites Historical Airbase dataset (2002 to 2012)
-      airbase -c NO -c DK -c FI historical
-    - download only SO2, PM10 and PM2.5 observations from the Verified E1a dataset (2013 to 2025)
-      airbase -p SO2 -p PM10 -p PM2.5 verified
+      $ airbase -c NO -c DK -c FI historical
+    - download only SO2, PM10 and PM2.5 observations from the Verified E1a dataset (2013 to 2024)
+      $ airbase -p SO2 -p PM10 -p PM2.5 verified
     - download only PM10 and PM2.5 from sites in Oslo from the Unverified E2a dataset (from 2025)
-      airbase -C Oslo -p PM10 -p PM2.5 unverified
+      $ airbase -C Oslo -p PM10 -p PM2.5 unverified
+
+    \b
+    Chain commands to request data from different datasets
+    - request an estimate of the number of files and disk size required to download all
+      available observations
+      $ airbase --summary --quiet historical verified unverified
+    - download verified and unverified PM10 and PM2.5 observations from sites in Berlin
+      $ airbase -C Berlin -p PM10 verified unverified
     """
 
     session = Session(progress=not quiet, raise_for_status=False)
@@ -133,6 +141,8 @@ def callback(
                 overwrite=overwrite,
             )
         )
+        if flush_stderr:
+            sys.stderr.flush()
 
     ctx.obj = CtxObj(
         mode="SUMMARY" if summary_only else "PARQUET",
@@ -180,6 +190,7 @@ def historical(
     """
     Historical Airbase data delivered between 2002 and 2012 before Air Quality Directive 2008/50/EC entered into force.
     """
+    typer.echo(ctx.command_path)
     obj: CtxObj = ctx.ensure_object(dict)  # type:ignore[assignment]
     info = request_info(
         Dataset.Historical,
@@ -224,6 +235,7 @@ def verified(
     """
     Verified data (E1a) from 2013 to 2024 reported by countries by 30 September each year for the previous year.
     """
+    typer.echo(ctx.command_path)
     obj: CtxObj = ctx.ensure_object(dict)  # type:ignore[assignment]
     info = request_info(
         Dataset.Verified,
@@ -269,6 +281,7 @@ def unverified(
     """
     Unverified data transmitted continuously (Up-To-Date/UTD/E2a) data from the beginning of 2025.
     """
+    typer.echo(ctx.command_path)
     obj: CtxObj = ctx.ensure_object(dict)  # type:ignore[assignment]
     info = request_info(
         Dataset.Unverified,
