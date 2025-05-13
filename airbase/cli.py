@@ -22,12 +22,23 @@ def version_callback(value: bool):
 
 @main.callback()
 def callback(
+    ctx:typer.Context,
     version: Annotated[
         bool,
         typer.Option("--version", "-V", callback=version_callback),
     ] = False,
+    quiet: Annotated[
+        bool,
+        typer.Option("-q", "--quiet", help="No progress-bar."),
+    ] = False,
 ):
     """Download Air Quality Data from the European Environment Agency (EEA)"""
+
+    obj = ctx.ensure_object(dict)
+    obj.update(
+        session=Session(progress=not quiet, raise_for_status=False),
+        quiet=quiet,
+    )
 
 
 CountryList: TypeAlias = Annotated[
@@ -78,14 +89,11 @@ OverwriteOption: TypeAlias = Annotated[
     bool,
     typer.Option("-O", "--overwrite", help="Re-download existing files."),
 ]
-QuietOption: TypeAlias = Annotated[
-    bool,
-    typer.Option("-q", "--quiet", help="No progress-bar."),
-]
 
 
 @main.command(no_args_is_help=True)
 def historical(
+    ctx: typer.Context,
     countries: CountryList = [],
     pollutants: PollutantList = [],
     cities: CityList = [],
@@ -94,7 +102,6 @@ def historical(
     summary_only: SummaryOption = False,
     country_subdir: SubdirOption = True,
     overwrite: OverwriteOption = False,
-    quiet: QuietOption = False,
 ):
     """
     Historical Airbase data delivered between 2002 and 2012 before Air Quality Directive 2008/50/EC entered into force.
@@ -115,11 +122,12 @@ def historical(
         pollutants=pollutants,
         cities=cities,
     )
+    obj = ctx.ensure_object(dict)
     asyncio.run(
         download(
             info,
             path,
-            session=Session(progress=not quiet, raise_for_status=False),
+            session=obj["session"],
             metadata=metadata,
             summary_only=summary_only,
             country_subdir=country_subdir,
@@ -130,6 +138,7 @@ def historical(
 
 @main.command(no_args_is_help=True)
 def verified(
+    ctx: typer.Context,
     countries: CountryList = [],
     pollutants: PollutantList = [],
     cities: CityList = [],
@@ -138,7 +147,6 @@ def verified(
     summary_only: SummaryOption = False,
     country_subdir: SubdirOption = True,
     overwrite: OverwriteOption = False,
-    quiet: QuietOption = False,
 ):
     """
     Verified data (E1a) from 2013 to 2024 reported by countries by 30 September each year for the previous year.
@@ -159,11 +167,12 @@ def verified(
         pollutants=pollutants,
         cities=cities,
     )
+    obj = ctx.ensure_object(dict)
     asyncio.run(
         download(
             info,
             path,
-            session=Session(progress=not quiet, raise_for_status=False),
+            session=obj["session"],
             metadata=metadata,
             summary_only=summary_only,
             country_subdir=country_subdir,
@@ -174,6 +183,7 @@ def verified(
 
 @main.command(no_args_is_help=True)
 def unverified(
+    ctx: typer.Context,
     countries: CountryList = [],
     pollutants: PollutantList = [],
     cities: CityList = [],
@@ -182,7 +192,6 @@ def unverified(
     summary_only: SummaryOption = False,
     country_subdir: SubdirOption = True,
     overwrite: OverwriteOption = False,
-    quiet: QuietOption = False,
 ):
     """
     Unverified data transmitted continuously (Up-To-Date/UTD/E2a) data from the beginning of 2025.
@@ -203,11 +212,12 @@ def unverified(
         pollutants=pollutants,
         cities=cities,
     )
+    obj = ctx.ensure_object(dict)
     asyncio.run(
         download(
             info,
             path,
-            session=Session(progress=not quiet, raise_for_status=False),
+            session=obj["session"],
             metadata=metadata,
             summary_only=summary_only,
             country_subdir=country_subdir,
