@@ -33,7 +33,7 @@ def test_download(cmd: str, tmp_path: Path):
 @pytest.mark.parametrize("cmd", ("historical", "verified", "unverified"))
 @pytest.mark.usefixtures("mock_parquet_api")
 def test_summary(cmd: str, tmp_path: Path):
-    options = f"{cmd} --summary --country MT --path {tmp_path}"
+    options = f"--summary {cmd} --country MT --path {tmp_path}"
     result = runner.invoke(main, f"--quiet {options}")
     assert result.exit_code == 0
     assert result.output.strip() == "found 22 file(s), ~11 Mb in total"

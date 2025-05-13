@@ -1,6 +1,6 @@
 import asyncio
 from pathlib import Path
-from typing import Annotated, Literal, TypeAlias
+from typing import Annotated, Literal, TypeAlias, TypedDict
 
 import typer
 from click import Choice
@@ -10,6 +10,12 @@ from .parquet_api import Dataset, Session, download, request_info
 from .summary import DB
 
 main = typer.Typer(add_completion=False, no_args_is_help=True)
+
+
+class CtxObj(TypedDict):
+    mode: Literal["SUMMARY", "METADATA", "PARQUET"]
+    session: Session
+    quiet: bool
 
 
 def print_version(value: bool):
@@ -27,6 +33,19 @@ def callback(
         bool,
         typer.Option("--version", "-V", callback=print_version),
     ] = False,
+    metadata: Annotated[
+        bool,
+        typer.Option("-M", "--metadata", help="Download station metadata."),
+    ] = False,
+    summary_only: Annotated[
+        bool,
+        typer.Option(
+            "-n",
+            "--dry-run",
+            "--summary",
+            help="Total download files/size, nothing will be downloaded.",
+        ),
+    ] = False,
     quiet: Annotated[
         bool,
         typer.Option("-q", "--quiet", help="No progress-bar."),
@@ -34,11 +53,15 @@ def callback(
 ):
     """Download Air Quality Data from the European Environment Agency (EEA)"""
 
-    obj = ctx.ensure_object(dict)
-    obj.update(
-        session=Session(progress=not quiet, raise_for_status=False),
-        quiet=quiet,
-    )
+    obj: CtxObj = ctx.ensure_object(dict)  # type:ignore[assignment]
+    if summary_only:
+        obj["mode"] = "SUMMARY"
+    elif metadata:
+        obj["mode"] = "METADATA"
+    else:
+        obj["mode"] = "PARQUET"
+    obj["session"] = Session(progress=not quiet, raise_for_status=False)
+    obj["quiet"] = quiet
 
 
 CountryList: TypeAlias = Annotated[
@@ -63,20 +86,8 @@ CityList: TypeAlias = Annotated[
         help="Only from selected <cities> (--country option will be ignored).",
     ),
 ]
-MetadataOption: TypeAlias = Annotated[
-    bool, typer.Option("-M", "--metadata", help="Download station metadata.")
-]
 PathOption: TypeAlias = Annotated[
     Path, typer.Option("--path", exists=True, dir_okay=True, writable=True)
-]
-SummaryOption: TypeAlias = Annotated[
-    bool,
-    typer.Option(
-        "-n",
-        "--dry-run",
-        "--summary",
-        help="Total download files/size, nothing will be downloaded.",
-    ),
 ]
 SubdirOption: TypeAlias = Annotated[
     bool,
@@ -97,9 +108,7 @@ def historical(
     countries: CountryList = [],
     pollutants: PollutantList = [],
     cities: CityList = [],
-    metadata: MetadataOption = False,
     path: PathOption = Path("data/historical"),
-    summary_only: SummaryOption = False,
     country_subdir: SubdirOption = True,
     overwrite: OverwriteOption = False,
 ):
@@ -122,12 +131,10 @@ def historical(
         pollutants=pollutants,
         cities=cities,
     )
-    mode: Literal["SUMMARY", "METADATA", "PARQUET"]
-    mode = "SUMMARY" if summary_only else "METADATA" if metadata else "PARQUET"
-    obj = ctx.ensure_object(dict)
+    obj: CtxObj = ctx.ensure_object(dict)  # type:ignore[assignment]
     asyncio.run(
         download(
-            mode,
+            obj["mode"],
             obj["session"],
             info,
             path,
@@ -143,9 +150,7 @@ def verified(
     countries: CountryList = [],
     pollutants: PollutantList = [],
     cities: CityList = [],
-    metadata: MetadataOption = False,
     path: PathOption = Path("data/verified"),
-    summary_only: SummaryOption = False,
     country_subdir: SubdirOption = True,
     overwrite: OverwriteOption = False,
 ):
@@ -168,12 +173,10 @@ def verified(
         pollutants=pollutants,
         cities=cities,
     )
-    mode: Literal["SUMMARY", "METADATA", "PARQUET"]
-    mode = "SUMMARY" if summary_only else "METADATA" if metadata else "PARQUET"
-    obj = ctx.ensure_object(dict)
+    obj: CtxObj = ctx.ensure_object(dict)  # type:ignore[assignment]
     asyncio.run(
         download(
-            mode,
+            obj["mode"],
             obj["session"],
             info,
             path,
@@ -189,9 +192,7 @@ def unverified(
     countries: CountryList = [],
     pollutants: PollutantList = [],
     cities: CityList = [],
-    metadata: MetadataOption = False,
     path: PathOption = Path("data/unverified"),
-    summary_only: SummaryOption = False,
     country_subdir: SubdirOption = True,
     overwrite: OverwriteOption = False,
 ):
@@ -214,12 +215,10 @@ def unverified(
         pollutants=pollutants,
         cities=cities,
     )
-    obj = ctx.ensure_object(dict)
-    mode: Literal["SUMMARY", "METADATA", "PARQUET"]
-    mode = "SUMMARY" if summary_only else "METADATA" if metadata else "PARQUET"
+    obj: CtxObj = ctx.ensure_object(dict)  # type:ignore[assignment]
     asyncio.run(
         download(
-            mode,
+            obj["mode"],
             obj["session"],
             info,
             path,
