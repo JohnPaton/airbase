@@ -36,13 +36,15 @@ def test_download(
     expected: set[str],
     tmp_path: Path,
 ):
-    options = f"{cmd} --city {city} --pollutant {pollutant} --path {tmp_path}"
+    tmp_path.joinpath(cmd).mkdir()
+    options = f"--path {tmp_path} {cmd} --city {city} --pollutant {pollutant}"
     result = runner.invoke(main, f"--quiet {options}")
     assert result.exit_code == 0
 
     found = set(tmp_path.rglob("*.parquet"))
-    paths = set(tmp_path / file for file in expected)
+    paths = set(tmp_path.joinpath(cmd, file) for file in expected)
     assert found >= paths > set()
+    assert not set(tmp_path.rglob("*.csv"))
 
 
 @pytest.mark.parametrize(
@@ -71,10 +73,10 @@ def test_summary(
     expected: str,
     tmp_path: Path,
 ):
-    options = f"--summary {cmd} -C {city} -p {pollutant} --path {tmp_path}"
+    options = f"--summary --path {tmp_path} {cmd} -C {city} -p {pollutant}"
     result = runner.invoke(main, f"--quiet {options}")
     assert result.exit_code == 0
     assert expected in result.output
 
-    found = set(tmp_path.rglob("*.parquet"))
-    assert not found
+    assert not set(tmp_path.rglob("*.parquet"))
+    assert not set(tmp_path.rglob("*.csv"))
