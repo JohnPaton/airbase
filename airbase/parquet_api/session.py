@@ -336,7 +336,7 @@ async def download(
         "SUMMARY" mode
         Request total files/size, nothing will be downloaded.
         "METADATA" mide
-        Download station metadata into `root_path/metadata.csv`.
+        Download station metadata into `root_path`.
         "PARQUET" mode
         Download observations file to `root_path`.
     :param info: requests by country|city/pollutant.
@@ -367,11 +367,10 @@ async def download(
 
         if mode == "METADATA":
             await session.download_metadata(
-                root_path / "metadata.csv",
+                root_path,
                 skip_existing=not overwrite,
             )
-            if isinstance(info, frozenset) and not info:
-                return
+            return
 
         await session.url_to_files(*info)
         if session.number_of_urls == 0:
