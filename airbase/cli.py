@@ -50,7 +50,7 @@ def callback(
         bool,
         typer.Option(
             "--subdir/--no-subdir",
-            help="Download files for different counties to different sub directories.",
+            help="Download files to PATH/dataset[frequency/]/country.",
         ),
     ] = True,
     metadata: Annotated[
@@ -82,15 +82,6 @@ def callback(
     """Download Air Quality Data from the European Environment Agency (EEA)"""
 
     session = Session(progress=not quiet, raise_for_status=False)
-    ctx.obj = CtxObj(
-        mode="SUMMARY" if summary_only else "PARQUET",
-        session=session,
-        path=path,
-        subdir=subdir,
-        overwrite=overwrite,
-        quiet=quiet,
-    )
-
     if not summary_only and metadata:
         asyncio.run(
             download(
@@ -102,6 +93,15 @@ def callback(
                 overwrite=overwrite,
             )
         )
+
+    ctx.obj = CtxObj(
+        mode="SUMMARY" if summary_only else "PARQUET",
+        session=session,
+        path=path,
+        subdir=subdir,
+        overwrite=overwrite,
+        quiet=quiet,
+    )
 
 
 CountryList: TypeAlias = Annotated[
@@ -152,7 +152,6 @@ def historical(
         Path | None,
         typer.Option(
             "--data-path",
-            exists=True,
             dir_okay=True,
             writable=True,
             metavar="PATH/dataset",
@@ -182,9 +181,11 @@ def historical(
         cities=cities,
     )
     obj: CtxObj = ctx.ensure_object(dict)  # type:ignore[assignment]
+    if path is None and obj["subdir"]:  # default
+        path = obj["path"].joinpath(ctx.info_name or "")
     if path is None:
-        assert ctx.info_name is not None
-        path = obj["path"] / ctx.info_name
+        path = obj["path"]
+    path.mkdir(parents=True, exist_ok=True)
     asyncio.run(
         download(
             obj["mode"],
@@ -207,7 +208,6 @@ def verified(
         Path | None,
         typer.Option(
             "--data-path",
-            exists=True,
             dir_okay=True,
             writable=True,
             metavar="PATH/dataset",
@@ -237,9 +237,11 @@ def verified(
         cities=cities,
     )
     obj: CtxObj = ctx.ensure_object(dict)  # type:ignore[assignment]
+    if path is None and obj["subdir"]:  # default
+        path = obj["path"].joinpath(ctx.info_name or "")
     if path is None:
-        assert ctx.info_name is not None
-        path = obj["path"] / ctx.info_name
+        path = obj["path"]
+    path.mkdir(parents=True, exist_ok=True)
     asyncio.run(
         download(
             obj["mode"],
@@ -262,7 +264,6 @@ def unverified(
         Path | None,
         typer.Option(
             "--data-path",
-            exists=True,
             dir_okay=True,
             writable=True,
             metavar="PATH/dataset",
@@ -292,9 +293,11 @@ def unverified(
         cities=cities,
     )
     obj: CtxObj = ctx.ensure_object(dict)  # type:ignore[assignment]
+    if path is None and obj["subdir"]:  # default
+        path = obj["path"].joinpath(ctx.info_name or "")
     if path is None:
-        assert ctx.info_name is not None
-        path = obj["path"] / ctx.info_name
+        path = obj["path"]
+    path.mkdir(parents=True, exist_ok=True)
     asyncio.run(
         download(
             obj["mode"],

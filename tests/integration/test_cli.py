@@ -11,38 +11,36 @@ runner = CliRunner()
 
 
 @pytest.mark.parametrize(
-    "cmd,city,pollutant,expected",
+    "cmd,pollutant,expected",
     (
         pytest.param(
-            "historical", "Valletta", "PM2.5",
-            {"MT/SPO-MT00005_06001_100.parquet"},
+            "historical", "PM2.5",
+            {"SPO-MT00005_06001_100.parquet"},
             id="historical",
         ),
         pytest.param(
-            "verified", "Valletta", "O3",
-            {"MT/SPO-MT00003_00007_100.parquet", "MT/SPO-MT00005_00007_100.parquet"},
+            "verified", "O3",
+            {"SPO-MT00003_00007_100.parquet", "SPO-MT00005_00007_100.parquet"},
             id="verified"),
         pytest.param(
-            "unverified", "Valletta", "PM10",
-            {"MT/SPO-MT00005_00005_100.parquet", "MT/SPO-MT00005_00005_101.parquet"},
+            "unverified", "PM10",
+            {"SPO-MT00005_00005_100.parquet"},
             id="unverified"
         ),
     ),
 )  # fmt:skip
 def test_download(
     cmd: str,
-    city: str,
     pollutant: str,
     expected: set[str],
     tmp_path: Path,
 ):
-    tmp_path.joinpath(cmd).mkdir()
-    options = f"--path {tmp_path} {cmd} --city {city} --pollutant {pollutant}"
+    options = f"--path {tmp_path} {cmd} -C Valletta -p {pollutant}"
     result = runner.invoke(main, f"--quiet {options}")
     assert result.exit_code == 0
 
     found = set(tmp_path.rglob("*.parquet"))
-    paths = set(tmp_path.joinpath(cmd, file) for file in expected)
+    paths = set(tmp_path.joinpath(cmd, "MT", file) for file in expected)
     assert found >= paths > set()
     assert not set(tmp_path.rglob("*.csv"))
 
