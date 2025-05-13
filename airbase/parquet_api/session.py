@@ -7,7 +7,7 @@ from collections.abc import AsyncIterator, Awaitable, Iterable, Iterator
 from contextlib import AbstractAsyncContextManager
 from pathlib import Path
 from types import TracebackType
-from typing import TypeVar
+from typing import Literal, TypeVar
 from warnings import warn
 
 if sys.version_info >= (3, 11):
@@ -321,25 +321,30 @@ class Session(AbstractAsyncContextManager):
 
 
 async def download(
+    mode: Literal["SUMMARY", "METADATA", "PARQUET"],
+    session: Session,
     info: Iterable[ParquetData],
     root_path: Path,
     *,
-    session: Session,
-    summary_only: bool = False,
-    metadata: bool = False,
     country_subdir: bool = True,
     overwrite: bool = False,
 ):
     """
     request file urls and download unique files
 
-    :param info: requests by country|city/pollutant.
-    :param root_path: The directory to save files in (must exist).
-    :param session: Parquet downloads API session.
-    :param summary_only: (optional, default `False`)
+    :param model: indicate the type of request to be made
+        "SUMMARY" mode
         Request total files/size, nothing will be downloaded.
-    :param metadata: (optional, default `False`)
-        Download station metadata into `root_path/"metadata.csv"`.
+        "METADATA" mide
+        Download station metadata into `root_path/metadata.csv`.
+        "PARQUET" mode
+        Download observations file to `root_path`.
+    :param info: requests by country|city/pollutant.
+    :param root_path:
+        The directory to save files in (must exist)
+        or file path to write station metadata into,
+        depending pn `mode`.
+    :param session: Parquet downloads API session.
     :param country_subdir: (optional, default `True`)
         Download files for different counties to different `root_path` sub directories.
         If False, download all files to `root_path`
@@ -348,17 +353,19 @@ async def download(
         If False, existing files will be skipped.
         Empty files will be re-downloaded regardless of this option.
     """
-    if summary_only:
-        async with session:
+    if mode not in {"SUMMARY", "METADATA", "PARQUET"}:
+        raise ValueError(f"Unsupported {mode=}")
+
+    async with session:
+        if mode == "SUMMARY":
             await session.summary(*info)
             print(
                 f"found {session.expected_files:_} file(s), ~{session.expected_size:_} Mb in total",
                 file=sys.stderr,
             )
-        return
+            return
 
-    async with session:
-        if metadata:
+        if mode == "METADATA":
             await session.download_metadata(
                 root_path / "metadata.csv",
                 skip_existing=not overwrite,

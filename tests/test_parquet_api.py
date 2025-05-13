@@ -338,9 +338,8 @@ async def test_download(tmp_path: Path, session: Session):
     assert not tuple(tmp_path.rglob("*.parquet"))
     assert not tuple(tmp_path.rglob("*.csv"))
     info = request_info(Dataset.Historical, cities={"Valletta"})
-    await download(info, tmp_path, metadata=True, session=session)
+    await download("PARQUET", session, info, tmp_path)
     assert len(tuple(tmp_path.glob("MT/*.parquet"))) == 22
-    assert tmp_path.joinpath("metadata.csv").is_file()
 
 
 @pytest.mark.asyncio
@@ -349,6 +348,6 @@ async def test_download_metadata(tmp_path: Path, session: Session):
     assert not tuple(tmp_path.rglob("*.csv"))
     info = request_info(Dataset.Historical, cities={"Valletta"})
     metadata = tmp_path / "metadata.csv"
-    await download(info, metadata.parent, session=session, metadata=True)
+    await download("METADATA", session, info, metadata.parent)
     assert tuple(tmp_path.rglob("*.csv")) == (metadata,)
     assert len(tuple(tmp_path.glob("MT/*.parquet"))) == 22

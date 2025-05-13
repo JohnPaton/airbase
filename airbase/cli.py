@@ -1,6 +1,6 @@
 import asyncio
 from pathlib import Path
-from typing import Annotated, TypeAlias
+from typing import Annotated, Literal, TypeAlias
 
 import typer
 from click import Choice
@@ -12,7 +12,7 @@ from .summary import DB
 main = typer.Typer(add_completion=False, no_args_is_help=True)
 
 
-def version_callback(value: bool):
+def print_version(value: bool):
     if not value:
         return
 
@@ -25,7 +25,7 @@ def callback(
     ctx:typer.Context,
     version: Annotated[
         bool,
-        typer.Option("--version", "-V", callback=version_callback),
+        typer.Option("--version", "-V", callback=print_version),
     ] = False,
     quiet: Annotated[
         bool,
@@ -122,14 +122,15 @@ def historical(
         pollutants=pollutants,
         cities=cities,
     )
+    mode: Literal["SUMMARY", "METADATA", "PARQUET"]
+    mode = "SUMMARY" if summary_only else "METADATA" if metadata else "PARQUET"
     obj = ctx.ensure_object(dict)
     asyncio.run(
         download(
+            mode,
+            obj["session"],
             info,
             path,
-            session=obj["session"],
-            metadata=metadata,
-            summary_only=summary_only,
             country_subdir=country_subdir,
             overwrite=overwrite,
         )
@@ -167,14 +168,15 @@ def verified(
         pollutants=pollutants,
         cities=cities,
     )
+    mode: Literal["SUMMARY", "METADATA", "PARQUET"]
+    mode = "SUMMARY" if summary_only else "METADATA" if metadata else "PARQUET"
     obj = ctx.ensure_object(dict)
     asyncio.run(
         download(
+            mode,
+            obj["session"],
             info,
             path,
-            session=obj["session"],
-            metadata=metadata,
-            summary_only=summary_only,
             country_subdir=country_subdir,
             overwrite=overwrite,
         )
@@ -213,13 +215,14 @@ def unverified(
         cities=cities,
     )
     obj = ctx.ensure_object(dict)
+    mode: Literal["SUMMARY", "METADATA", "PARQUET"]
+    mode = "SUMMARY" if summary_only else "METADATA" if metadata else "PARQUET"
     asyncio.run(
         download(
+            mode,
+            obj["session"],
             info,
             path,
-            session=obj["session"],
-            metadata=metadata,
-            summary_only=summary_only,
             country_subdir=country_subdir,
             overwrite=overwrite,
         )
