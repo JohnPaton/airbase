@@ -23,7 +23,7 @@ def test_version(options: str):
 @pytest.mark.usefixtures("mock_parquet_api")
 def test_download(cmd: str, tmp_path: Path):
     tmp_path.joinpath(cmd).mkdir()
-    options = f"--metadata --path {tmp_path} {cmd} --city Valletta"
+    options = f"--metadata --city Valletta --path {tmp_path} {cmd}"
     result = runner.invoke(main, f"--quiet {options}")
     assert result.exit_code == 0
 
@@ -34,7 +34,7 @@ def test_download(cmd: str, tmp_path: Path):
 @pytest.mark.parametrize("cmd", ("historical", "verified", "unverified"))
 @pytest.mark.usefixtures("mock_parquet_api")
 def test_summary(cmd: str, tmp_path: Path):
-    options = f"--summary --metadata --path {tmp_path} {cmd} --city Valletta"
+    options = f"--summary --metadata --city Valletta --path {tmp_path} {cmd}"
     result = runner.invoke(main, f"--quiet {options}")
     assert result.exit_code == 0
     assert result.output.strip() == "found 22 file(s), ~11 Mb in total"
