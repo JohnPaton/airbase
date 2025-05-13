@@ -16,12 +16,13 @@ from . import __version__
 from .parquet_api import Dataset, Session, download, request_info
 from .summary import DB
 
-main = typer.Typer(add_completion=False, no_args_is_help=True)
+main = typer.Typer(name=__package__, add_completion=False, no_args_is_help=True)
 
 
 class CtxObj(TypedDict):
     mode: Literal["SUMMARY", "PARQUET"]
     session: Session
+    path: Path
     subdir: bool
     overwrite: bool
     quiet: bool
@@ -84,6 +85,7 @@ def callback(
     ctx.obj = CtxObj(
         mode="SUMMARY" if summary_only else "PARQUET",
         session=session,
+        path=path,
         subdir=subdir,
         overwrite=overwrite,
         quiet=quiet,
@@ -124,9 +126,20 @@ CityList: TypeAlias = Annotated[
         help="Only from selected <cities> (--country option will be ignored).",
     ),
 ]
-PathOption: TypeAlias = Annotated[
-    Path, typer.Option("--path", exists=True, dir_okay=True, writable=True)
-]
+
+
+def check_path(ctx: typer.Context, value: Path | None):
+    if not isinstance(value, Path):
+        return value
+
+    obj: CtxObj = ctx.ensure_object(dict)  # type:ignore[assignment]
+    if (path := obj.get("path")) is None:
+        return value
+
+    if not value.is_relative_to(path):
+        raise typer.BadParameter(f"Is not subdir of `--path={path}/`")
+
+    return value
 
 
 @main.command(no_args_is_help=True)
@@ -135,7 +148,19 @@ def historical(
     countries: CountryList = [],
     pollutants: PollutantList = [],
     cities: CityList = [],
-    path: PathOption = Path("data/historical"),
+    path: Annotated[
+        Path | None,
+        typer.Option(
+            "--data-path",
+            exists=True,
+            dir_okay=True,
+            writable=True,
+            metavar="PATH/dataset",
+            help="[default: PATH/historical]",
+            show_default=False,
+            callback=check_path,
+        ),
+    ] = None,
 ):
     """
     Historical Airbase data delivered between 2002 and 2012 before Air Quality Directive 2008/50/EC entered into force.
@@ -157,6 +182,9 @@ def historical(
         cities=cities,
     )
     obj: CtxObj = ctx.ensure_object(dict)  # type:ignore[assignment]
+    if path is None:
+        assert ctx.info_name is not None
+        path = obj["path"] / ctx.info_name
     asyncio.run(
         download(
             obj["mode"],
@@ -175,7 +203,19 @@ def verified(
     countries: CountryList = [],
     pollutants: PollutantList = [],
     cities: CityList = [],
-    path: PathOption = Path("data/verified"),
+    path: Annotated[
+        Path | None,
+        typer.Option(
+            "--data-path",
+            exists=True,
+            dir_okay=True,
+            writable=True,
+            metavar="PATH/dataset",
+            help="[default: PATH/verified]",
+            show_default=False,
+            callback=check_path,
+        ),
+    ] = None,
 ):
     """
     Verified data (E1a) from 2013 to 2024 reported by countries by 30 September each year for the previous year.
@@ -197,6 +237,9 @@ def verified(
         cities=cities,
     )
     obj: CtxObj = ctx.ensure_object(dict)  # type:ignore[assignment]
+    if path is None:
+        assert ctx.info_name is not None
+        path = obj["path"] / ctx.info_name
     asyncio.run(
         download(
             obj["mode"],
@@ -215,7 +258,19 @@ def unverified(
     countries: CountryList = [],
     pollutants: PollutantList = [],
     cities: CityList = [],
-    path: PathOption = Path("data/unverified"),
+    path: Annotated[
+        Path | None,
+        typer.Option(
+            "--data-path",
+            exists=True,
+            dir_okay=True,
+            writable=True,
+            metavar="PATH/dataset",
+            help="[default: PATH/unverified]",
+            show_default=False,
+            callback=check_path,
+        ),
+    ] = None,
 ):
     """
     Unverified data transmitted continuously (Up-To-Date/UTD/E2a) data from the beginning of 2025.
@@ -237,6 +292,9 @@ def unverified(
         cities=cities,
     )
     obj: CtxObj = ctx.ensure_object(dict)  # type:ignore[assignment]
+    if path is None:
+        assert ctx.info_name is not None
+        path = obj["path"] / ctx.info_name
     asyncio.run(
         download(
             obj["mode"],

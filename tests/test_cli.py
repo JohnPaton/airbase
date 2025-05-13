@@ -22,23 +22,24 @@ def test_version(options: str):
 @pytest.mark.parametrize("cmd", ("historical", "verified", "unverified"))
 @pytest.mark.usefixtures("mock_parquet_api")
 def test_download(cmd: str, tmp_path: Path):
-    options = f"--metadata --path {tmp_path} {cmd} --path {tmp_path}"
-    result = runner.invoke(main, f"--quiet {options} -C Valletta")
+    tmp_path.joinpath(cmd).mkdir()
+    options = f"--metadata --path {tmp_path} {cmd} --city Valletta"
+    result = runner.invoke(main, f"--quiet {options}")
     assert result.exit_code == 0
 
-    found = sum(1 for _ in tmp_path.glob("MT/*.parquet"))
-    assert found == 22
+    assert sum(1 for _ in tmp_path.glob(f"{cmd}/MT/*.parquet")) == 22
+    assert set(tmp_path.glob("*.csv")) == {tmp_path / "metadata.csv"}
 
 
 @pytest.mark.parametrize("cmd", ("historical", "verified", "unverified"))
 @pytest.mark.usefixtures("mock_parquet_api")
 def test_summary(cmd: str, tmp_path: Path):
-    options = f"--summary --metadata --path {tmp_path} {cmd} --path {tmp_path}"
-    result = runner.invoke(main, f"--quiet {options} -C Valletta")
+    options = f"--summary --metadata --path {tmp_path} {cmd} --city Valletta"
+    result = runner.invoke(main, f"--quiet {options}")
     assert result.exit_code == 0
     assert result.output.strip() == "found 22 file(s), ~11 Mb in total"
 
-    assert not set(tmp_path.glob("MT/*.parquet"))
+    assert not set(tmp_path.glob("*.parquet"))
     assert not set(tmp_path.glob("*.csv"))
 
 
