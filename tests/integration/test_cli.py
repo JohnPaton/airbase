@@ -35,7 +35,7 @@ def test_download(
     expected: set[str],
     tmp_path: Path,
 ):
-    options = f"--path {tmp_path} {cmd} -C Valletta -p {pollutant}"
+    options = f"-C Valletta -p {pollutant} --path {tmp_path} {cmd}"
     result = runner.invoke(main, f"--quiet {options}")
     assert result.exit_code == 0
 
@@ -71,7 +71,7 @@ def test_summary(
     expected: str,
     tmp_path: Path,
 ):
-    options = f"--summary --path {tmp_path} {cmd} -C {city} -p {pollutant}"
+    options = f"--summary -C {city} -p {pollutant} --path {tmp_path} {cmd}"
     result = runner.invoke(main, f"--quiet {options}")
     assert result.exit_code == 0
     assert expected in result.output
