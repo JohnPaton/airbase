@@ -6,6 +6,7 @@ from collections.abc import Iterator
 from contextlib import closing, contextmanager
 from functools import cached_property
 from pathlib import Path
+from types import MappingProxyType
 from typing import TYPE_CHECKING, NamedTuple
 
 if sys.version_info >= (3, 11):
@@ -51,6 +52,18 @@ class SummaryDB:
         """db cursor as a "self closing" context manager"""
         with closing(cls.db.cursor()) as cur:
             yield cur
+
+    @cached_property
+    def COUNTRY_CODE(self) -> MappingProxyType[str, str]:
+        """Map country name to country codes"""
+        with self.cursor() as cur:
+            cur.execute("SELECT country_name, country_code FROM country;")
+            return MappingProxyType(
+                {
+                    country_name: country_code
+                    for (country_name, country_code) in cur
+                }
+            )
 
     def countries(cls) -> list[str]:
         """
