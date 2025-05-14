@@ -1,7 +1,7 @@
 import asyncio
 import sys
 from pathlib import Path
-from typing import Annotated, Literal
+from typing import Annotated, Literal, TypeAlias
 
 if sys.version_info >= (3, 11):
     from typing import TypedDict
@@ -71,13 +71,19 @@ def callback(
         ),
     ] = [],
     path: Annotated[
-        Path, typer.Option(exists=True, dir_okay=True, writable=True)
+        Path,
+        typer.Option(
+            exists=True,
+            dir_okay=True,
+            writable=True,
+            help="Donwload root path.",
+        ),
     ] = Path("data"),
     subdir: Annotated[
         bool,
         typer.Option(
             "--subdir/--no-subdir",
-            help="Download files to PATH/dataset[frequency/]/country.",
+            help="Download observations to PATH/dataset/[frequnecy/]country.",
         ),
     ] = True,
     metadata: Annotated[
@@ -147,12 +153,15 @@ def callback(
     ctx.obj = CtxObj(
         mode="SUMMARY" if summary_only else "PARQUET",
         session=session,
+        # info
         countries=set(countries),
         pollutants=set(pollutants),
         cities=set(cities),
+        # path
         path=path,
         subdir=subdir,
         overwrite=overwrite,
+        # progress
         quiet=quiet,
     )
 
@@ -171,21 +180,24 @@ def check_path(ctx: typer.Context, value: Path | None):
     return value
 
 
+PathOption: TypeAlias = Annotated[
+    Path | None,
+    typer.Option(
+        "--data-path",
+        dir_okay=True,
+        writable=True,
+        metavar="PATH/dataset/",
+        help="Override dataset donwload path.",
+        show_default=False,
+        callback=check_path,
+    ),
+]
+
+
 @main.command()
 def historical(
     ctx: typer.Context,
-    path: Annotated[
-        Path | None,
-        typer.Option(
-            "--data-path",
-            dir_okay=True,
-            writable=True,
-            metavar="PATH/dataset",
-            help="[default: PATH/historical]",
-            show_default=False,
-            callback=check_path,
-        ),
-    ] = None,
+    path: PathOption = None,
 ):
     """
     Historical Airbase data delivered between 2002 and 2012 before Air Quality Directive 2008/50/EC entered into force.
@@ -219,18 +231,7 @@ def historical(
 @main.command()
 def verified(
     ctx: typer.Context,
-    path: Annotated[
-        Path | None,
-        typer.Option(
-            "--data-path",
-            dir_okay=True,
-            writable=True,
-            metavar="PATH/dataset",
-            help="[default: PATH/verified]",
-            show_default=False,
-            callback=check_path,
-        ),
-    ] = None,
+    path: PathOption = None,
 ):
     """
     Verified data (E1a) from 2013 to 2024 reported by countries by 30 September each year for the previous year.
@@ -265,18 +266,7 @@ def verified(
 @main.command()
 def unverified(
     ctx: typer.Context,
-    path: Annotated[
-        Path | None,
-        typer.Option(
-            "--data-path",
-            dir_okay=True,
-            writable=True,
-            metavar="PATH/dataset",
-            help="[default: PATH/unverified]",
-            show_default=False,
-            callback=check_path,
-        ),
-    ] = None,
+    path: PathOption = None,
 ):
     """
     Unverified data transmitted continuously (Up-To-Date/UTD/E2a) data from the beginning of 2025.
