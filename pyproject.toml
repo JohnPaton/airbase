@@ -41,8 +41,10 @@ Documentation = "https://airbase.readthedocs.io"
 airbase = "airbase.main:main"
 
 [project.entry-points."airbase.cli"]
+catalog = "airbase.plugins.cli:catalog [catalog]"
 
 [project.optional-dependencies]
+catalog = ["polars >=1.20.0"]
 typer = ["typer-slim[standard]"]
 
 [build-system]
