@@ -1,7 +1,8 @@
 import asyncio
 import sys
+from collections.abc import Callable
 from pathlib import Path
-from typing import Annotated, Literal, TypeAlias
+from typing import Annotated, TypeAlias
 
 if sys.version_info >= (3, 11):
     from typing import TypedDict
@@ -20,15 +21,11 @@ main = typer.Typer(name=__package__, add_completion=False)
 
 
 class CtxObj(TypedDict):
-    mode: Literal["SUMMARY", "PARQUET"]
-    session: Session
-    countries: set[str]
-    pollutants: set[str]
-    cities: set[str]
     path: Path
     subdir: bool
     overwrite: bool
     quiet: bool
+    donwloader: Callable[[Dataset, Path | None], None]
 
 
 def print_version(value: bool):
@@ -70,9 +67,11 @@ def callback(
             help="Only from selected <cities> (--country option will be ignored).",
         ),
     ] = [],
-    path: Annotated[
+    root_path: Annotated[
         Path,
         typer.Option(
+            "--path",
+            "--root-path",
             exists=True,
             dir_okay=True,
             writable=True,
@@ -142,7 +141,30 @@ def callback(
                 "METADATA",
                 session,
                 frozenset(),
-                path / "metadata.csv",
+                root_path / "metadata.csv",
+                country_subdir=subdir,
+                overwrite=overwrite,
+            )
+        )
+
+    def donwloader(dataset: Dataset, path: Path | None):
+        if path is None and subdir:  # default
+            path = root_path.joinpath(dataset.name.casefold())
+        if path is None:
+            path = root_path
+        if not summary_only:
+            path.mkdir(parents=True, exist_ok=True)
+
+        info = request_info(
+            dataset, countries=countries, pollutants=pollutants, cities=cities
+        )
+
+        asyncio.run(
+            download(
+                "SUMMARY" if summary_only else "PARQUET",
+                session,
+                info,
+                path,
                 country_subdir=subdir,
                 overwrite=overwrite,
             )
@@ -151,18 +173,11 @@ def callback(
             sys.stderr.flush()
 
     ctx.obj = CtxObj(
-        mode="SUMMARY" if summary_only else "PARQUET",
-        session=session,
-        # info
-        countries=set(countries),
-        pollutants=set(pollutants),
-        cities=set(cities),
-        # path
-        path=path,
+        path=root_path,
         subdir=subdir,
         overwrite=overwrite,
-        # progress
         quiet=quiet,
+        donwloader=donwloader,
     )
 
 
@@ -183,6 +198,7 @@ def check_path(ctx: typer.Context, value: Path | None):
 PathOption: TypeAlias = Annotated[
     Path | None,
     typer.Option(
+        "--path",
         "--data-path",
         dir_okay=True,
         writable=True,
@@ -204,28 +220,7 @@ def historical(
     """
     typer.echo(ctx.command_path)
     obj: CtxObj = ctx.ensure_object(dict)  # type:ignore[assignment]
-    info = request_info(
-        Dataset.Historical,
-        countries=obj["countries"],
-        pollutants=obj["pollutants"],
-        cities=obj["cities"],
-    )
-    if path is None and obj["subdir"]:  # default
-        path = obj["path"].joinpath(ctx.info_name or "")
-    if path is None:
-        path = obj["path"]
-    if obj["mode"] == "PARQUET":
-        path.mkdir(parents=True, exist_ok=True)
-    asyncio.run(
-        download(
-            obj["mode"],
-            obj["session"],
-            info,
-            path,
-            country_subdir=obj["subdir"],
-            overwrite=obj["overwrite"],
-        )
-    )
+    obj["donwloader"](Dataset.Historical, path)
 
 
 @main.command()
@@ -238,28 +233,7 @@ def verified(
     """
     typer.echo(ctx.command_path)
     obj: CtxObj = ctx.ensure_object(dict)  # type:ignore[assignment]
-    info = request_info(
-        Dataset.Verified,
-        countries=obj["countries"],
-        pollutants=obj["pollutants"],
-        cities=obj["cities"],
-    )
-    if path is None and obj["subdir"]:  # default
-        path = obj["path"].joinpath(ctx.info_name or "")
-    if path is None:
-        path = obj["path"]
-    if obj["mode"] == "PARQUET":
-        path.mkdir(parents=True, exist_ok=True)
-    asyncio.run(
-        download(
-            obj["mode"],
-            obj["session"],
-            info,
-            path,
-            country_subdir=obj["subdir"],
-            overwrite=obj["overwrite"],
-        )
-    )
+    obj["donwloader"](Dataset.Verified, path)
 
 
 @main.command()
@@ -272,25 +246,4 @@ def unverified(
     """
     typer.echo(ctx.command_path)
     obj: CtxObj = ctx.ensure_object(dict)  # type:ignore[assignment]
-    info = request_info(
-        Dataset.Unverified,
-        countries=obj["countries"],
-        pollutants=obj["pollutants"],
-        cities=obj["cities"],
-    )
-    if path is None and obj["subdir"]:  # default
-        path = obj["path"].joinpath(ctx.info_name or "")
-    if path is None:
-        path = obj["path"]
-    if obj["mode"] == "PARQUET":
-        path.mkdir(parents=True, exist_ok=True)
-    asyncio.run(
-        download(
-            obj["mode"],
-            obj["session"],
-            info,
-            path,
-            country_subdir=obj["subdir"],
-            overwrite=obj["overwrite"],
-        )
-    )
+    obj["donwloader"](Dataset.Unverified, path)
