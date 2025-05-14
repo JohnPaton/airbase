@@ -133,7 +133,6 @@ def callback(
     - download verified and unverified PM10 and PM2.5 observations from sites in Berlin
       $ airbase -C Berlin -p PM10 verified unverified
     """
-
     session = Session(progress=not quiet, raise_for_status=False)
     if not summary_only and metadata:
         asyncio.run(
