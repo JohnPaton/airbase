@@ -201,7 +201,6 @@ PathOption: TypeAlias = Annotated[
         writable=True,
         metavar="PATH/dataset/",
         help="Override dataset donwload path.",
-        show_default=False,
         callback=check_path,
     ),
 ]
