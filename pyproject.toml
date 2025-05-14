@@ -42,6 +42,9 @@ airbase = "airbase.main:main"
 
 [project.entry-points."airbase.cli"]
 
+[project.optional-dependencies]
+typer = ["typer-slim[standard]"]
+
 [build-system]
 requires = ["hatchling", "hatch-vcs", "hatch-build-scripts"]
 build-backend = "hatchling.build"
