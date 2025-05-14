@@ -7,6 +7,15 @@ import pytest
 from airbase.summary.db import DB
 
 
+def test_COUNTRY_CODE():
+    assert len(DB.COUNTRY_CODE) == len(DB.COUNTRY_CODES) == 39
+    assert set(DB.COUNTRY_CODE.values()) == DB.COUNTRY_CODES
+    assert DB.COUNTRY_CODE.get("Turkey") == "TR"
+    assert DB.COUNTRY_CODE.get("Kosovo") == "XK"
+    assert DB.COUNTRY_CODE.get("Ukraine", "UA") == "UA"
+    assert DB.COUNTRY_CODE.get("Georgia", "GE") == "GE"
+
+
 def test_countries():
     countries = DB.countries()
     assert isinstance(countries, list)
