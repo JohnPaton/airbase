@@ -250,7 +250,6 @@ def verified(
         path = obj["path"]
     if obj["mode"] == "PARQUET":
         path.mkdir(parents=True, exist_ok=True)
-    path.mkdir(parents=True, exist_ok=True)
     asyncio.run(
         download(
             obj["mode"],
