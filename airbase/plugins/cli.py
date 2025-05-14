@@ -10,6 +10,26 @@ if TYPE_CHECKING:
 def catalog(
     ctx: typer.Context,
     *,
+    path: Annotated[
+        Path | None,
+        typer.Option(
+            "--path",
+            "--data-path",
+            dir_okay=True,
+            readable=True,
+            metavar="DATA",
+            help="Override catalog search path.",
+        ),
+    ] = None,
+    catalog: Annotated[
+        Path | None,
+        typer.Option(
+            file_okay=True,
+            writable=True,
+            metavar="[DATA|PATH]/catalog.parquet",
+            help="Override combined metadata path",
+        ),
+    ] = None,
     metadata: Annotated[
         Path | None,
         typer.Option(
@@ -18,26 +38,6 @@ def catalog(
             readable=True,
             metavar="PATH/metadata.csv",
             help="Override station metadata path.",
-        ),
-    ] = None,
-    catalog: Annotated[
-        Path | None,
-        typer.Option(
-            file_okay=True,
-            writable=True,
-            metavar="PATH/catalog.parquet",
-            help="Override combined metadata path",
-        ),
-    ] = None,
-    path: Annotated[
-        Path | None,
-        typer.Option(
-            "--path",
-            "--data-path",
-            dir_okay=True,
-            readable=True,
-            hidden=True,
-            help="Override donwload path.",
         ),
     ] = None,
     stop_after: Annotated[
@@ -51,7 +51,8 @@ def catalog(
     ] = None,
 ):
     """
-    Combine station metadata with observation metadata from files found on `PATH`.
+    Combine station metadata with observation metadata from files found
+    on the donwload root path (set by `airbase --path PATH`).
     """
     try:
         from .catalog import write_catalog
@@ -61,10 +62,10 @@ def catalog(
         raise typer.Abort()
 
     obj: CtxObj = ctx.ensure_object(dict)  # type:ignore[assignment]
+    if metadata is None:
+        metadata = obj["path"] / "metadata.csv"
     if path is None:
         path = obj["path"]
-    if metadata is None:
-        metadata = path / "metadata.csv"
     if catalog is None:
         catalog = path / "catalog.parquet"
 
