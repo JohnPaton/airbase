@@ -1,4 +1,3 @@
-import asyncio
 import sys
 from collections.abc import Callable
 from pathlib import Path
@@ -140,10 +139,8 @@ def callback(
     """
     session = Session(progress=not quiet, raise_for_status=False)
     if not summary_only and metadata:
-        asyncio.run(
-            download.metadata(
-                session, root_path / "metadata.csv", overwrite=overwrite
-            )
+        download.metadata(
+            session, root_path / "metadata.csv", overwrite=overwrite
         )
 
     def donwloader(dataset: Dataset, path: Path | None):
@@ -152,7 +149,7 @@ def callback(
         )
 
         if summary_only:
-            asyncio.run(download.summary(session, info))
+            download.summary(session, info)
             return
 
         if path is None and subdir:  # default
@@ -161,10 +158,8 @@ def callback(
             path = root_path
         path.mkdir(parents=True, exist_ok=True)
 
-        asyncio.run(
-            download.parquet(
-                session, info, path, country_subdir=subdir, overwrite=overwrite
-            )
+        download.parquet(
+            session, info, path, country_subdir=subdir, overwrite=overwrite
         )
         if flush_stderr:
             sys.stderr.flush()
