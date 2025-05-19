@@ -11,7 +11,13 @@ if sys.version_info >= (3, 11):
 else:
     from typing_extensions import assert_never
 
-from .parquet_api import Dataset, Session, download, request_info
+from .parquet_api import (
+    Dataset,
+    Session,
+    download_metadata,
+    download_parquet,
+    request_info,
+)
 from .summary import DB
 
 
@@ -245,8 +251,8 @@ class AirbaseRequest:
         )
         self.session.raise_for_status = raise_for_status
         asyncio.run(
-            download(
-                "PARQUET", self.session, info, dir, overwrite=not skip_existing
+            download_parquet(
+                self.session, info, dir, overwrite=not skip_existing
             )
         )
 
@@ -268,4 +274,4 @@ class AirbaseRequest:
         if self.verbose:
             print(f"Writing metadata to {filepath}...", file=sys.stderr)
 
-        asyncio.run(download("METADATA", self.session, frozenset(), filepath))
+        asyncio.run(download_metadata(self.session, filepath))

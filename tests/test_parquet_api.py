@@ -11,7 +11,8 @@ from airbase.parquet_api import (
     Dataset,
     ParquetData,
     Session,
-    download,
+    download_metadata,
+    download_parquet,
     request_info,
 )
 from airbase.summary import DB
@@ -334,20 +335,16 @@ async def test_Session_download_metadata(tmp_path: Path, session: Session):
 
 
 @pytest.mark.asyncio
-async def test_download(tmp_path: Path, session: Session):
+async def test_download_parquet(tmp_path: Path, session: Session):
     assert not tuple(tmp_path.rglob("*.parquet"))
-    assert not tuple(tmp_path.rglob("*.csv"))
     info = request_info(Dataset.Historical, cities={"Valletta"})
-    await download("PARQUET", session, info, tmp_path)
+    await download_parquet(session, info, tmp_path)
     assert len(tuple(tmp_path.glob("MT/*.parquet"))) == 22
 
 
 @pytest.mark.asyncio
 async def test_download_metadata(tmp_path: Path, session: Session):
-    assert not tuple(tmp_path.rglob("*.parquet"))
     assert not tuple(tmp_path.rglob("*.csv"))
-    info = request_info(Dataset.Historical, cities={"Valletta"})
     metadata = tmp_path / "meta.csv"
-    await download("METADATA", session, info, metadata)
+    await download_metadata(session, metadata)
     assert tuple(tmp_path.rglob("*.csv")) == (metadata,)
-    assert not tuple(tmp_path.glob("MT/*.parquet"))
