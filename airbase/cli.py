@@ -14,7 +14,14 @@ import typer
 from click import Choice
 
 from . import __version__
-from .parquet_api import Dataset, Session, download, request_info
+from .parquet_api import (
+    Dataset,
+    Session,
+    download_metadata,
+    download_parquet,
+    download_summary,
+    request_info,
+)
 from .summary import DB
 
 main = typer.Typer(name=__package__, add_completion=False)
@@ -136,36 +143,29 @@ def callback(
     session = Session(progress=not quiet, raise_for_status=False)
     if not summary_only and metadata:
         asyncio.run(
-            download(
-                "METADATA",
-                session,
-                frozenset(),
-                root_path / "metadata.csv",
-                country_subdir=subdir,
-                overwrite=overwrite,
+            download_metadata(
+                session, root_path / "metadata.csv", overwrite=overwrite
             )
         )
 
     def donwloader(dataset: Dataset, path: Path | None):
-        if path is None and subdir:  # default
-            path = root_path.joinpath(dataset.name.casefold())
-        if path is None:
-            path = root_path
-        if not summary_only:
-            path.mkdir(parents=True, exist_ok=True)
-
         info = request_info(
             dataset, countries=countries, pollutants=pollutants, cities=cities
         )
 
+        if summary_only:
+            asyncio.run(download_summary(session, info))
+            return
+
+        if path is None and subdir:  # default
+            path = root_path.joinpath(dataset.name.casefold())
+        if path is None:
+            path = root_path
+        path.mkdir(parents=True, exist_ok=True)
+
         asyncio.run(
-            download(
-                "SUMMARY" if summary_only else "PARQUET",
-                session,
-                info,
-                path,
-                country_subdir=subdir,
-                overwrite=overwrite,
+            download_parquet(
+                session, info, path, country_subdir=subdir, overwrite=overwrite
             )
         )
         if flush_stderr:
