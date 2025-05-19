@@ -17,9 +17,7 @@ from . import __version__
 from .parquet_api import (
     Dataset,
     Session,
-    download_metadata,
-    download_parquet,
-    download_summary,
+    download,
     request_info,
 )
 from .summary import DB
@@ -143,7 +141,7 @@ def callback(
     session = Session(progress=not quiet, raise_for_status=False)
     if not summary_only and metadata:
         asyncio.run(
-            download_metadata(
+            download.metadata(
                 session, root_path / "metadata.csv", overwrite=overwrite
             )
         )
@@ -154,7 +152,7 @@ def callback(
         )
 
         if summary_only:
-            asyncio.run(download_summary(session, info))
+            asyncio.run(download.summary(session, info))
             return
 
         if path is None and subdir:  # default
@@ -164,7 +162,7 @@ def callback(
         path.mkdir(parents=True, exist_ok=True)
 
         asyncio.run(
-            download_parquet(
+            download.parquet(
                 session, info, path, country_subdir=subdir, overwrite=overwrite
             )
         )
