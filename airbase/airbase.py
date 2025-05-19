@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import asyncio
 import sys
 from collections.abc import Iterable
 from pathlib import Path
@@ -244,11 +243,7 @@ class AirbaseRequest:
             pollutants=self.pollutants,
         )
         self.session.raise_for_status = raise_for_status
-        asyncio.run(
-            download.parquet(
-                self.session, info, dir, overwrite=not skip_existing
-            )
-        )
+        download.parquet(self.session, info, dir, overwrite=not skip_existing)
 
     def download_metadata(self, filepath: str | Path) -> None:
         """
@@ -268,4 +263,4 @@ class AirbaseRequest:
         if self.verbose:
             print(f"Writing metadata to {filepath}...", file=sys.stderr)
 
-        asyncio.run(download.metadata(self.session, filepath))
+        download.metadata(self.session, filepath)

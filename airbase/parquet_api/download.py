@@ -1,3 +1,4 @@
+import asyncio
 import sys
 from collections.abc import Iterable
 from pathlib import Path
@@ -7,7 +8,7 @@ from .dataset import ParquetData
 from .session import Session
 
 
-async def metadata(session: Session, path: Path, *, overwrite: bool = False):
+def metadata(session: Session, path: Path, *, overwrite: bool = False):
     """download station metadata.
 
     :param session:
@@ -18,25 +19,34 @@ async def metadata(session: Session, path: Path, *, overwrite: bool = False):
         Re-download metadata.
         Empty files will be re-downloaded regardless of this option.
     """
-    async with session:
-        await session.download_metadata(path, skip_existing=not overwrite)
+
+    async def download():
+        async with session:
+            await session.download_metadata(path, skip_existing=not overwrite)
+
+    asyncio.run(download())
 
 
-async def summary(session: Session, info: Iterable[ParquetData]):
+def summary(session: Session, info: Iterable[ParquetData]):
     """request total files/size, nothing will be downloaded.
 
     :param session: Parquet downloads API session.
     :param info: requests by country|city/pollutant.
     """
-    async with session:
-        await session.summary(*info)
-        print(
-            f"found {session.expected_files:_} file(s), ~{session.expected_size:_} Mb in total",
-            file=sys.stderr,
-        )
+
+    async def summary() -> tuple[int, int]:
+        async with session:
+            await session.summary(*info)
+            return session.expected_files, session.expected_size
+
+    expected_files, expected_size = asyncio.run(summary())
+    print(
+        f"found {expected_files:_} file(s), ~{expected_size:_} Mb in total",
+        file=sys.stderr,
+    )
 
 
-async def parquet(
+def parquet(
     session: Session,
     info: Iterable[ParquetData],
     root_path: Path,
@@ -60,15 +70,22 @@ async def parquet(
         If False, existing files will be skipped.
         Empty files will be re-downloaded regardless of this option.
     """
-    async with session:
-        await session.url_to_files(*info)
-        if session.number_of_urls == 0:
-            hint = "please try different countries|cites/pollutants"
-            warn(f"Found no data matching your selection, {hint}", UserWarning)
-            return
 
-        await session.download_to_directory(
-            root_path,
-            country_subdir=country_subdir,
-            skip_existing=not overwrite,
-        )
+    async def download():
+        async with session:
+            await session.url_to_files(*info)
+            if session.number_of_urls == 0:
+                hint = "please try different countries|cites/pollutants"
+                warn(
+                    f"Found no data matching your selection, {hint}",
+                    UserWarning,
+                )
+                return
+
+            await session.download_to_directory(
+                root_path,
+                country_subdir=country_subdir,
+                skip_existing=not overwrite,
+            )
+
+    asyncio.run(download())

@@ -333,17 +333,15 @@ async def test_Session_download_metadata(tmp_path: Path, session: Session):
         assert len(file.readlines()) == 276
 
 
-@pytest.mark.asyncio
-async def test_download_parquet(tmp_path: Path, session: Session):
+def test_download_parquet(tmp_path: Path, session: Session):
     assert not tuple(tmp_path.rglob("*.parquet"))
     info = request_info(Dataset.Historical, cities={"Valletta"})
-    await download.parquet(session, info, tmp_path)
+    download.parquet(session, info, tmp_path)
     assert len(tuple(tmp_path.glob("MT/*.parquet"))) == 22
 
 
-@pytest.mark.asyncio
-async def test_download_metadata(tmp_path: Path, session: Session):
+def test_download_metadata(tmp_path: Path, session: Session):
     assert not tuple(tmp_path.rglob("*.csv"))
     metadata = tmp_path / "meta.csv"
-    await download.metadata(session, metadata)
+    download.metadata(session, metadata)
     assert tuple(tmp_path.rglob("*.csv")) == (metadata,)
