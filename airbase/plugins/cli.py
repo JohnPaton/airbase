@@ -1,43 +1,40 @@
 from pathlib import Path
-from typing import TYPE_CHECKING, Annotated
+from typing import Annotated
 
 import typer
 
-if TYPE_CHECKING:
-    from airbase.cli import CtxObj
+from airbase.cli import CtxObj, check_subdir
 
 
 def catalog(
     ctx: typer.Context,
     *,
-    path: Annotated[
+    subdir: Annotated[
         Path | None,
         typer.Option(
-            "--path",
-            "--data-path",
-            dir_okay=True,
-            readable=True,
-            metavar="DATA",
-            help="Override catalog search path.",
+            "--subdir",
+            file_okay=False,
+            metavar="SUBDIR",
+            help="Restrict catalog search path to PATH/SUBDIR.",
+            callback=check_subdir,
         ),
     ] = None,
     catalog: Annotated[
         Path | None,
         typer.Option(
-            file_okay=True,
+            dir_okay=False,
             writable=True,
-            metavar="[DATA|PATH]/catalog.parquet",
-            help="Override combined metadata path",
+            metavar="PARQUET",
+            help="Override combined metadata path. Defaults to PATH/SUBDIR/catalog.parquet.",
         ),
     ] = None,
     metadata: Annotated[
         Path | None,
         typer.Option(
             exists=True,
-            file_okay=True,
-            readable=True,
-            metavar="PATH/metadata.csv",
-            help="Override station metadata path.",
+            dir_okay=False,
+            metavar="CSV",
+            help="Override station metadata path. Defaults to PATH/metadata.csv.",
         ),
     ] = None,
     stop_after: Annotated[
@@ -63,16 +60,14 @@ def catalog(
 
     obj: CtxObj = ctx.ensure_object(dict)  # type:ignore[assignment]
     if metadata is None:
-        metadata = obj["path"] / "metadata.csv"
-    if path is None:
-        path = obj["path"]
+        metadata = obj["path"].joinpath("metadata.csv")
     if catalog is None:
-        catalog = path / "catalog.parquet"
+        catalog = obj["path"].joinpath(subdir or "", "catalog.parquet")
 
     typer.echo(ctx.command_path)
     write_catalog(
         catalog,
-        path,
+        catalog.parent,
         metadata,
         overwrite=obj["overwrite"],
         stop_after=stop_after,

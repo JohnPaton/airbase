@@ -26,7 +26,6 @@ main = typer.Typer(name=__package__, add_completion=False)
 
 class CtxObj(TypedDict):
     path: Path
-    subdir: bool
     overwrite: bool
     quiet: bool
     donwloader: Callable[[Dataset, Path | None], None]
@@ -77,23 +76,18 @@ def callback(
             "--path",
             "--root-path",
             exists=True,
-            dir_okay=True,
+            file_okay=False,
             writable=True,
             help="Donwload root path.",
         ),
     ] = Path("data"),
-    subdir: Annotated[
-        bool,
-        typer.Option(
-            "--subdir/--no-subdir",
-            help="Download observations to PATH/dataset/[frequnecy/]country.",
-        ),
-    ] = True,
     metadata: Annotated[
         bool,
         typer.Option(
             "-M",
             "--metadata",
+            dir_okay=False,
+            writable=True,
             help="Download station metadata to PATH/metadata.csv.",
         ),
     ] = False,
@@ -152,11 +146,11 @@ def callback(
             download.summary(session, info)
             return
 
-        if path is None and subdir:  # default
+        if subdir := path is None:  # default
             path = root_path.joinpath(dataset.name.casefold())
-        if path is None:
-            path = root_path
-        path.mkdir(parents=True, exist_ok=True)
+            path.mkdir(parents=True, exist_ok=True)
+        else:
+            path = root_path.joinpath(path)
 
         download.parquet(
             session, info, path, country_subdir=subdir, overwrite=overwrite
@@ -166,37 +160,32 @@ def callback(
 
     ctx.obj = CtxObj(
         path=root_path,
-        subdir=subdir,
         overwrite=overwrite,
         quiet=quiet,
         donwloader=donwloader,
     )
 
 
-def check_path(ctx: typer.Context, value: Path | None):
+def check_subdir(ctx: typer.Context, value: Path | None):
     if not isinstance(value, Path):
         return value
 
     obj: CtxObj = ctx.ensure_object(dict)  # type:ignore[assignment]
-    if (path := obj.get("path")) is None:
-        return value
-
-    if not value.is_relative_to(path):
-        raise typer.BadParameter(f"Is not subdir of `--path={path}/`")
+    if not value.is_relative_to(path := obj["path"]):
+        raise typer.BadParameter(f"Path '{value}/' is not subdir of `--root-path={path}/`")
 
     return value
 
 
-PathOption: TypeAlias = Annotated[
+SubdirOption: TypeAlias = Annotated[
     Path | None,
     typer.Option(
-        "--path",
-        "--data-path",
-        dir_okay=True,
+        "--subdir",
+        file_okay=False,
         writable=True,
-        metavar="PATH/dataset/",
-        help="Override dataset donwload path.",
-        callback=check_path,
+        metavar="SUBDIR",
+        help="Override dataset donwload subdir (dataset/country).",
+        callback=check_subdir,
     ),
 ]
 
@@ -204,7 +193,7 @@ PathOption: TypeAlias = Annotated[
 @main.command()
 def historical(
     ctx: typer.Context,
-    path: PathOption = None,
+    path: SubdirOption = None,
 ):
     """
     Historical Airbase data delivered between 2002 and 2012 before Air Quality Directive 2008/50/EC entered into force.
@@ -217,7 +206,7 @@ def historical(
 @main.command()
 def verified(
     ctx: typer.Context,
-    path: PathOption = None,
+    path: SubdirOption = None,
 ):
     """
     Verified data (E1a) from 2013 to 2024 reported by countries by 30 September each year for the previous year.
@@ -230,7 +219,7 @@ def verified(
 @main.command()
 def unverified(
     ctx: typer.Context,
-    path: PathOption = None,
+    path: SubdirOption = None,
 ):
     """
     Unverified data transmitted continuously (Up-To-Date/UTD/E2a) data from the beginning of 2025.
