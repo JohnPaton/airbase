@@ -27,7 +27,7 @@ dependencies = [
     "aiofiles >=24.1.0",
     "importlib_resources; python_version < '3.11'",
     "tqdm",
-    "typer-slim >=0.12.0",
+    "typer-slim >=0.12.4",
     "typing_extensions >=4.12.2; python_version < '3.11'",
 ]
 
@@ -89,12 +89,6 @@ extend-exclude = ["docs", "build"]
 select = ["E", "W", "F", "I", "UP"]
 ignore = [
     "E501", # https://docs.astral.sh/ruff/rules/line-too-long/
-]
-
-[tool.ruff.lint.per-file-ignores]
-"cli.py" = [ # typer needs typing.Optional
-    "UP007", # https://docs.astral.sh/ruff/rules/non-pep604-annotation-union/
-    "UP045", # https://docs.astral.sh/ruff/rules/non-pep604-annotation-optional/
 ]
 
 [tool.mypy]

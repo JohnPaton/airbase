@@ -1,7 +1,7 @@
 import asyncio
 from enum import Enum
 from pathlib import Path
-from typing import Annotated, Optional, TypeAlias
+from typing import Annotated, TypeAlias
 
 import typer
 
@@ -60,9 +60,9 @@ def version_callback(value: bool):
 @main.callback()
 def callback(
     version: Annotated[
-        Optional[bool],
+        bool,
         typer.Option("--version", "-V", callback=version_callback),
-    ] = None,
+    ] = False,
 ):
     """Download Air Quality Data from the European Environment Agency (EEA)"""
 
@@ -80,7 +80,7 @@ CityList: TypeAlias = Annotated[
     typer.Option("-C", "--city", help="Only from selected <cities>."),
 ]
 FrequencyOption: TypeAlias = Annotated[
-    Optional[Frequency],
+    Frequency | None,
     typer.Option(
         "--aggregation-type",
         "--frequency",

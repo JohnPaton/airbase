@@ -1,4 +1,5 @@
 version = 1
+revision = 3
 requires-python = ">=3.10, <4"
 resolution-markers = [
     "python_full_version >= '3.12'",
@@ -179,7 +180,7 @@ requires-dist = [
     { name = "async-property", specifier = ">=0.2.2" },
     { name = "importlib-resources", marker = "python_full_version < '3.11'" },
     { name = "tqdm" },
-    { name = "typer-slim", specifier = ">=0.12.0" },
+    { name = "typer-slim", specifier = ">=0.12.4" },
     { name = "typing-extensions", marker = "python_full_version < '3.11'", specifier = ">=4.12.2" },
 ]
 
@@ -1134,15 +1135,15 @@ wheels = [
 
 [[package]]
 name = "typer-slim"
-version = "0.15.2"
+version = "0.12.4"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "click" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/29/67/88189eb827c491646511dc6c806e2e6e543241cae5438383aa042b1dfa40/typer_slim-0.15.2.tar.gz", hash = "sha256:4a666bb7839a88f51dd25d078d36dbc1d0f37c8c2696e184fbc1f3eaa314a91b", size = 100755, upload-time = "2025-02-27T19:17:41.239Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/d5/19/a20681c8501208b167189fec35d407a9925ce38a1e60f0237e8e3d75c25a/typer_slim-0.12.4.tar.gz", hash = "sha256:4629238b526feb8ea71ad663d058ae8370b1520bb40f48b2f8e0c67a551b399f", size = 98029, upload-time = "2024-08-17T03:33:10.625Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/9e/84/9b68e98bf7417d25e38b27a0296bfcbc6719b15d7000f4c09d9716fa9d11/typer_slim-0.15.2-py3-none-any.whl", hash = "sha256:4273014a3378b24367bffed45c2ce8dd3d85bd201a6f02e51ba6b19f336009be", size = 45117, upload-time = "2025-02-27T19:17:36.408Z" },
+    { url = "https://files.pythonhosted.org/packages/b8/96/7a182808231c66dcd6f5c3239d9b73af29987588e748403ae97f1522a728/typer_slim-0.12.4-py3-none-any.whl", hash = "sha256:790a9cd6589494ce063a178473ccdad878fa36bc03f428710f5864670e988144", size = 47220, upload-time = "2024-08-17T03:33:08.896Z" },
 ]
 
 [[package]]
