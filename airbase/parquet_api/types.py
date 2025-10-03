@@ -69,6 +69,7 @@ class PollutantDict(TypedDict):
 
     notation: str
     id: str
+    pk: int
 
 
 """full `Pollutant` response"""
