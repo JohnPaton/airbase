@@ -107,13 +107,13 @@ Options:
   --help                          Show this message and exit.
 ```
 
-### Verified data from 2013 to 2023
+### Verified data from 2013 to 2024
 
 ``` console
 $ airbase verified --help
 Usage: airbase verified [OPTIONS]
 
-  Verified data (E1a) from 2013 to 2023 reported by countries by 30 September
+  Verified data (E1a) from 2013 to 2024 reported by countries by 30 September
   each year for the previous year.
 
   Use -c/--country and -p/--pollutant to restrict the download specific countries and pollutants, e.g.
@@ -142,14 +142,14 @@ Options:
   --help                          Show this message and exit.
 ```
 
-### Unverified data from the beginning of 2024
+### Unverified data from the beginning of 2025
 
 ``` console
 $ airbase unverified --help
 Usage: airbase unverified [OPTIONS]
 
   Unverified data transmitted continuously (Up-To-Date/UTD/E2a) data from the
-  beginning of 2024.
+  beginning of 2025.
 
   Use -c/--country and -p/--pollutant to restrict the download specific countries and pollutants, e.g.
   - download only Norwegian, Danish and Finish sites

@@ -186,7 +186,7 @@ def verified(
     quiet: QuietOption = False,
 ):
     """
-    Verified data (E1a) from 2013 to 2023 reported by countries by 30 September each year for the previous year.
+    Verified data (E1a) from 2013 to 2024 reported by countries by 30 September each year for the previous year.
 
     \b
     Use -c/--country and -p/--pollutant to restrict the download specific countries and pollutants, e.g.
@@ -231,7 +231,7 @@ def unverified(
     quiet: QuietOption = False,
 ):
     """
-    Unverified data transmitted continuously (Up-To-Date/UTD/E2a) data from the beginning of 2024.
+    Unverified data transmitted continuously (Up-To-Date/UTD/E2a) data from the beginning of 2025.
 
     \b
     Use -c/--country and -p/--pollutant to restrict the download specific countries and pollutants, e.g.
