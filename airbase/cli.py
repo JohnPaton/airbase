@@ -1,5 +1,4 @@
 import asyncio
-from enum import Enum
 from pathlib import Path
 from typing import Annotated, TypeAlias
 
@@ -11,21 +10,6 @@ from .parquet_api import AggregationType, Dataset, download
 from .summary import DB
 
 main = typer.Typer(add_completion=False, no_args_is_help=True)
-
-
-class Frequency(str, Enum):
-    _ignore_ = "agg Frequency"  # type:ignore[misc]
-
-    Frequency = vars()
-    for agg in AggregationType:
-        Frequency[agg.name.casefold()] = agg.name.casefold()
-
-    def __str__(self) -> str:
-        return self.name
-
-    @property
-    def aggregation_type(self) -> AggregationType:
-        return AggregationType[self.name.capitalize()]
 
 
 def version_callback(value: bool):
@@ -65,12 +49,13 @@ CityList: TypeAlias = Annotated[
     typer.Option("-C", "--city", help="Only from selected <cities>."),
 ]
 FrequencyOption: TypeAlias = Annotated[
-    Frequency | None,
+    str | None,
     typer.Option(
         "--aggregation-type",
         "--frequency",
         "-F",
         help="Only hourly data, daily data or other aggregation frequency.",
+        click_type=Choice([agg.name.casefold() for agg in AggregationType]),
     ),
 ]
 MetadataOption: TypeAlias = Annotated[
@@ -140,7 +125,9 @@ def historical(
             countries=frozenset(countries),
             pollutants=frozenset(pollutants),
             cities=frozenset(cities),
-            frequency=None if frequency is None else frequency.aggregation_type,
+            frequency=None
+            if frequency is None
+            else AggregationType[frequency.capitalize()],
             metadata=metadata,
             summary_only=summary_only,
             country_subdir=country_subdir,
@@ -185,7 +172,9 @@ def verified(
             countries=frozenset(countries),
             pollutants=frozenset(pollutants),
             cities=frozenset(cities),
-            frequency=None if frequency is None else frequency.aggregation_type,
+            frequency=None
+            if frequency is None
+            else AggregationType[frequency.capitalize()],
             metadata=metadata,
             summary_only=summary_only,
             country_subdir=country_subdir,
@@ -230,7 +219,9 @@ def unverified(
             countries=frozenset(countries),
             pollutants=frozenset(pollutants),
             cities=frozenset(cities),
-            frequency=None if frequency is None else frequency.aggregation_type,
+            frequency=None
+            if frequency is None
+            else AggregationType[frequency.capitalize()],
             metadata=metadata,
             summary_only=summary_only,
             country_subdir=country_subdir,
