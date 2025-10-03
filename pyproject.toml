@@ -94,6 +94,7 @@ ignore = [
 [tool.ruff.lint.per-file-ignores]
 "cli.py" = [ # typer needs typing.Optional
     "UP007", # https://docs.astral.sh/ruff/rules/non-pep604-annotation-union/
+    "UP045", # https://docs.astral.sh/ruff/rules/non-pep604-annotation-optional/
 ]
 
 [tool.mypy]

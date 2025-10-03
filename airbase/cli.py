@@ -1,14 +1,7 @@
 import asyncio
-import sys
 from enum import Enum
 from pathlib import Path
-from typing import Annotated, Optional
-
-if sys.version_info >= (3, 10):
-    from typing import TypeAlias
-else:
-    from typing_extensions import TypeAlias
-
+from typing import Annotated, Optional, TypeAlias
 
 import typer
 
