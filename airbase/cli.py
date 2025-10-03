@@ -13,17 +13,6 @@ from .summary import DB
 main = typer.Typer(add_completion=False, no_args_is_help=True)
 
 
-class Pollutant(str, Enum):
-    _ignore_ = "poll Pollutant"  # type:ignore[misc]
-
-    Pollutant = vars()
-    for poll in sorted(DB.POLLUTANTS, key=lambda poll: len(poll)):
-        Pollutant[poll] = poll
-
-    def __str__(self) -> str:
-        return self.name
-
-
 class Frequency(str, Enum):
     _ignore_ = "agg Frequency"  # type:ignore[misc]
 
@@ -64,8 +53,12 @@ CountryList: TypeAlias = Annotated[
     ),
 ]
 PollutantList: TypeAlias = Annotated[
-    list[Pollutant],
-    typer.Option("-p", "--pollutant"),
+    list[str],
+    typer.Option(
+        "-p",
+        "--pollutant",
+        click_type=Choice(sorted(DB.POLLUTANTS, key=lambda poll: len(poll))),
+    ),
 ]
 CityList: TypeAlias = Annotated[
     list[str],
@@ -145,7 +138,7 @@ def historical(
             Dataset.Historical,
             path,
             countries=frozenset(countries),
-            pollutants=frozenset(map(str, pollutants)),
+            pollutants=frozenset(pollutants),
             cities=frozenset(cities),
             frequency=None if frequency is None else frequency.aggregation_type,
             metadata=metadata,
@@ -190,7 +183,7 @@ def verified(
             Dataset.Verified,
             path,
             countries=frozenset(countries),
-            pollutants=frozenset(map(str, pollutants)),
+            pollutants=frozenset(pollutants),
             cities=frozenset(cities),
             frequency=None if frequency is None else frequency.aggregation_type,
             metadata=metadata,
@@ -235,7 +228,7 @@ def unverified(
             Dataset.Unverified,
             path,
             countries=frozenset(countries),
-            pollutants=frozenset(map(str, pollutants)),
+            pollutants=frozenset(pollutants),
             cities=frozenset(cities),
             frequency=None if frequency is None else frequency.aggregation_type,
             metadata=metadata,
