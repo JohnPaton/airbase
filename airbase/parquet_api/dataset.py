@@ -65,9 +65,7 @@ class ParquetData(NamedTuple):
         payload: ParquetDataJSON = dict(
             countries=[self.country],
             cities=[] if self.city is None else [self.city],
-            pollutants=[]
-            if self.pollutant is None
-            else DB.properties(*self.pollutant),
+            pollutants=[] if self.pollutant is None else sorted(self.pollutant),
             dataset=self.dataset,
             source=self.source,
         )
