@@ -4,23 +4,13 @@ from pathlib import Path
 from typing import Annotated, TypeAlias
 
 import typer
+from click import Choice
 
 from . import __version__
 from .parquet_api import AggregationType, Dataset, download
 from .summary import DB
 
 main = typer.Typer(add_completion=False, no_args_is_help=True)
-
-
-class Country(str, Enum):
-    _ignore_ = "country Country"  # type:ignore[misc]
-
-    Country = vars()
-    for country in sorted(DB.COUNTRY_CODES):
-        Country[country] = country
-
-    def __str__(self) -> str:
-        return self.name
 
 
 class Pollutant(str, Enum):
@@ -68,8 +58,10 @@ def callback(
 
 
 CountryList: TypeAlias = Annotated[
-    list[Country],
-    typer.Option("-c", "--country"),
+    list[str],
+    typer.Option(
+        "-c", "--country", click_type=Choice(sorted(DB.COUNTRY_CODES))
+    ),
 ]
 PollutantList: TypeAlias = Annotated[
     list[Pollutant],
@@ -152,7 +144,7 @@ def historical(
         download(
             Dataset.Historical,
             path,
-            countries=frozenset(map(str, countries)),
+            countries=frozenset(countries),
             pollutants=frozenset(map(str, pollutants)),
             cities=frozenset(cities),
             frequency=None if frequency is None else frequency.aggregation_type,
@@ -197,7 +189,7 @@ def verified(
         download(
             Dataset.Verified,
             path,
-            countries=frozenset(map(str, countries)),
+            countries=frozenset(countries),
             pollutants=frozenset(map(str, pollutants)),
             cities=frozenset(cities),
             frequency=None if frequency is None else frequency.aggregation_type,
@@ -242,7 +234,7 @@ def unverified(
         download(
             Dataset.Unverified,
             path,
-            countries=frozenset(map(str, countries)),
+            countries=frozenset(countries),
             pollutants=frozenset(map(str, pollutants)),
             cities=frozenset(cities),
             frequency=None if frequency is None else frequency.aggregation_type,
