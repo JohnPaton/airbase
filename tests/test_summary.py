@@ -37,19 +37,6 @@ def test_pollutants():
         assert pollutants.get(poll) == ids
 
 
-@pytest.mark.parametrize(
-    "poll,ids",
-    (pytest.param(poll, ids, id=poll) for poll, ids in POLLUTANT_IDs.items()),
-)
-def test_properties(poll: str, ids: set[str]):
-    assert DB.properties(poll) == list(
-        map(
-            "http://dd.eionet.europa.eu/vocabulary/aq/pollutant/{}".format,
-            sorted(ids),
-        )
-    )
-
-
 CITY_COUNTRY = {
     "Tromsø": "NO",
     "Reykjavik": "IS",

@@ -94,25 +94,6 @@ class SummaryDB:
         """All unique pollutant IDs"""
         return frozenset(chain.from_iterable(self.pollutants().values()))
 
-    def properties(self, *pollutants: str) -> list[str]:
-        """
-        Pollutant description URLs
-
-        https://dd.eionet.europa.eu/vocabulary/aq/pollutant
-        """
-        if not pollutants:
-            return []
-
-        with self.cursor() as cur:
-            cur.execute(
-                f"""
-                SELECT definition_url FROM pollutant
-                WHERE pollutant in ({",".join("?" * len(pollutants))});
-                """,
-                pollutants,
-            )
-            return [url for (url,) in cur]
-
     def search_pollutant(
         self, query: str, *, limit: int | None = None
     ) -> Iterator[Pollutant]:
