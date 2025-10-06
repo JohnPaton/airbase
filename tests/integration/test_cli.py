@@ -74,7 +74,7 @@ def test_summary(
     expected: str,
     tmp_path: Path,
 ):
-    options = f"{cmd} --quiet --country {country} --city {city} --pollutant {pollutant} --path {tmp_path} --aggregation-type hourly --summary"
+    options = f"{cmd} --quiet --country {country} --city {city} --pollutant {pollutant} --path {tmp_path} --summary"
     with runner.isolated_filesystem(temp_dir=tmp_path):
         result = runner.invoke(main, options.split())
         assert result.exit_code == 0
