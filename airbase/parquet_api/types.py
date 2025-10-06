@@ -15,7 +15,7 @@ else:
 
 
 if TYPE_CHECKING:
-    from .dataset import AggregationType, Dataset
+    from .dataset import Dataset
 
 
 class CityData(TypedDict):
@@ -52,9 +52,7 @@ class ParquetDataJSON(TypedDict):
     source: NotRequired[str]
     dateTimeStart: NotRequired[str]  #  yyyy-mm-ddTHH:MM:SSZ
     dateTimeEnd: NotRequired[str]  #  yyyy-mm-ddTHH:MM:SSZ
-    aggregationType: NotRequired[
-        Literal["hour", "day", "var"] | AggregationType
-    ]
+    aggregationType: NotRequired[Literal["hour", "day", "var"]]
 
 
 class DownloadSummaryJSON(TypedDict):

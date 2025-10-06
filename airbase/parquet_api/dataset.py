@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from enum import Enum, IntEnum
+from enum import IntEnum
 from typing import NamedTuple
 from warnings import warn
 
@@ -26,24 +26,6 @@ class Dataset(IntEnum):
 
     def __str__(self) -> str:  # pragma:no cover
         return self.name
-
-
-class AggregationType(str, Enum):
-    """
-    represents whether the data collected is obtaining the values:
-    1. Hourly data.
-    2. Daily data.
-    3. Variable intervals (different than the previous observations such as weekly, monthly, etc.)
-
-    https://eeadmz1-downloads-webapp.azurewebsites.net/content/documentation/How_To_Downloads.pdf
-    """
-
-    Hourly = "hour"
-    Daily = "day"
-    Other = VariableIntervals = "var"
-
-    def __str__(self) -> str:
-        return self.value
 
 
 class ParquetData(NamedTuple):
