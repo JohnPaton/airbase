@@ -22,7 +22,6 @@ from tqdm import tqdm
 from ..summary import DB
 from .client import Client
 from .dataset import (
-    AggregationType,
     Dataset,
     ParquetData,
     request_info_by_city,
@@ -341,7 +340,6 @@ async def download(
     countries: frozenset[str] | set[str],
     pollutants: frozenset[str] | set[str] | None = None,
     cities: frozenset[str] | set[str] | None = None,
-    frequency: AggregationType | None = None,
     summary_only: bool = False,
     metadata: bool = False,
     country_subdir: bool = True,
@@ -378,14 +376,12 @@ async def download(
         If False, a :py:func:`warnings.warn` will be issued instead.
     """
     if cities:  # one request for each city/pollutant
-        info = request_info_by_city(
-            dataset, *cities, pollutants=pollutants, frequency=frequency
-        )
+        info = request_info_by_city(dataset, *cities, pollutants=pollutants)
     else:  # one request for each country/pollutant
         if not countries:
             countries = DB.COUNTRY_CODES
         info = request_info_by_country(
-            dataset, *countries, pollutants=pollutants, frequency=frequency
+            dataset, *countries, pollutants=pollutants
         )
 
     if not info:

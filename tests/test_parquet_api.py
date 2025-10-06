@@ -7,7 +7,6 @@ from pathlib import Path
 import pytest
 
 from airbase.parquet_api import (
-    AggregationType,
     Client,
     Dataset,
     ParquetData,
@@ -42,36 +41,27 @@ def test_Dataset():
 
 
 @pytest.mark.parametrize(
-    "city,country,pollutants,frequency",
+    "city,country,pollutants",
     (
-        pytest.param("Reykjavik", "IS", {"PM10", "NO"}, None, id="pollutants"),
-        pytest.param(
-            "Göteborg", "SE", None, AggregationType.Hourly, id="no-pollutants"
-        ),
+        pytest.param("Reykjavik", "IS", {"PM10", "NO"}, id="pollutants"),
+        pytest.param("Göteborg", "SE", None, id="no-pollutants"),
     ),
 )
 def test_request_info_by_city(
     city: str,
     country: str,
     pollutants: set[str] | None,
-    frequency: AggregationType | None,
     dataset: Dataset = Dataset.Historical,
 ):
     if not pollutants:
         assert (
-            request_info_by_city(dataset, city, frequency=frequency)
-            == request_info_by_city(
-                dataset, city, pollutants=set(), frequency=frequency
-            )
-            == {ParquetData(country, dataset, city=city, frequency=frequency)}
+            request_info_by_city(dataset, city)
+            == request_info_by_city(dataset, city, pollutants=set())
+            == {ParquetData(country, dataset, city=city)}
         )
     else:
-        assert request_info_by_city(
-            dataset, city, pollutants=pollutants, frequency=frequency
-        ) == {
-            ParquetData(
-                country, dataset, frozenset(pollutants), city, frequency
-            )
+        assert request_info_by_city(dataset, city, pollutants=pollutants) == {
+            ParquetData(country, dataset, frozenset(pollutants), city)
         }
 
 
@@ -84,35 +74,28 @@ def test_request_info_by_city_warning(
 
 
 @pytest.mark.parametrize(
-    "country,pollutants,frequency",
+    "country,pollutants",
     (
-        pytest.param("IS", {"PM10", "NO"}, None, id="IS"),
-        pytest.param("NO", set(), AggregationType.Hourly, id="NO"),
-        pytest.param("SE", None, AggregationType.Daily, id="SE"),
+        pytest.param("IS", {"PM10", "NO"}, id="IS"),
+        pytest.param("NO", set(), id="NO"),
+        pytest.param("SE", None, id="SE"),
     ),
 )
 def test_request_info_by_country(
     country: str,
     pollutants: set[str] | None,
-    frequency: AggregationType | None,
     dataset: Dataset = Dataset.Historical,
 ):
     if not pollutants:
         assert (
-            request_info_by_country(dataset, country, frequency=frequency)
-            == request_info_by_country(
-                dataset, country, pollutants=set(), frequency=frequency
-            )
-            == {ParquetData(country, dataset, frequency=frequency)}
+            request_info_by_country(dataset, country)
+            == request_info_by_country(dataset, country, pollutants=set())
+            == {ParquetData(country, dataset)}
         )
     else:
         assert request_info_by_country(
-            dataset, country, pollutants=pollutants, frequency=frequency
-        ) == {
-            ParquetData(
-                country, dataset, frozenset(pollutants), frequency=frequency
-            )
-        }
+            dataset, country, pollutants=pollutants
+        ) == {ParquetData(country, dataset, frozenset(pollutants))}
 
 
 def test_request_info_by_country_warning(
@@ -124,12 +107,11 @@ def test_request_info_by_country_warning(
 
 
 @pytest.mark.parametrize(
-    "pollutants,country,city,aggregation_type,historical,verified,unverified",
+    "pollutants,country,city,historical,verified,unverified",
     (
         pytest.param(
             frozenset({"PM10"}),
             "NO",
-            None,
             None,
             '{"countries": ["NO"], "cities": [], "pollutants": ["PM10"], "dataset": 3, "source": "API"}',
             '{"countries": ["NO"], "cities": [], "pollutants": ["PM10"], "dataset": 2, "source": "API"}',
@@ -140,7 +122,6 @@ def test_request_info_by_country_warning(
             frozenset({"O3"}),
             "IS",
             "Reykjavik",
-            None,
             '{"countries": ["IS"], "cities": ["Reykjavik"], "pollutants": ["O3"], "dataset": 3, "source": "API"}',
             '{"countries": ["IS"], "cities": ["Reykjavik"], "pollutants": ["O3"], "dataset": 2, "source": "API"}',
             '{"countries": ["IS"], "cities": ["Reykjavik"], "pollutants": ["O3"], "dataset": 1, "source": "API"}',
@@ -150,10 +131,9 @@ def test_request_info_by_country_warning(
             frozenset({"SO2"}),
             "SE",
             None,
-            AggregationType.Hourly,
-            '{"countries": ["SE"], "cities": [], "pollutants": ["SO2"], "dataset": 3, "source": "API", "aggregationType": "hour"}',
-            '{"countries": ["SE"], "cities": [], "pollutants": ["SO2"], "dataset": 2, "source": "API", "aggregationType": "hour"}',
-            '{"countries": ["SE"], "cities": [], "pollutants": ["SO2"], "dataset": 1, "source": "API", "aggregationType": "hour"}',
+            '{"countries": ["SE"], "cities": [], "pollutants": ["SO2"], "dataset": 3, "source": "API"}',
+            '{"countries": ["SE"], "cities": [], "pollutants": ["SO2"], "dataset": 2, "source": "API"}',
+            '{"countries": ["SE"], "cities": [], "pollutants": ["SO2"], "dataset": 1, "source": "API"}',
             id="SO2-SE",
         ),
     ),
@@ -162,32 +142,25 @@ def test_ParquetData_payload(
     pollutants: frozenset[str],
     country: str,
     city: str | None,
-    aggregation_type: AggregationType | None,
     historical: str,
     verified: str,
     unverified: str,
 ):
     assert (
         json.dumps(
-            ParquetData(
-                country, Dataset.Historical, pollutants, city, aggregation_type
-            ).payload()
+            ParquetData(country, Dataset.Historical, pollutants, city).payload()
         )
         == historical
     ), "unexpected historical info"
     assert (
         json.dumps(
-            ParquetData(
-                country, Dataset.Verified, pollutants, city, aggregation_type
-            ).payload()
+            ParquetData(country, Dataset.Verified, pollutants, city).payload()
         )
         == verified
     ), "unexpected verified info"
     assert (
         json.dumps(
-            ParquetData(
-                country, Dataset.Unverified, pollutants, city, aggregation_type
-            ).payload()
+            ParquetData(country, Dataset.Unverified, pollutants, city).payload()
         )
         == unverified
     ), "unexpected unverified info"

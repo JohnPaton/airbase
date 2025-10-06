@@ -49,7 +49,7 @@ class AggregationType(str, Enum):
 class ParquetData(NamedTuple):
     """
     info needed for requesting the URLs for country and dataset
-    the request can be further restricted with the `pollutant`, `city` and `frequency`
+    the request can be further restricted with the `pollutant` and `city`
     """
 
     country: str
@@ -58,11 +58,10 @@ class ParquetData(NamedTuple):
     city: str | None = None
 
     # Optional
-    frequency: AggregationType | None = None
     source: str = "API"  # for EEA internal use
 
     def payload(self) -> ParquetDataJSON:
-        payload: ParquetDataJSON = dict(
+        return ParquetDataJSON(
             countries=[self.country],
             cities=[] if self.city is None else [self.city],
             pollutants=[] if self.pollutant is None else sorted(self.pollutant),
@@ -70,18 +69,11 @@ class ParquetData(NamedTuple):
             source=self.source,
         )
 
-        # Optional
-        if self.frequency is not None:
-            payload["aggregationType"] = self.frequency
-
-        return payload
-
 
 def request_info_by_city(
     dataset: Dataset,
     *cities,
     pollutants: frozenset[str] | set[str] | None = None,
-    frequency: AggregationType | None = None,
 ) -> set[ParquetData]:
     """download info one city at the time"""
     if not pollutants:
@@ -95,7 +87,7 @@ def request_info_by_city(
             warn(f"Unknown {city=}, skip", UserWarning, stacklevel=-2)
             continue
 
-        info.add(ParquetData(country, dataset, pollutants, city, frequency))
+        info.add(ParquetData(country, dataset, pollutants, city))
 
     return info
 
@@ -104,7 +96,6 @@ def request_info_by_country(
     dataset: Dataset,
     *countries,
     pollutants: frozenset[str] | set[str] | None = None,
-    frequency: AggregationType | None = None,
 ) -> set[ParquetData]:
     """download info one country at the time"""
     if not pollutants:
@@ -118,6 +109,6 @@ def request_info_by_country(
             warn(f"Unknown {country=}, skip", UserWarning, stacklevel=-2)
             continue
 
-        info.add(ParquetData(country, dataset, pollutants, frequency=frequency))
+        info.add(ParquetData(country, dataset, pollutants))
 
     return info
