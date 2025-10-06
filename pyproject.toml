@@ -25,6 +25,7 @@ dependencies = [
     "aiohttp >= 3.9.0; python_version >= '3.12'",
     "async_property >=0.2.2",
     "aiofiles >=24.1.0",
+    "tenacity >=9.1.2",
     "importlib_resources; python_version < '3.11'",
     "tqdm",
     "typer-slim >=0.12.4",
