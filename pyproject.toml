@@ -1,7 +1,7 @@
 [project]
 name = "airbase"
 dynamic = ["version"]
-requires-python = ">=3.9,<4"
+requires-python = ">=3.10,<4"
 description = "An easy downloader for the AirBase air quality data."
 readme = {file = "README.md", content-type = "text/markdown"}
 authors = [{name="John Paton", email="john@johnpaton.net"}]
@@ -11,7 +11,6 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -28,7 +27,7 @@ dependencies = [
     "aiofiles >=24.1.0",
     "importlib_resources; python_version < '3.11'",
     "tqdm",
-    "typer-slim >=0.12.0",
+    "typer-slim >=0.12.4",
     "typing_extensions >=4.12.2; python_version < '3.11'",
 ]
 
@@ -46,7 +45,7 @@ build-backend = "hatchling.build"
 [dependency-groups]
 dev = [{ include-group = "test" }, { include-group = "lint" }]
 test = ["pytest>=6.0", "aioresponses", "pytest-asyncio>=0.24.0", "coverage>=7.2.0", "pytest-cov"]
-lint = ["mypy>=1.11.2", "ruff>=0.6.7", "types-aiofiles>=24.1.0.20241221"]
+lint = ["mypy>=1.18.2", "ruff>=0.13.3", "types-aiofiles>=24.1.0.20241221"]
 docs = ["sphinx>=7.1.2", "sphinx-rtd-theme>=2.0.0"]
 
 [tool.uv]
@@ -83,7 +82,6 @@ skip_empty = true
 show_missing = true
 
 [tool.ruff]
-target-version = "py39"
 line-length = 80
 extend-exclude = ["docs", "build"]
 
@@ -93,13 +91,8 @@ ignore = [
     "E501", # https://docs.astral.sh/ruff/rules/line-too-long/
 ]
 
-[tool.ruff.lint.per-file-ignores]
-"cli.py" = [ # typer needs typing.Optional
-    "UP007", # https://docs.astral.sh/ruff/rules/non-pep604-annotation-union/
-]
-
 [tool.mypy]
-python_version = "3.9"
+python_version = "3.10"
 warn_unused_configs = true
 warn_unused_ignores = false
 warn_no_return = true
@@ -117,14 +110,14 @@ ignore_missing_imports = true
 [tool.tox]
 legacy_tox_ini = """
 [tox]
-envlist = py39, py310, py311, py312, py313, integration, report, lint, docs
+envlist = py310, py311, py312, py313, integration, report, lint, docs
 skip_missing_interpreters = True
 isolated_build = True
 requires =
     tox>=4.25
     tox-uv>=1.25
 labels =
-    coverage = py39, py310, py311, py312, py313, integration, report
+    coverage = py310, py311, py312, py313, integration, report
 
 [testenv]
 description = non-interation tests
@@ -154,7 +147,7 @@ commands =
 deps =
     coverage
 depends =
-    py39, py310, py311, py312, py313, integration
+    py310, py311, py312, py313, integration
 
 [testenv:lint]
 description = run linters

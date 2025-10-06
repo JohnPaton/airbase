@@ -1,59 +1,15 @@
 import asyncio
-import sys
-from enum import Enum
 from pathlib import Path
-from typing import Annotated, Optional
-
-if sys.version_info >= (3, 10):
-    from typing import TypeAlias
-else:
-    from typing_extensions import TypeAlias
-
+from typing import Annotated, TypeAlias
 
 import typer
+from click import Choice
 
 from . import __version__
 from .parquet_api import AggregationType, Dataset, download
 from .summary import DB
 
 main = typer.Typer(add_completion=False, no_args_is_help=True)
-
-
-class Country(str, Enum):
-    _ignore_ = "country Country"  # type:ignore[misc]
-
-    Country = vars()
-    for country in sorted(DB.COUNTRY_CODES):
-        Country[country] = country
-
-    def __str__(self) -> str:
-        return self.name
-
-
-class Pollutant(str, Enum):
-    _ignore_ = "poll Pollutant"  # type:ignore[misc]
-
-    Pollutant = vars()
-    for poll in sorted(DB.POLLUTANTS, key=lambda poll: len(poll)):
-        Pollutant[poll] = poll
-
-    def __str__(self) -> str:
-        return self.name
-
-
-class Frequency(str, Enum):
-    _ignore_ = "agg Frequency"  # type:ignore[misc]
-
-    Frequency = vars()
-    for agg in AggregationType:
-        Frequency[agg.name.casefold()] = agg.name.casefold()
-
-    def __str__(self) -> str:
-        return self.name
-
-    @property
-    def aggregation_type(self) -> AggregationType:
-        return AggregationType[self.name.capitalize()]
 
 
 def version_callback(value: bool):
@@ -67,32 +23,39 @@ def version_callback(value: bool):
 @main.callback()
 def callback(
     version: Annotated[
-        Optional[bool],
+        bool,
         typer.Option("--version", "-V", callback=version_callback),
-    ] = None,
+    ] = False,
 ):
     """Download Air Quality Data from the European Environment Agency (EEA)"""
 
 
 CountryList: TypeAlias = Annotated[
-    list[Country],
-    typer.Option("-c", "--country"),
+    list[str],
+    typer.Option(
+        "-c", "--country", click_type=Choice(sorted(DB.COUNTRY_CODES))
+    ),
 ]
 PollutantList: TypeAlias = Annotated[
-    list[Pollutant],
-    typer.Option("-p", "--pollutant"),
+    list[str],
+    typer.Option(
+        "-p",
+        "--pollutant",
+        click_type=Choice(sorted(DB.POLLUTANTS, key=lambda poll: len(poll))),
+    ),
 ]
 CityList: TypeAlias = Annotated[
     list[str],
     typer.Option("-C", "--city", help="Only from selected <cities>."),
 ]
 FrequencyOption: TypeAlias = Annotated[
-    Optional[Frequency],
+    str | None,
     typer.Option(
         "--aggregation-type",
         "--frequency",
         "-F",
         help="Only hourly data, daily data or other aggregation frequency.",
+        click_type=Choice([agg.name.casefold() for agg in AggregationType]),
     ),
 ]
 MetadataOption: TypeAlias = Annotated[
@@ -159,10 +122,12 @@ def historical(
         download(
             Dataset.Historical,
             path,
-            countries=frozenset(map(str, countries)),
-            pollutants=frozenset(map(str, pollutants)),
+            countries=frozenset(countries),
+            pollutants=frozenset(pollutants),
             cities=frozenset(cities),
-            frequency=None if frequency is None else frequency.aggregation_type,
+            frequency=None
+            if frequency is None
+            else AggregationType[frequency.capitalize()],
             metadata=metadata,
             summary_only=summary_only,
             country_subdir=country_subdir,
@@ -186,7 +151,7 @@ def verified(
     quiet: QuietOption = False,
 ):
     """
-    Verified data (E1a) from 2013 to 2023 reported by countries by 30 September each year for the previous year.
+    Verified data (E1a) from 2013 to 2024 reported by countries by 30 September each year for the previous year.
 
     \b
     Use -c/--country and -p/--pollutant to restrict the download specific countries and pollutants, e.g.
@@ -204,10 +169,12 @@ def verified(
         download(
             Dataset.Verified,
             path,
-            countries=frozenset(map(str, countries)),
-            pollutants=frozenset(map(str, pollutants)),
+            countries=frozenset(countries),
+            pollutants=frozenset(pollutants),
             cities=frozenset(cities),
-            frequency=None if frequency is None else frequency.aggregation_type,
+            frequency=None
+            if frequency is None
+            else AggregationType[frequency.capitalize()],
             metadata=metadata,
             summary_only=summary_only,
             country_subdir=country_subdir,
@@ -231,7 +198,7 @@ def unverified(
     quiet: QuietOption = False,
 ):
     """
-    Unverified data transmitted continuously (Up-To-Date/UTD/E2a) data from the beginning of 2024.
+    Unverified data transmitted continuously (Up-To-Date/UTD/E2a) data from the beginning of 2025.
 
     \b
     Use -c/--country and -p/--pollutant to restrict the download specific countries and pollutants, e.g.
@@ -249,10 +216,12 @@ def unverified(
         download(
             Dataset.Unverified,
             path,
-            countries=frozenset(map(str, countries)),
-            pollutants=frozenset(map(str, pollutants)),
+            countries=frozenset(countries),
+            pollutants=frozenset(pollutants),
             cities=frozenset(cities),
-            frequency=None if frequency is None else frequency.aggregation_type,
+            frequency=None
+            if frequency is None
+            else AggregationType[frequency.capitalize()],
             metadata=metadata,
             summary_only=summary_only,
             country_subdir=country_subdir,

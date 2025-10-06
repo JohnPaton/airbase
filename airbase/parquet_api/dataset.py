@@ -11,8 +11,8 @@ from .types import ParquetDataJSON
 class Dataset(IntEnum):
     """
     1. Unverified data transmitted continuously (Up-To-Date/UTD/E2a) data from the
-    beginning of 2024.
-    2. Verified data (E1a) from 2013 to 2023 reported by countries by 30 September each
+    beginning of 2025.
+    2. Verified data (E1a) from 2013 to 2024 reported by countries by 30 September each
     year for the previous year.
     3. Historical Airbase data delivered between 2002 and 2012 before Air Quality
     Directive 2008/50/EC entered into force.
@@ -65,9 +65,7 @@ class ParquetData(NamedTuple):
         payload: ParquetDataJSON = dict(
             countries=[self.country],
             cities=[] if self.city is None else [self.city],
-            pollutants=[]
-            if self.pollutant is None
-            else DB.properties(*self.pollutant),
+            pollutants=[] if self.pollutant is None else sorted(self.pollutant),
             dataset=self.dataset,
             source=self.source,
         )

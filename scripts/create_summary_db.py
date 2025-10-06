@@ -46,10 +46,11 @@ CREATE TABLE city (
 
 DROP TABLE IF EXISTS pollutant;
 CREATE TABLE pollutant (
+    pk INTEGER NOT NULL,
     pollutant TEXT NOT NULL,
     pollutant_id INTEGER NOT NULL,
     definition_url TEXT NOT NULL,
-    UNIQUE (pollutant, pollutant_id)
+    UNIQUE (pk, pollutant, pollutant_id)
 );
 
 
@@ -86,8 +87,8 @@ VALUES (:countryCode, :cityName);
 """
 
 INSERT_PROPERTY_JSON = """
-INSERT OR IGNORE INTO pollutant (pollutant, pollutant_id, definition_url)
-VALUES (:notation, :id, :url);
+INSERT OR IGNORE INTO pollutant (pk, pollutant, pollutant_id, definition_url)
+VALUES (:pk, :notation, :id, :url);
 """
 
 

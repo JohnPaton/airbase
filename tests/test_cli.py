@@ -4,19 +4,9 @@ import pytest
 from typer.testing import CliRunner
 
 from airbase import __version__
-from airbase.cli import Country, Pollutant, main
+from airbase.cli import main
 
 runner = CliRunner()
-
-
-@pytest.mark.parametrize("country", Country)
-def test_country(country: Country):
-    assert country.name == country.value == str(country)
-
-
-@pytest.mark.parametrize("pollutant", Pollutant)
-def test_pollutant(pollutant: Pollutant):
-    assert pollutant.name == pollutant.value == str(pollutant)
 
 
 @pytest.mark.parametrize("options", ("--version", "-V"))
