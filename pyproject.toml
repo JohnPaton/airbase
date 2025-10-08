@@ -15,6 +15,7 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Intended Audience :: Science/Research",
     "Topic :: Scientific/Engineering",
     "Topic :: Scientific/Engineering :: Atmospheric Science",
@@ -111,14 +112,14 @@ ignore_missing_imports = true
 [tool.tox]
 legacy_tox_ini = """
 [tox]
-envlist = py310, py311, py312, py313, integration, report, lint, docs
+envlist = py310, py311, py312, py313, py314, integration, report, lint, docs
 skip_missing_interpreters = True
 isolated_build = True
 requires =
     tox>=4.25
     tox-uv>=1.25
 labels =
-    coverage = py310, py311, py312, py313, integration, report
+    coverage = py310, py311, py312, py313, py314, integration, report
 
 [testenv]
 description = non-interation tests
@@ -148,7 +149,7 @@ commands =
 deps =
     coverage
 depends =
-    py310, py311, py312, py313, integration
+    py310, py311, py312, py313, py314, integration
 
 [testenv:lint]
 description = run linters
