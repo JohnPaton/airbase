@@ -76,7 +76,7 @@ def test_summary(
 ):
     options = f"{cmd} --quiet --country {country} --city {city} --pollutant {pollutant} --path {tmp_path} --summary"
     with runner.isolated_filesystem(temp_dir=tmp_path):
-        result = runner.invoke(main, options, env={"FLUSH_STDERR": "YES"})
+        result = runner.invoke(main, options)
         assert result.exit_code == 0
         assert expected in result.output
 

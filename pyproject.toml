@@ -46,7 +46,16 @@ build-backend = "hatchling.build"
 
 [dependency-groups]
 dev = [{ include-group = "test" }, { include-group = "lint" }]
-test = ["pytest>=6.0", "aioresponses", "pytest-asyncio>=0.24.0", "coverage>=7.2.0", "pytest-cov"]
+test = [
+    "pytest>=6.0",
+    "aioresponses",
+    "pytest-asyncio>=0.24.0",
+    "coverage>=7.2.0",
+    "pytest-cov",
+    # click 8.2.0 CliRunner does not flush sys.stderr, fixed on 8.2.1
+    # https://github.com/pallets/click/issues/2682
+    "click!=8.2.0",
+]
 lint = ["mypy>=1.18.2", "ruff>=0.13.3", "types-aiofiles>=24.1.0.20241221"]
 docs = ["sphinx>=7.1.2", "sphinx-rtd-theme>=2.0.0"]
 
