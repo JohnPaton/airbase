@@ -5,7 +5,6 @@ import sys
 from collections.abc import Iterator
 from contextlib import closing, contextmanager
 from functools import cached_property
-from itertools import chain
 from pathlib import Path
 from typing import TYPE_CHECKING, NamedTuple
 
@@ -89,11 +88,6 @@ class SummaryDB:
         """All unique pollutant names/notations"""
         return frozenset(self.pollutants())
 
-    @cached_property
-    def POLLUTANT_IDS(self) -> frozenset[int]:
-        """All unique pollutant IDs"""
-        return frozenset(chain.from_iterable(self.pollutants().values()))
-
     def search_pollutant(
         self, query: str, *, limit: int | None = None
     ) -> Iterator[Pollutant]:
@@ -118,27 +112,6 @@ class SummaryDB:
             )
             for pollutant, pollutant_id in cur.fetchall():
                 yield Pollutant(pollutant, pollutant_id)
-
-    def search_pollutants(self, *pollutants: str) -> Iterator[int]:
-        """
-        Search for a pollutant ID numbers based from exact matches to pollutant names.
-
-        :param pollutants: The pollutant name(s)/notation(s) to search for.
-
-        :return: ID(s) corresponding to the name(s)/notation(s),
-            e.g. "NO" --> 38
-        """
-
-        with self.cursor() as cur:
-            cur.execute(
-                f"""
-                SELECT pollutant_id FROM pollutants
-                WHERE pollutant in ({",".join("?" * len(pollutants))});
-                """,
-                pollutants,
-            )
-            for row in cur.fetchall():
-                yield row[0]
 
     def search_city(self, city: str) -> str | None:
         """
