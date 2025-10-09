@@ -6,6 +6,7 @@ from pathlib import Path
 from warnings import warn
 
 import polars as pl  # type:ignore[import-not-found]
+from tqdm import tqdm
 
 from airbase.summary import DB
 
@@ -142,27 +143,33 @@ def catalog(
     metadata: Path,
     *,
     exclude: set[str] = {"catalog", "metadata"},
+    progress: bool = False,
     stop_after: int | None = None,
 ) -> pl.DataFrame:
     """
     Combine station and observation metadata from all observation files on `data_path`
     """
 
-    df = (
-        pl.concat(
-            islice(
-                obs_time_range(data_path.rglob("*.parquet"), exclude=exclude),
-                stop_after,
+    with tqdm(
+        islice(data_path.rglob("*.parquet"), stop_after),
+        desc="catalog".ljust(8),
+        unit=" files",
+        mininterval=1,
+        total=stop_after,
+        disable=not progress,
+    ) as paths:
+        df = (
+            pl.concat(obs_time_range(paths, exclude=exclude))
+            .join(
+                station_metadata(metadata),
+                how="left",
+                left_on="Samplingpoint",
+                right_on=pl.format(
+                    "{}/{}", "Country Code", "Sampling Point Id"
+                ),
             )
+            .sort("Samplingpoint", "AggType")
         )
-        .join(
-            station_metadata(metadata),
-            how="left",
-            left_on="Samplingpoint",
-            right_on=pl.format("{}/{}", "Country Code", "Sampling Point Id"),
-        )
-        .sort("Samplingpoint", "AggType")
-    )
 
     missing = df.filter(pl.any_horizontal(pl.all().is_null()))
     if not missing.is_empty():
@@ -231,6 +238,7 @@ def write_catalog(
     metadata: Path,
     *,
     overwrite: bool = False,
+    progress: bool = False,
     stop_after: int | None = None,
 ) -> None:
     """Write combined statnon and observation metadata"""
@@ -242,6 +250,7 @@ def write_catalog(
         data_path,
         metadata,
         exclude={"catalog", path.stem, "metadata", metadata.stem},
+        progress=progress,
         stop_after=stop_after,
     )
     if df.is_empty():
