@@ -95,9 +95,6 @@ Options:
   -c, --country [AD|AL|AT|...]
   -p, --pollutant [k|V|NT|...]
   -C, --city TEXT                 only from selected <cities>
-  -F, --aggregation-type, --frequency [hourly|daily|other]
-                                  only hourly data, daily data or other
-                                  aggregation frequency
   -M, --metadata                  download station metadata
   --path PATH                     [default: data/historical]
   -n, --dry-run, --summary        Total download files/size, nothing will be
@@ -130,9 +127,6 @@ Options:
   -c, --country [AD|AL|AT|...]
   -p, --pollutant [k|V|NT|...]
   -C, --city TEXT                 only from selected <cities>
-  -F, --aggregation-type, --frequency [hourly|daily|other]
-                                  only hourly data, daily data or other
-                                  aggregation frequency
   -M, --metadata                  download station metadata
   --path PATH                     [default: data/verified]
   -n, --dry-run, --summary        Total download files/size, nothing will be
@@ -165,9 +159,6 @@ Options:
   -c, --country [AD|AL|AT|...]
   -p, --pollutant [k|V|NT|...]
   -C, --city TEXT                 only from selected <cities>
-  -F, --aggregation-type, --frequency [hourly|daily|other]
-                                  only hourly data, daily data or other
-                                  aggregation frequency
   -M, --metadata                  download station metadata
   --path PATH                     [default: data/unverified]
   -n, --dry-run, --summary        Total download files/size, nothing will be
