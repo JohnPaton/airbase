@@ -114,7 +114,7 @@ def obs_time_range(
         "Validity",
         "Verification",
     }
-    for path in sorted(paths):
+    for path in paths:
         if path.stem.casefold() in exclude:
             continue
 
@@ -164,6 +164,7 @@ def catalog(
             left_on="Samplingpoint",
             right_on=pl.format("{}/{}", "Country Code", "Sampling Point Id"),
         )
+        .sort("Samplingpoint", "AggType")
         .collect()
     )
 
