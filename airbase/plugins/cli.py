@@ -70,6 +70,7 @@ def catalog(
         catalog.parent,
         metadata,
         overwrite=obj["overwrite"],
+        progress=not obj["quiet"],
         stop_after=stop_after,
     )
 
