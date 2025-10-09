@@ -32,7 +32,7 @@ AGGREGATION_TYPE = (  # https://eeadmz1-downloads-webapp.azurewebsites.net/conte
 )
 
 
-def station_metadata(path: Path) -> pl.LazyFrame:
+def station_metadata(path: Path) -> pl.DataFrame:
     country_name = {
         "Türkiye": "Turkey",
         "Kosovo under UNSCR 1244/99": "Kosovo",
@@ -84,12 +84,13 @@ def station_metadata(path: Path) -> pl.LazyFrame:
             "Air Quality Station Type",
             "Air Quality Station Area",
         )
+        .collect()
     )
 
 
 def obs_time_range(
     paths: Iterable[Path], *, exclude: set[str] = set()
-) -> Iterator[pl.LazyFrame]:
+) -> Iterator[pl.DataFrame]:
     # https://dd.eionet.europa.eu/vocabulary/aq/observationvalidity
     # -99 Not valid due to station maintenance or calibration
     #  -1 Not valid
@@ -105,26 +106,13 @@ def obs_time_range(
     #   3 Not verified
     verification = pl.col("Verification").is_in({1, 2, 3})
 
-    columns = {
-        "filename",
-        "Samplingpoint",
-        "AggType",
-        "Start",
-        "End",
-        "Validity",
-        "Verification",
-    }
     for path in paths:
         if path.stem.casefold() in exclude:
             continue
 
-        df = pl.scan_parquet(path, include_file_paths="filename")
-        if missing := columns.difference(df.collect_schema().names()):
-            warn(f"Misssing {','.join(missing)} column(s) in {path}, skip")
-            continue
-
-        yield (
-            df.filter(
+        df = (
+            pl.scan_parquet(path, include_file_paths="filename")
+            .filter(
                 validity,
                 verification,
             )
@@ -138,6 +126,15 @@ def obs_time_range(
                 pl.max("End"),
             )
         )
+
+        try:
+            yield df.collect()
+        except (
+            pl.exceptions.SchemaError,
+            pl.exceptions.ColumnNotFoundError,
+            pl.exceptions.DuplicateError,
+        ) as e:
+            warn(f"{e} while reading {path}, skip")
 
 
 def catalog(
@@ -153,9 +150,9 @@ def catalog(
 
     df = (
         pl.concat(
-            obs_time_range(
-                islice(data_path.rglob("*.parquet"), stop_after),
-                exclude=exclude,
+            islice(
+                obs_time_range(data_path.rglob("*.parquet"), exclude=exclude),
+                stop_after,
             )
         )
         .join(
@@ -165,7 +162,6 @@ def catalog(
             right_on=pl.format("{}/{}", "Country Code", "Sampling Point Id"),
         )
         .sort("Samplingpoint", "AggType")
-        .collect()
     )
 
     missing = df.filter(pl.any_horizontal(pl.all().is_null()))
