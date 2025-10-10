@@ -149,24 +149,30 @@ def catalog(
     """
     Combine station and observation metadata from all observation files on `data_path`
     """
-
-    with tqdm(
+    paths = tqdm(
         islice(data_path.rglob("*.parquet"), stop_after),
         desc="catalog".ljust(8),
         unit=" files",
         mininterval=1,
         total=stop_after,
         disable=not progress,
-    ) as paths:
+    )
+    samplingpoint = (
+        pl.when(
+            pl.col("Country Code") == "GB",
+            pl.col("Sampling Point Id").str.starts_with("GIB_"),
+        )
+        .then(pl.format("GI/{}", "Sampling Point Id"))
+        .otherwise(pl.format("{}/{}", "Country Code", "Sampling Point Id"))
+    )
+    with paths:
         df = (
             pl.concat(obs_time_range(paths, exclude=exclude))
             .join(
                 station_metadata(metadata),
                 how="left",
                 left_on="Samplingpoint",
-                right_on=pl.format(
-                    "{}/{}", "Country Code", "Sampling Point Id"
-                ),
+                right_on=samplingpoint,
             )
             .sort("Samplingpoint", "AggType")
         )
