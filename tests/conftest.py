@@ -1,12 +1,24 @@
 from __future__ import annotations
 
 import re
+from importlib import metadata
 
 import pytest
 from aioresponses import aioresponses
 
 from airbase.summary import DB
 from tests import resources
+
+
+def pytest_collection_modifyitems(items: list[pytest.Item]):
+    fail_on_click_8_2_0 = pytest.mark.xfail(
+        metadata.version("click") == "8.2.0",
+        reason="click 8.2.0 CliRunner does not flush sys.stderr, fixed on 8.2.1",
+        run=False,
+    )
+    for item in items:
+        if "test_cli.py::test_summary" in item.nodeid:
+            item.add_marker(fail_on_click_8_2_0)
 
 
 @pytest.fixture

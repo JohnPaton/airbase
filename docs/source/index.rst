@@ -70,6 +70,53 @@ To install ``airbase``, simply run
 🚆 Command line interface
 =========================
 
+.. code-block:: console
+
+   $ airbase --help
+   Usage: airbase [OPTIONS] COMMAND1 [ARGS]... [COMMAND2 [ARGS]...]...
+
+     Download Air Quality Data from the European Environment Agency (EEA)
+
+     Use -c/--country and -p/--pollutant to restrict the download specific countries and pollutants,
+     or -C/--city and -p/--pollutant to restrict the download specific cities and pollutants, e.g.
+     - download only Norwegian, Danish and Finish sites Historical Airbase dataset (2002 to 2012)
+       $ airbase -c NO -c DK -c FI historical
+     - download only SO2, PM10 and PM2.5 observations from the Verified E1a dataset (2013 to 2024)
+       $ airbase -p SO2 -p PM10 -p PM2.5 verified
+     - download only PM10 and PM2.5 from sites in Oslo from the Unverified E2a dataset (from 2025)
+       $ airbase -C Oslo -p PM10 -p PM2.5 unverified
+
+     Chain commands to request data from different datasets
+     - request an estimate of the number of files and disk size required to download all
+       available observations
+       $ airbase --summary --quiet historical verified unverified
+     - download verified and unverified PM10 and PM2.5 observations from sites in Berlin
+       $ airbase -C Berlin -p PM10 verified unverified
+
+   Options:
+     -V, --version
+     -c, --country [AD|AL|AT|BA|BE|BG|CH|CY|CZ|DE|DK|EE|ES|FI|FR|...]
+     -p, --pollutant [V|k|Fe|As|CO|NT|TP|TI|pH|Pb|O3|Hg|H+|OC|BS|...]
+     -C, --city TEXT                 Only from selected <cities> (--country
+                                     option will be ignored).
+     --path, --root-path PATH        Donwload root path.  [default: data]
+     --subdir / --no-subdir          Download observations to
+                                     PATH/dataset/country.  [default:
+                                     subdir]
+     -M, --metadata                  Download station metadata to
+                                     PATH/metadata.csv.
+     -n, --dry-run, --summary        Total download files/size, nothing will be
+                                     downloaded.
+     -O, --overwrite                 Re-download existing files.
+     -q, --quiet                     No progress-bar.
+     --help                          Show this message and exit.
+
+   Commands:
+     historical  Historical Airbase data delivered between 2002 and 2012...
+     unverified  Unverified data transmitted continuously...
+     verified    Verified data (E1a) from 2013 to 2024 reported by countries...
+
+
 Historical data delivered between 2002 and 2012
 -----------------------------------------------
 
@@ -81,29 +128,9 @@ Historical data delivered between 2002 and 2012
      Historical Airbase data delivered between 2002 and 2012 before Air Quality
      Directive 2008/50/EC entered into force.
 
-     Use -c/--country and -p/--pollutant to restrict the download specific countries and pollutants, e.g.
-     - download only Norwegian, Danish and Finish sites
-       airbase historical -c NO -c DK -c FI
-     - download only SO2, PM10 and PM2.5 observations
-       airbase historical -p SO2 -p PM10 -p PM2.5
-
-     Use -C/--city to further restrict the download to specific cities, e.g.
-     - download only PM10 and PM2.5 from Valletta, the Capital of Malta
-       airbase historical -C Valletta -c MT -p PM10 -p PM2.5
-
    Options:
-     -c, --country [AD|AL|AT|...]
-     -p, --pollutant [k|V|NT|...]
-     -C, --city TEXT                 only from selected <cities>
-     -F, --aggregation-type, --frequency [hourly|daily|other]
-                                     only hourly data, daily data or other
-                                     aggregation frequency
-     -M, --metadata                  download station metadata
-     --path PATH                     [default: data/historical]
-     -n, --dry-run, --summary        Total download files/size, nothing will be
-                                     downloaded.
-     -O, --overwrite                 Re-download existing files.
-     -q, --quiet                     No progress-bar.
+     --path, --data-path PATH/dataset/
+                                     Override dataset donwload path.
      --help                          Show this message and exit.
 
 
@@ -116,30 +143,11 @@ Verified data from 2013 to 2024
      Verified data (E1a) from 2013 to 2024 reported by countries by 30 September
      each year for the previous year.
 
-     Use -c/--country and -p/--pollutant to restrict the download specific countries and pollutants, e.g.
-     - download only Norwegian, Danish and Finish sites
-       airbase verified -c NO -c DK -c FI
-     - download only SO2, PM10 and PM2.5 observations
-       airbase verified -p SO2 -p PM10 -p PM2.5
-
-     Use -C/--city to further restrict the download to specific cities, e.g.
-     - download only PM10 and PM2.5 from Valletta, the Capital of Malta
-       airbase verified -C Valletta -c MT -p PM10 -p PM2.5
-
    Options:
-     -c, --country [AD|AL|AT|...]
-     -p, --pollutant [k|V|NT|...]
-     -C, --city TEXT                 only from selected <cities>
-     -F, --aggregation-type, --frequency [hourly|daily|other]
-                                     only hourly data, daily data or other
-                                     aggregation frequency
-     -M, --metadata                  download station metadata
-     --path PATH                     [default: data/verified]
-     -n, --dry-run, --summary        Total download files/size, nothing will be
-                                     downloaded.
-     -O, --overwrite                 Re-download existing files.
-     -q, --quiet                     No progress-bar.
+     --path, --data-path PATH/dataset/
+                                     Override dataset donwload path.
      --help                          Show this message and exit.
+
 
 Unverified data from the beginning of 2025
 ------------------------------------------
@@ -150,30 +158,11 @@ Unverified data from the beginning of 2025
      Unverified data transmitted continuously (Up-To-Date/UTD/E2a) data from the
      beginning of 2025.
 
-     Use -c/--country and -p/--pollutant to restrict the download specific countries and pollutants, e.g.
-     - download only Norwegian, Danish and Finish sites
-       airbase unverified -c NO -c DK -c FI
-     - download only SO2, PM10 and PM2.5 observations
-       airbase unverified -p SO2 -p PM10 -p PM2.5
-
-     Use -C/--city to further restrict the download to specific cities, e.g.
-     - download only PM10 and PM2.5 from Valletta, the Capital of Malta
-       airbase unverified -C Valletta -c MT -p PM10 -p PM2.5
-
    Options:
-     -c, --country [AD|AL|AT|...]
-     -p, --pollutant [k|V|NT|...]
-     -C, --city TEXT                 only from selected <cities>
-     -F, --aggregation-type, --frequency [hourly|daily|other]
-                                     only hourly data, daily data or other
-                                     aggregation frequency
-     -M, --metadata                  download station metadata
-     --path PATH                     [default: data/unverified]
-     -n, --dry-run, --summary        Total download files/size, nothing will be
-                                     downloaded.
-     -O, --overwrite                 Re-download existing files.
-     -q, --quiet                     No progress-bar.
+     --path, --data-path PATH/dataset/
+                                     Override dataset donwload path.
      --help                          Show this message and exit.
+
 
 Key Concepts
 ============

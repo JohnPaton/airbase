@@ -1,20 +1,11 @@
 from .client import Client
-from .dataset import (
-    AggregationType,
-    Dataset,
-    ParquetData,
-    request_info_by_city,
-    request_info_by_country,
-)
-from .session import Session, download
+from .dataset import Dataset, ParquetData, request_info
+from .session import Session
 
 __all__ = [
-    "AggregationType",
     "Client",
     "Dataset",
     "ParquetData",
-    "request_info_by_city",
-    "request_info_by_country",
+    "request_info",
     "Session",
-    "download",
 ]

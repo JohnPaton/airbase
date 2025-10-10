@@ -5,62 +5,60 @@ from pathlib import Path
 import pytest
 from typer.testing import CliRunner
 
-from airbase.cli import main
+from airbase.main import main
 
 runner = CliRunner()
 
 
 @pytest.mark.parametrize(
-    "cmd,country,city,pollutant,expected",
+    "cmd,pollutant,expected",
     (
         pytest.param(
-            "historical", "MT", "Valletta", "PM2.5",
-            {"MT/SPO-MT00005_06001_100.parquet"},
+            "historical", "PM2.5",
+            {"SPO-MT00005_06001_100.parquet"},
             id="historical",
         ),
         pytest.param(
-            "verified", "MT", "Valletta", "O3",
-            {"MT/SPO-MT00003_00007_100.parquet", "MT/SPO-MT00005_00007_100.parquet"},
+            "verified", "O3",
+            {"SPO-MT00003_00007_100.parquet", "SPO-MT00005_00007_100.parquet"},
             id="verified"),
         pytest.param(
-            "unverified", "MT", "Valletta", "PM10",
-            {"MT/SPO-MT00005_00005_100.parquet", "MT/SPO-MT00005_00005_101.parquet"},
+            "unverified", "PM10",
+            {"SPO-MT00005_00005_100.parquet"},
             id="unverified"
         ),
     ),
 )  # fmt:skip
 def test_download(
     cmd: str,
-    country: str,
-    city: str,
     pollutant: str,
     expected: set[str],
     tmp_path: Path,
 ):
-    options = f"{cmd} --quiet --country {country} --city {city} --pollutant {pollutant} --path {tmp_path}"
-    with runner.isolated_filesystem(temp_dir=tmp_path):
-        result = runner.invoke(main, options.split())
-        assert result.exit_code == 0
+    options = f"-C Valletta -p {pollutant} --path {tmp_path} {cmd}"
+    result = runner.invoke(main, f"--quiet {options}")
+    assert result.exit_code == 0
 
-    found = set(tmp_path.rglob("*.*"))
-    paths = set(tmp_path / file for file in expected)
+    found = set(tmp_path.rglob("*.parquet"))
+    paths = set(tmp_path.joinpath(cmd, "MT", file) for file in expected)
     assert found >= paths > set()
+    assert not set(tmp_path.rglob("*.csv"))
 
 
 @pytest.mark.parametrize(
-    "cmd,country,city,pollutant,expected",
+    "cmd,city,pollutant,expected",
     (
         pytest.param(
-            "historical", "MT", "Valletta", "PM2.5",
+            "historical", "Valletta", "PM2.5",
             "found 1 file(s), ~0 Mb in total",
             id="historical",
         ),
         pytest.param(
-            "verified", "MT", "Valletta", "O3",
+            "verified", "Valletta", "O3",
             "found 2 file(s), ~1 Mb in total",
             id="verified"),
         pytest.param(
-            "unverified", "MT", "Valletta", "PM10",
+            "unverified", "Valletta", "PM10",
             "found 2 file(s), ~0 Mb in total",
             id="unverified"
         ),
@@ -68,17 +66,15 @@ def test_download(
 )  # fmt:skip
 def test_summary(
     cmd: str,
-    country: str,
     city: str,
     pollutant: str,
     expected: str,
     tmp_path: Path,
 ):
-    options = f"{cmd} --quiet --country {country} --city {city} --pollutant {pollutant} --path {tmp_path} --aggregation-type hourly --summary"
-    with runner.isolated_filesystem(temp_dir=tmp_path):
-        result = runner.invoke(main, options.split())
-        assert result.exit_code == 0
-        assert expected in result.stdout
+    options = f"--summary -C {city} -p {pollutant} --path {tmp_path} {cmd}"
+    result = runner.invoke(main, f"--quiet {options}")
+    assert result.exit_code == 0
+    assert expected in result.output
 
-    files = tuple(tmp_path.rglob("*.parquet"))
-    assert not files
+    assert not set(tmp_path.rglob("*.parquet"))
+    assert not set(tmp_path.rglob("*.csv"))
