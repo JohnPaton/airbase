@@ -54,10 +54,10 @@ def test_request_info_by_city(
 ):
     info = request_info(dataset, cities={city}, pollutants=pollutants)
     if not pollutants:
-        assert set(info) == {ParquetData(country, dataset, city=city)}
+        assert set(info) == {ParquetData(dataset, country, city=city)}
     else:
         assert set(info) == {
-            ParquetData(country, dataset, frozenset(pollutants), city)
+            ParquetData(dataset, country, frozenset(pollutants), city)
         }
 
 
@@ -84,10 +84,10 @@ def test_request_info_by_country(
 ):
     info = request_info(dataset, countries={country}, pollutants=pollutants)
     if not pollutants:
-        assert set(info) == {ParquetData(country, dataset)}
+        assert set(info) == {ParquetData(dataset, country)}
     else:
         assert set(info) == {
-            ParquetData(country, dataset, frozenset(pollutants))
+            ParquetData(dataset, country, frozenset(pollutants))
         }
 
 
@@ -141,19 +141,19 @@ def test_ParquetData_payload(
 ):
     assert (
         json.dumps(
-            ParquetData(country, Dataset.Historical, pollutants, city).payload()
+            ParquetData(Dataset.Historical, country, pollutants, city).payload()
         )
         == historical
     ), "unexpected historical info"
     assert (
         json.dumps(
-            ParquetData(country, Dataset.Verified, pollutants, city).payload()
+            ParquetData(Dataset.Verified, country, pollutants, city).payload()
         )
         == verified
     ), "unexpected verified info"
     assert (
         json.dumps(
-            ParquetData(country, Dataset.Unverified, pollutants, city).payload()
+            ParquetData(Dataset.Unverified, country, pollutants, city).payload()
         )
         == unverified
     ), "unexpected unverified info"
@@ -197,7 +197,7 @@ async def test_Client_city(client: Client):
 
 @pytest.mark.asyncio
 async def test_Client_download_urls(client: Client):
-    info = ParquetData("MT", Dataset.Historical, None, "Valletta")
+    info = ParquetData(Dataset.Historical, "MT", city="Valletta")
     async with client:
         text = await client.download_urls(info.payload())
 
@@ -282,7 +282,7 @@ async def test_Session_city(session: Session):
 
 @pytest.mark.asyncio
 async def test_Session_url_to_files(session: Session):
-    info = ParquetData("MT", Dataset.Historical, None, "Valletta")
+    info = ParquetData(Dataset.Historical, "MT", city="Valletta")
 
     assert session.number_of_urls == 0
     async with session:

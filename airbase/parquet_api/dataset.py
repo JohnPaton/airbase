@@ -35,13 +35,10 @@ class ParquetData(NamedTuple):
     the request can be further restricted with the `pollutant` and `city`
     """
 
-    country: str
     dataset: Dataset
+    country: str
     pollutant: frozenset[str] | None = None
     city: str | None = None
-
-    # Optional
-    source: str = "API"  # for EEA internal use
 
     def payload(self) -> ParquetDataJSON:
         return ParquetDataJSON(
@@ -49,7 +46,7 @@ class ParquetData(NamedTuple):
             cities=[] if self.city is None else [self.city],
             pollutants=[] if self.pollutant is None else sorted(self.pollutant),
             dataset=self.dataset,
-            source=self.source,
+            source="API",  # for EEA internal use
         )
 
 
@@ -64,7 +61,7 @@ def __by_city(
             warn(f"Unknown {city=}, skip", UserWarning, stacklevel=-2)
             continue
 
-        yield ParquetData(country, dataset, pollutants, city)
+        yield ParquetData(dataset, country, pollutants, city)
 
 
 def __by_country(
@@ -78,7 +75,7 @@ def __by_country(
             warn(f"Unknown {country=}, skip", UserWarning, stacklevel=-2)
             continue
 
-        yield ParquetData(country, dataset, pollutants)
+        yield ParquetData(dataset, country, pollutants)
 
 
 def request_info(
