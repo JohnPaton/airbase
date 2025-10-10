@@ -89,9 +89,7 @@ def station_metadata(path: Path) -> pl.DataFrame:
     )
 
 
-def obs_time_range(
-    paths: Iterable[Path], *, exclude: set[str] = set()
-) -> Iterator[pl.DataFrame]:
+def obs_time_range(paths: Iterable[Path]) -> Iterator[pl.DataFrame]:
     # https://dd.eionet.europa.eu/vocabulary/aq/observationvalidity
     # -99 Not valid due to station maintenance or calibration
     #  -1 Not valid
@@ -108,9 +106,6 @@ def obs_time_range(
     verification = pl.col("Verification").is_in({1, 2, 3})
 
     for path in paths:
-        if path.stem.casefold() in exclude:
-            continue
-
         df = (
             pl.scan_parquet(path, include_file_paths="filename")
             .filter(
@@ -144,6 +139,7 @@ def catalog(
     *,
     exclude: set[str] = {"catalog", "metadata"},
     progress: bool = False,
+    newer_than: float | None = None,
     stop_after: int | None = None,
 ) -> pl.DataFrame:
     """
@@ -166,8 +162,14 @@ def catalog(
         .otherwise(pl.format("{}/{}", "Country Code", "Sampling Point Id"))
     )
     with paths:
+        paths = (path for path in paths if path.stem.casefold() not in exclude)
+        if newer_than is not None:
+            paths = (
+                path for path in paths if path.stat().st_mtime >= newer_than
+            )
+
         df = (
-            pl.concat(obs_time_range(paths, exclude=exclude))
+            pl.concat(obs_time_range(paths))
             .join(
                 station_metadata(metadata),
                 how="left",
@@ -245,6 +247,7 @@ def write_catalog(
     *,
     overwrite: bool = False,
     progress: bool = False,
+    newer_than: float | None = None,
     stop_after: int | None = None,
 ) -> None:
     """Write combined statnon and observation metadata"""
@@ -257,6 +260,7 @@ def write_catalog(
         metadata,
         exclude={"catalog", path.stem, "metadata", metadata.stem},
         progress=progress,
+        newer_than=newer_than,
         stop_after=stop_after,
     )
     if df.is_empty():
