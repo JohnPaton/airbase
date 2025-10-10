@@ -109,30 +109,30 @@ def test_request_info_by_country_warning(
             '{"countries": ["NO"], "cities": [], "pollutants": ["PM10"], "dataset": 3, "source": "API"}',
             '{"countries": ["NO"], "cities": [], "pollutants": ["PM10"], "dataset": 2, "source": "API"}',
             '{"countries": ["NO"], "cities": [], "pollutants": ["PM10"], "dataset": 1, "source": "API"}',
-            id="PM10-NO",
+            id="frozenset",
         ),
         pytest.param(
-            frozenset({"O3"}),
+            "O3",
             "IS",
             "Reykjavik",
             '{"countries": ["IS"], "cities": ["Reykjavik"], "pollutants": ["O3"], "dataset": 3, "source": "API"}',
             '{"countries": ["IS"], "cities": ["Reykjavik"], "pollutants": ["O3"], "dataset": 2, "source": "API"}',
             '{"countries": ["IS"], "cities": ["Reykjavik"], "pollutants": ["O3"], "dataset": 1, "source": "API"}',
-            id="O3-IS",
+            id="str",
         ),
         pytest.param(
-            frozenset({"SO2"}),
+            None,
             "SE",
             None,
-            '{"countries": ["SE"], "cities": [], "pollutants": ["SO2"], "dataset": 3, "source": "API"}',
-            '{"countries": ["SE"], "cities": [], "pollutants": ["SO2"], "dataset": 2, "source": "API"}',
-            '{"countries": ["SE"], "cities": [], "pollutants": ["SO2"], "dataset": 1, "source": "API"}',
-            id="SO2-SE",
+            '{"countries": ["SE"], "cities": [], "pollutants": [], "dataset": 3, "source": "API"}',
+            '{"countries": ["SE"], "cities": [], "pollutants": [], "dataset": 2, "source": "API"}',
+            '{"countries": ["SE"], "cities": [], "pollutants": [], "dataset": 1, "source": "API"}',
+            id="None",
         ),
     ),
 )
 def test_ParquetData_payload(
-    pollutants: frozenset[str],
+    pollutants: frozenset[str] | str | None,
     country: str,
     city: str | None,
     historical: str,
@@ -205,7 +205,7 @@ async def test_Client_download_urls(client: Client):
     assert header == "ParquetFileUrl"
     assert len(urls) == 22
 
-    regex = re.compile(rf"https://.*/{info.country}/.*\.parquet")
+    regex = re.compile(r"https://.*/MT/.*\.parquet")
     for url in urls:
         assert regex.match(url) is not None, f"wrong {url=} start"
 
@@ -289,7 +289,7 @@ async def test_Session_url_to_files(session: Session):
         await session.url_to_files(info)
         assert session.number_of_urls == 22
 
-        regex = re.compile(rf"https://.*/{info.country}/.*\.parquet")
+        regex = re.compile(r"https://.*/MT/.*\.parquet")
         for url in session.urls:
             assert regex.match(url) is not None, f"wrong {url=} start"
 

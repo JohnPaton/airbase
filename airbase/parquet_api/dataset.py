@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from collections.abc import Collection, Iterator
+from collections.abc import Collection, Iterator, Set
 from enum import IntEnum
 from typing import NamedTuple
 from warnings import warn
@@ -36,15 +36,25 @@ class ParquetData(NamedTuple):
     """
 
     dataset: Dataset
-    country: str
-    pollutant: frozenset[str] | None = None
+    country: str | None
+    pollutant: frozenset[str] | str | None = None
     city: str | None = None
 
     def payload(self) -> ParquetDataJSON:
+        def to_list_str(x: frozenset[str] | str | None) -> list[str]:
+            if x is None or not x:
+                return []
+            if isinstance(x, str):
+                return [x]
+            return sorted(x)
+
+        if self.city and not self.country:
+            raise ValueError(f"city={self.city} without country")
+
         return ParquetDataJSON(
-            countries=[self.country],
-            cities=[] if self.city is None else [self.city],
-            pollutants=[] if self.pollutant is None else sorted(self.pollutant),
+            countries=to_list_str(self.country),
+            cities=to_list_str(self.city),
+            pollutants=to_list_str(self.pollutant),
             dataset=self.dataset,
             source="API",  # for EEA internal use
         )
@@ -52,7 +62,7 @@ class ParquetData(NamedTuple):
 
 def __by_city(
     dataset: Dataset,
-    cities: set[str],
+    cities: Set[str],
     pollutants: frozenset[str] | None,
 ) -> Iterator[ParquetData]:
     """download info one city at the time"""
@@ -66,7 +76,7 @@ def __by_city(
 
 def __by_country(
     dataset: Dataset,
-    countries: set[str],
+    countries: Set[str],
     pollutants: frozenset[str] | None,
 ) -> Iterator[ParquetData]:
     """download info one country at the time"""
@@ -76,6 +86,19 @@ def __by_country(
             continue
 
         yield ParquetData(dataset, country, pollutants)
+
+
+def __by_pollutant(
+    dataset: Dataset,
+    pollutants: frozenset[str],
+) -> Iterator[ParquetData]:
+    """download info one pollutant at the time"""
+    for poll in pollutants:
+        if poll not in DB.POLLUTANTS:
+            warn(f"Unknown {poll=}, skip", UserWarning, stacklevel=-2)
+            continue
+
+        yield ParquetData(dataset, None, poll)
 
 
 def request_info(
@@ -97,7 +120,9 @@ def request_info(
 
     if cities:
         yield from __by_city(dataset, set(cities), pollutants)
-    else:
-        if not countries:
-            countries = DB.COUNTRY_CODES
+    elif countries:
         yield from __by_country(dataset, set(countries), pollutants)
+    elif pollutants is None:
+        yield from __by_country(dataset, DB.COUNTRY_CODES, pollutants)
+    else:
+        yield from __by_pollutant(dataset, pollutants)
