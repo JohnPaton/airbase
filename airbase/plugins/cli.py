@@ -1,3 +1,4 @@
+from datetime import datetime
 from pathlib import Path
 from typing import Annotated
 
@@ -37,6 +38,14 @@ def catalog(
             help="Override station metadata path. Defaults to PATH/metadata.csv.",
         ),
     ] = None,
+    newer_than: Annotated[
+        datetime | None,
+        typer.Option(
+            "--newer-than",
+            formats=["%Y%m%d %H:%M", "%Y-%m-%d %H:%M:%S"],
+            help="Ignore files older than reference time.",
+        ),
+    ] = None,
     stop_after: Annotated[
         int | None,
         typer.Option(
@@ -71,6 +80,7 @@ def catalog(
         metadata,
         overwrite=obj["overwrite"],
         progress=not obj["quiet"],
+        newer_than=newer_than.timestamp() if newer_than else None,
         stop_after=stop_after,
     )
 
