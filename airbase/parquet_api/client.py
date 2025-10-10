@@ -56,7 +56,7 @@ class Client(AbstractAsyncContextManager):
         self,
         *,
         timeout: float | None = None,
-        max_concurrent: int = 10,
+        max_concurrent: int = 5,
     ) -> None:
         self.timeout = timeout
         self.max_concurrent = max_concurrent
