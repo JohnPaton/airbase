@@ -174,7 +174,7 @@ def catalog(
     missing = df.filter(pl.any_horizontal(pl.all().is_null()))
     if not missing.is_empty():
         for file in missing.get_column("filename"):
-            warn(f"No metadata for {data_path}/{file}")
+            warn(f"No metadata for {file}")
 
     # Start/End datatype has no time zome info
     # use UTC+01 for AggType=hour/var and Timezone for AggType=day
