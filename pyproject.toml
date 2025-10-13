@@ -56,7 +56,7 @@ test = [
     # https://github.com/pallets/click/issues/2682
     "click!=8.2.0",
 ]
-lint = ["mypy>=1.18.2", "ruff>=0.13.3", "types-aiofiles>=24.1.0.20241221"]
+lint = ["mypy>=1.18.2", "ruff>=0.14.0", "types-aiofiles>=24.1.0.20241221"]
 docs = ["sphinx>=7.1.2", "sphinx-rtd-theme>=2.0.0"]
 
 [tool.uv]
