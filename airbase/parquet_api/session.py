@@ -22,7 +22,6 @@ from tqdm import tqdm
 from ..summary import DB
 from .client import Client
 from .dataset import (
-    AggregationType,
     Dataset,
     ParquetData,
     request_info_by_city,
@@ -135,8 +134,9 @@ class Session(AbstractAsyncContextManager):
         payload = await self.client.pollutant()
         ids: defaultdict[str, set[int]] = defaultdict(set)
         for poll in payload:
-            key, val = poll["notation"], pollutant_id_from_url(poll["id"])
-            ids[key].add(val)
+            if poll["code"] is None:
+                continue
+            ids[poll["notation"]].add(poll["code"])
         return ids
 
     async def cities(self, *countries: str) -> defaultdict[str, set[str]]:
@@ -323,17 +323,6 @@ class Session(AbstractAsyncContextManager):
                 warn(str(e), category=RuntimeWarning)
 
 
-def pollutant_id_from_url(url: str) -> int:
-    """
-    numeric pollutant id from urls like
-        http://dd.eionet.europa.eu/vocabulary/aq/pollutant/1
-        http://dd.eionet.europa.eu/vocabularyconcept/aq/pollutant/44/view
-    """
-    if url.endswith("view"):
-        return int(url.split("/")[-2])
-    return int(url.split("/")[-1])
-
-
 async def download(
     dataset: Dataset,
     root_path: Path,
@@ -341,7 +330,6 @@ async def download(
     countries: frozenset[str] | set[str],
     pollutants: frozenset[str] | set[str] | None = None,
     cities: frozenset[str] | set[str] | None = None,
-    frequency: AggregationType | None = None,
     summary_only: bool = False,
     metadata: bool = False,
     country_subdir: bool = True,
@@ -378,14 +366,12 @@ async def download(
         If False, a :py:func:`warnings.warn` will be issued instead.
     """
     if cities:  # one request for each city/pollutant
-        info = request_info_by_city(
-            dataset, *cities, pollutants=pollutants, frequency=frequency
-        )
+        info = request_info_by_city(dataset, *cities, pollutants=pollutants)
     else:  # one request for each country/pollutant
         if not countries:
             countries = DB.COUNTRY_CODES
         info = request_info_by_country(
-            dataset, *countries, pollutants=pollutants, frequency=frequency
+            dataset, *countries, pollutants=pollutants
         )
 
     if not info:

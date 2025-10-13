@@ -6,16 +6,16 @@ https://eeadmz1-downloads-api-appservice.azurewebsites.net/swagger/index.html
 from __future__ import annotations
 
 import sys
-from typing import TYPE_CHECKING, Literal, TypeAlias, TypedDict
+from typing import TYPE_CHECKING, Literal, TypeAlias
 
 if sys.version_info >= (3, 11):
-    from typing import NotRequired
+    from typing import NotRequired, TypedDict
 else:
-    from typing_extensions import NotRequired
+    from typing_extensions import NotRequired, TypedDict
 
 
 if TYPE_CHECKING:
-    from .dataset import AggregationType, Dataset
+    from .dataset import Dataset
 
 
 class CityData(TypedDict):
@@ -52,9 +52,7 @@ class ParquetDataJSON(TypedDict):
     source: NotRequired[str]
     dateTimeStart: NotRequired[str]  #  yyyy-mm-ddTHH:MM:SSZ
     dateTimeEnd: NotRequired[str]  #  yyyy-mm-ddTHH:MM:SSZ
-    aggregationType: NotRequired[
-        Literal["hour", "day", "var"] | AggregationType
-    ]
+    aggregationType: NotRequired[Literal["hour", "day", "var"]]
 
 
 class DownloadSummaryJSON(TypedDict):
@@ -70,6 +68,7 @@ class PollutantDict(TypedDict):
     notation: str
     id: str
     pk: int
+    code: int | None
 
 
 """full `Pollutant` response"""

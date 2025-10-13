@@ -6,7 +6,7 @@ import typer
 from click import Choice
 
 from . import __version__
-from .parquet_api import AggregationType, Dataset, download
+from .parquet_api import Dataset, download
 from .summary import DB
 
 main = typer.Typer(add_completion=False, no_args_is_help=True)
@@ -48,16 +48,6 @@ CityList: TypeAlias = Annotated[
     list[str],
     typer.Option("-C", "--city", help="Only from selected <cities>."),
 ]
-FrequencyOption: TypeAlias = Annotated[
-    str | None,
-    typer.Option(
-        "--aggregation-type",
-        "--frequency",
-        "-F",
-        help="Only hourly data, daily data or other aggregation frequency.",
-        click_type=Choice([agg.name.casefold() for agg in AggregationType]),
-    ),
-]
 MetadataOption: TypeAlias = Annotated[
     bool, typer.Option("-M", "--metadata", help="Download station metadata.")
 ]
@@ -95,7 +85,6 @@ def historical(
     countries: CountryList = [],
     pollutants: PollutantList = [],
     cities: CityList = [],
-    frequency: FrequencyOption = None,
     metadata: MetadataOption = False,
     path: PathOption = Path("data/historical"),
     summary_only: SummaryOption = False,
@@ -125,9 +114,6 @@ def historical(
             countries=frozenset(countries),
             pollutants=frozenset(pollutants),
             cities=frozenset(cities),
-            frequency=None
-            if frequency is None
-            else AggregationType[frequency.capitalize()],
             metadata=metadata,
             summary_only=summary_only,
             country_subdir=country_subdir,
@@ -142,7 +128,6 @@ def verified(
     countries: CountryList = [],
     pollutants: PollutantList = [],
     cities: CityList = [],
-    frequency: FrequencyOption = None,
     metadata: MetadataOption = False,
     path: PathOption = Path("data/verified"),
     summary_only: SummaryOption = False,
@@ -172,9 +157,6 @@ def verified(
             countries=frozenset(countries),
             pollutants=frozenset(pollutants),
             cities=frozenset(cities),
-            frequency=None
-            if frequency is None
-            else AggregationType[frequency.capitalize()],
             metadata=metadata,
             summary_only=summary_only,
             country_subdir=country_subdir,
@@ -189,7 +171,6 @@ def unverified(
     countries: CountryList = [],
     pollutants: PollutantList = [],
     cities: CityList = [],
-    frequency: FrequencyOption = None,
     metadata: MetadataOption = False,
     path: PathOption = Path("data/unverified"),
     summary_only: SummaryOption = False,
@@ -219,9 +200,6 @@ def unverified(
             countries=frozenset(countries),
             pollutants=frozenset(pollutants),
             cities=frozenset(cities),
-            frequency=None
-            if frequency is None
-            else AggregationType[frequency.capitalize()],
             metadata=metadata,
             summary_only=summary_only,
             country_subdir=country_subdir,

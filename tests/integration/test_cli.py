@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 from typer.testing import CliRunner
 
-from airbase.cli import main
+from airbase.main import main
 
 runner = CliRunner()
 
@@ -39,7 +39,7 @@ def test_download(
 ):
     options = f"{cmd} --quiet --country {country} --city {city} --pollutant {pollutant} --path {tmp_path}"
     with runner.isolated_filesystem(temp_dir=tmp_path):
-        result = runner.invoke(main, options.split())
+        result = runner.invoke(main, options)
         assert result.exit_code == 0
 
     found = set(tmp_path.rglob("*.*"))
@@ -74,11 +74,11 @@ def test_summary(
     expected: str,
     tmp_path: Path,
 ):
-    options = f"{cmd} --quiet --country {country} --city {city} --pollutant {pollutant} --path {tmp_path} --aggregation-type hourly --summary"
+    options = f"{cmd} --quiet --country {country} --city {city} --pollutant {pollutant} --path {tmp_path} --summary"
     with runner.isolated_filesystem(temp_dir=tmp_path):
-        result = runner.invoke(main, options.split())
+        result = runner.invoke(main, options)
         assert result.exit_code == 0
-        assert expected in result.stdout
+        assert expected in result.output
 
     files = tuple(tmp_path.rglob("*.parquet"))
     assert not files
