@@ -15,6 +15,7 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Intended Audience :: Science/Research",
     "Topic :: Scientific/Engineering",
     "Topic :: Scientific/Engineering :: Atmospheric Science",
@@ -25,6 +26,7 @@ dependencies = [
     "aiohttp >= 3.9.0; python_version >= '3.12'",
     "async_property >=0.2.2",
     "aiofiles >=24.1.0",
+    "tenacity >=9.1.2",
     "importlib_resources; python_version < '3.11'",
     "tqdm",
     "typer-slim >=0.12.4",
@@ -39,17 +41,32 @@ Documentation = "https://airbase.readthedocs.io"
 airbase = "airbase.cli:main"
 
 [build-system]
-requires = ["hatchling", "hatch-vcs"]
+requires = ["hatchling", "hatch-vcs", "hatch-build-scripts"]
 build-backend = "hatchling.build"
 
 [dependency-groups]
 dev = [{ include-group = "test" }, { include-group = "lint" }]
-test = ["pytest>=6.0", "aioresponses", "pytest-asyncio>=0.24.0", "coverage>=7.2.0", "pytest-cov"]
-lint = ["mypy>=1.18.2", "ruff>=0.13.3", "types-aiofiles>=24.1.0.20241221"]
+test = [
+    "pytest>=6.0",
+    "aioresponses",
+    "pytest-asyncio>=0.24.0",
+    "coverage>=7.2.0",
+    "pytest-cov",
+    # click 8.2.0 CliRunner does not flush sys.stderr, fixed on 8.2.1
+    # https://github.com/pallets/click/issues/2682
+    "click!=8.2.0",
+]
+lint = ["mypy>=1.18.2", "ruff>=0.14.0", "types-aiofiles>=24.1.0.20241221"]
 docs = ["sphinx>=7.1.2", "sphinx-rtd-theme>=2.0.0"]
 
 [tool.uv]
 index-url = "https://pypi.org/simple"
+cache-keys = [
+    { file = "pyproject.toml" },
+    { file = "scripts/create_summary_db.py" },
+    { file = "airbase/parquet_api/types.py" },
+]
+
 
 [tool.hatch.version]
 source = "vcs"
@@ -57,8 +74,14 @@ source = "vcs"
 [tool.hatch.envs.default]
 installer = "uv"
 
+[tool.hatch.build]
+artifacts = ["airbase/summary/summary.sqlite"]
+
 [tool.hatch.build.targets.wheel]
 packages = ["airbase"]
+
+[[tool.hatch.build.hooks.build-scripts.scripts]]
+commands = ["scripts/create_summary_db.py"]
 
 [tool.pytest.ini_options]
 minversion = "6.0"
@@ -110,14 +133,14 @@ ignore_missing_imports = true
 [tool.tox]
 legacy_tox_ini = """
 [tox]
-envlist = py310, py311, py312, py313, integration, report, lint, docs
+envlist = py310, py311, py312, py313, py314, integration, report, lint, docs
 skip_missing_interpreters = True
 isolated_build = True
 requires =
     tox>=4.25
     tox-uv>=1.25
 labels =
-    coverage = py310, py311, py312, py313, integration, report
+    coverage = py310, py311, py312, py313, py314, integration, report
 
 [testenv]
 description = non-interation tests
@@ -147,7 +170,7 @@ commands =
 deps =
     coverage
 depends =
-    py310, py311, py312, py313, integration
+    py310, py311, py312, py313, py314, integration
 
 [testenv:lint]
 description = run linters

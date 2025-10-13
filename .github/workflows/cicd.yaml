@@ -13,11 +13,11 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python: ['3.10', '3.11', '3.12', '3.13']
+        python: ['3.10', '3.11', '3.12', '3.13', '3.14']
         prerelease: [false]
-        include:
-          - python: '3.14'
-            prerelease: true
+        #include:
+        #  - python: '3.14'
+        #    prerelease: true
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-project

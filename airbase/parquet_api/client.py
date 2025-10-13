@@ -15,6 +15,12 @@ from zipfile import ZipFile, is_zipfile
 
 import aiofiles
 import aiohttp
+from tenacity import (
+    retry,
+    retry_if_exception_type,
+    stop_after_attempt,
+    wait_random_exponential,
+)
 
 if sys.version_info >= (3, 11):
     from typing import Self
@@ -32,6 +38,12 @@ from .types import (
 API_BASE_URL = "https://eeadmz1-downloads-api-appservice.azurewebsites.net"
 METADATA_URL = "https://discomap.eea.europa.eu/App/AQViewer/download?fqn=Airquality_Dissem.b2g.measurements&f=csv"
 METADATA_ARCHIVE = "DataExtract.csv.zip"
+try_3_times = retry(
+    retry=retry_if_exception_type(aiohttp.ClientResponseError),
+    stop=stop_after_attempt(3),
+    wait=wait_random_exponential(),
+    reraise=True,
+)
 
 
 class Client(AbstractAsyncContextManager):
@@ -95,7 +107,7 @@ class Client(AbstractAsyncContextManager):
             return await r.json(encoding="UTF-8")  # type:ignore[no-any-return]
 
     async def pollutant(self) -> PollutantJSON:
-        """get request to /Property"""
+        """get request to /Pollutant"""
         async with self._session.get(f"{API_BASE_URL}/Pollutant") as r:
             r.raise_for_status()
             return await r.json(encoding="UTF-8")  # type:ignore[no-any-return]
@@ -108,6 +120,7 @@ class Client(AbstractAsyncContextManager):
             r.raise_for_status()
             return await r.json(encoding="UTF-8")  # type:ignore[no-any-return]
 
+    @try_3_times
     async def download_summary(
         self, payload: ParquetDataJSON
     ) -> DownloadSummaryJSON:
@@ -118,6 +131,7 @@ class Client(AbstractAsyncContextManager):
             r.raise_for_status()
             return await r.json(encoding="UTF-8")  # type:ignore[no-any-return]
 
+    @try_3_times
     async def download_urls(self, payload: ParquetDataJSON) -> str:
         """post request to /ParquetFile/urls"""
         async with self._session.post(
@@ -126,6 +140,7 @@ class Client(AbstractAsyncContextManager):
             r.raise_for_status()
             return await r.text(encoding="UTF-8")  # type:ignore[no-any-return]
 
+    @try_3_times
     async def download_binary(self, url: str, path: Path) -> Path:
         """get request to `url`, write response body content (in binary form) into a a binary file,
         and return `path` (exactly as the input)"""
@@ -138,6 +153,7 @@ class Client(AbstractAsyncContextManager):
 
         return path
 
+    @try_3_times
     async def download_metadata(self, path: Path) -> Path:
         """download compressed metadata file and returns path to uncompressed csv"""
         archive = await self.download_binary(
