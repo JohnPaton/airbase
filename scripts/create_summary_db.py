@@ -7,7 +7,6 @@ import subprocess
 from contextlib import closing
 from pathlib import Path
 
-from airbase.parquet_api.session import pollutant_id_from_url
 from airbase.parquet_api.types import (
     CityJSON,
     CountryJSON,
@@ -105,7 +104,10 @@ def main(db_path: Path = Path("airbase/summary/summary.sqlite")):
         # populate pollutant table
         pollutant = pollutant_json()
         for poll in pollutant:
-            poll.update(url=poll["id"], id=pollutant_id_from_url(poll["id"]))  # type:ignore[call-arg]
+            if poll["id"].endswith("44/view"):
+                poll.update(url=poll["id"], id=2044)  # type:ignore[call-arg]
+            else:
+                poll.update(url=poll["id"], id=poll["code"])  # type:ignore[call-arg]
         cur.executemany(INSERT_PROPERTY_JSON, pollutant)
 
 

@@ -107,7 +107,7 @@ class Client(AbstractAsyncContextManager):
             return await r.json(encoding="UTF-8")  # type:ignore[no-any-return]
 
     async def pollutant(self) -> PollutantJSON:
-        """get request to /Property"""
+        """get request to /Pollutant"""
         async with self._session.get(f"{API_BASE_URL}/Pollutant") as r:
             r.raise_for_status()
             return await r.json(encoding="UTF-8")  # type:ignore[no-any-return]

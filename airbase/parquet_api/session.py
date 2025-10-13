@@ -134,8 +134,9 @@ class Session(AbstractAsyncContextManager):
         payload = await self.client.pollutant()
         ids: defaultdict[str, set[int]] = defaultdict(set)
         for poll in payload:
-            key, val = poll["notation"], pollutant_id_from_url(poll["id"])
-            ids[key].add(val)
+            if poll["code"] is None:
+                continue
+            ids[poll["notation"]].add(poll["code"])
         return ids
 
     async def cities(self, *countries: str) -> defaultdict[str, set[str]]:
@@ -320,17 +321,6 @@ class Session(AbstractAsyncContextManager):
                 if self.raise_for_status:
                     raise
                 warn(str(e), category=RuntimeWarning)
-
-
-def pollutant_id_from_url(url: str) -> int:
-    """
-    numeric pollutant id from urls like
-        http://dd.eionet.europa.eu/vocabulary/aq/pollutant/1
-        http://dd.eionet.europa.eu/vocabularyconcept/aq/pollutant/44/view
-    """
-    if url.endswith("view"):
-        return int(url.split("/")[-2])
-    return int(url.split("/")[-1])
 
 
 async def download(

@@ -162,10 +162,19 @@ class SummaryDB:
         https://eeadmz1-downloads-api-appservice.azurewebsites.net/Pollutant
         """
         with self.cursor() as cur:
-            cur.execute("SELECT pollutant, definition_url, pk FROM pollutant;")
+            cur.execute(
+                "SELECT pollutant, definition_url, pk, pollutant_id FROM pollutant;"
+            )
             return [
-                dict(notation=pollutant, id=definition_url, pk=pk)
-                for (pollutant, definition_url, pk) in cur
+                dict(
+                    notation=pollutant,
+                    id=definition_url,
+                    pk=pk,
+                    code=None
+                    if definition_url.endswith("44/view")
+                    else pollutant_id,
+                )
+                for (pollutant, definition_url, pk, pollutant_id) in cur
             ]
 
 
