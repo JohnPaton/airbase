@@ -170,9 +170,14 @@ def check_subdir(ctx: typer.Context, value: Path | None):
     if not isinstance(value, Path):
         return value
 
+    if not value.is_absolute():
+        return value
+
     obj: CtxObj = ctx.ensure_object(dict)  # type:ignore[assignment]
     if not value.is_relative_to(path := obj["path"]):
-        raise typer.BadParameter(f"Path '{value}/' is not subdir of `--root-path={path}/`")
+        raise typer.BadParameter(
+            f"Path '{value}' is not subdir of `--root-path='{path}'"
+        )
 
     return value
 
