@@ -11,7 +11,7 @@ if sys.version_info >= (3, 11):
 else:
     from typing_extensions import assert_never
 
-from .parquet_api import Dataset, Session, download
+from .parquet_api import Dataset, Session, download, request_info
 from .summary import DB
 
 
@@ -212,7 +212,7 @@ class AirbaseRequest:
         else:  # pragma:no cover
             assert_never(poll)
 
-        self.verbose = verbose
+        self.session.progress = self.verbose = verbose
 
     def download(
         self,
@@ -238,16 +238,15 @@ class AirbaseRequest:
         if not dir.is_dir():
             raise NotADirectoryError(f"{dir.resolve()} is not a directory.")
 
+        info = request_info(
+            self.source,
+            countries=self.counties,
+            pollutants=self.pollutants,
+        )
+        self.session.raise_for_status = raise_for_status
         asyncio.run(
             download(
-                self.source,
-                dir,
-                countries=self.counties,
-                pollutants=self.pollutants,
-                overwrite=not skip_existing,
-                quiet=not self.verbose,
-                raise_for_status=raise_for_status,
-                session=self.session,
+                "PARQUET", self.session, info, dir, overwrite=not skip_existing
             )
         )
 
@@ -266,10 +265,7 @@ class AirbaseRequest:
                 f"{filepath.parent.resolve()} does not exist."
             )
 
-        async def fetch_metadata():
-            async with self.session:
-                await self.session.download_metadata(filepath)
-
         if self.verbose:
             print(f"Writing metadata to {filepath}...", file=sys.stderr)
-        asyncio.run(fetch_metadata())
+
+        asyncio.run(download("METADATA", self.session, frozenset(), filepath))

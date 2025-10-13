@@ -39,7 +39,7 @@ async def pollutant_json(client: Client) -> PollutantJSON:
         return await client.pollutant()
 
 
-def test_county(country_json: CountryJSON):
+def test_country(country_json: CountryJSON):
     assert DB.country_json() == country_json
 
 

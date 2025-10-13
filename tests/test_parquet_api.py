@@ -7,14 +7,12 @@ from pathlib import Path
 import pytest
 
 from airbase.parquet_api import (
-    AggregationType,
     Client,
     Dataset,
     ParquetData,
     Session,
     download,
-    request_info_by_city,
-    request_info_by_country,
+    request_info,
 )
 from airbase.summary import DB
 from tests.resources import CSV_PARQUET_URLS_RESPONSE
@@ -42,36 +40,24 @@ def test_Dataset():
 
 
 @pytest.mark.parametrize(
-    "city,country,pollutants,frequency",
+    "city,country,pollutants",
     (
-        pytest.param("Reykjavik", "IS", {"PM10", "NO"}, None, id="pollutants"),
-        pytest.param(
-            "Göteborg", "SE", None, AggregationType.Hourly, id="no-pollutants"
-        ),
+        pytest.param("Reykjavik", "IS", {"PM10", "NO"}, id="pollutants"),
+        pytest.param("Göteborg", "SE", None, id="no-pollutants"),
     ),
 )
 def test_request_info_by_city(
     city: str,
     country: str,
     pollutants: set[str] | None,
-    frequency: AggregationType | None,
     dataset: Dataset = Dataset.Historical,
 ):
+    info = request_info(dataset, cities={city}, pollutants=pollutants)
     if not pollutants:
-        assert (
-            request_info_by_city(dataset, city, frequency=frequency)
-            == request_info_by_city(
-                dataset, city, pollutants=set(), frequency=frequency
-            )
-            == {ParquetData(country, dataset, city=city, frequency=frequency)}
-        )
+        assert set(info) == {ParquetData(country, dataset, city=city)}
     else:
-        assert request_info_by_city(
-            dataset, city, pollutants=pollutants, frequency=frequency
-        ) == {
-            ParquetData(
-                country, dataset, frozenset(pollutants), city, frequency
-            )
+        assert set(info) == {
+            ParquetData(country, dataset, frozenset(pollutants), city)
         }
 
 
@@ -80,38 +66,28 @@ def test_request_info_by_city_warning(
     dataset: Dataset = Dataset.Historical,
 ):
     with pytest.warns(UserWarning, match=rf"Unknown city='{city}'"):
-        assert not request_info_by_city(dataset, city)
+        assert not set(request_info(dataset, cities={city}))
 
 
 @pytest.mark.parametrize(
-    "country,pollutants,frequency",
+    "country,pollutants",
     (
-        pytest.param("IS", {"PM10", "NO"}, None, id="IS"),
-        pytest.param("NO", set(), AggregationType.Hourly, id="NO"),
-        pytest.param("SE", None, AggregationType.Daily, id="SE"),
+        pytest.param("IS", {"PM10", "NO"}, id="IS"),
+        pytest.param("NO", set(), id="NO"),
+        pytest.param("SE", None, id="SE"),
     ),
 )
 def test_request_info_by_country(
     country: str,
     pollutants: set[str] | None,
-    frequency: AggregationType | None,
     dataset: Dataset = Dataset.Historical,
 ):
+    info = request_info(dataset, countries={country}, pollutants=pollutants)
     if not pollutants:
-        assert (
-            request_info_by_country(dataset, country, frequency=frequency)
-            == request_info_by_country(
-                dataset, country, pollutants=set(), frequency=frequency
-            )
-            == {ParquetData(country, dataset, frequency=frequency)}
-        )
+        assert set(info) == {ParquetData(country, dataset)}
     else:
-        assert request_info_by_country(
-            dataset, country, pollutants=pollutants, frequency=frequency
-        ) == {
-            ParquetData(
-                country, dataset, frozenset(pollutants), frequency=frequency
-            )
+        assert set(info) == {
+            ParquetData(country, dataset, frozenset(pollutants))
         }
 
 
@@ -120,40 +96,37 @@ def test_request_info_by_country_warning(
     dataset: Dataset = Dataset.Historical,
 ):
     with pytest.warns(UserWarning, match=rf"Unknown country='{country}'"):
-        assert not request_info_by_country(dataset, country)
+        assert not set(request_info(dataset, countries={country}))
 
 
 @pytest.mark.parametrize(
-    "pollutants,country,city,aggregation_type,historical,verified,unverified",
+    "pollutants,country,city,historical,verified,unverified",
     (
         pytest.param(
             frozenset({"PM10"}),
             "NO",
             None,
-            None,
-            '{"countries": ["NO"], "cities": [], "pollutants": ["http://dd.eionet.europa.eu/vocabulary/aq/pollutant/5"], "dataset": 3, "source": "API"}',
-            '{"countries": ["NO"], "cities": [], "pollutants": ["http://dd.eionet.europa.eu/vocabulary/aq/pollutant/5"], "dataset": 2, "source": "API"}',
-            '{"countries": ["NO"], "cities": [], "pollutants": ["http://dd.eionet.europa.eu/vocabulary/aq/pollutant/5"], "dataset": 1, "source": "API"}',
+            '{"countries": ["NO"], "cities": [], "pollutants": ["PM10"], "dataset": 3, "source": "API"}',
+            '{"countries": ["NO"], "cities": [], "pollutants": ["PM10"], "dataset": 2, "source": "API"}',
+            '{"countries": ["NO"], "cities": [], "pollutants": ["PM10"], "dataset": 1, "source": "API"}',
             id="PM10-NO",
         ),
         pytest.param(
             frozenset({"O3"}),
             "IS",
             "Reykjavik",
-            None,
-            '{"countries": ["IS"], "cities": ["Reykjavik"], "pollutants": ["http://dd.eionet.europa.eu/vocabulary/aq/pollutant/7"], "dataset": 3, "source": "API"}',
-            '{"countries": ["IS"], "cities": ["Reykjavik"], "pollutants": ["http://dd.eionet.europa.eu/vocabulary/aq/pollutant/7"], "dataset": 2, "source": "API"}',
-            '{"countries": ["IS"], "cities": ["Reykjavik"], "pollutants": ["http://dd.eionet.europa.eu/vocabulary/aq/pollutant/7"], "dataset": 1, "source": "API"}',
+            '{"countries": ["IS"], "cities": ["Reykjavik"], "pollutants": ["O3"], "dataset": 3, "source": "API"}',
+            '{"countries": ["IS"], "cities": ["Reykjavik"], "pollutants": ["O3"], "dataset": 2, "source": "API"}',
+            '{"countries": ["IS"], "cities": ["Reykjavik"], "pollutants": ["O3"], "dataset": 1, "source": "API"}',
             id="O3-IS",
         ),
         pytest.param(
             frozenset({"SO2"}),
             "SE",
             None,
-            AggregationType.Hourly,
-            '{"countries": ["SE"], "cities": [], "pollutants": ["http://dd.eionet.europa.eu/vocabulary/aq/pollutant/1"], "dataset": 3, "source": "API", "aggregationType": "hour"}',
-            '{"countries": ["SE"], "cities": [], "pollutants": ["http://dd.eionet.europa.eu/vocabulary/aq/pollutant/1"], "dataset": 2, "source": "API", "aggregationType": "hour"}',
-            '{"countries": ["SE"], "cities": [], "pollutants": ["http://dd.eionet.europa.eu/vocabulary/aq/pollutant/1"], "dataset": 1, "source": "API", "aggregationType": "hour"}',
+            '{"countries": ["SE"], "cities": [], "pollutants": ["SO2"], "dataset": 3, "source": "API"}',
+            '{"countries": ["SE"], "cities": [], "pollutants": ["SO2"], "dataset": 2, "source": "API"}',
+            '{"countries": ["SE"], "cities": [], "pollutants": ["SO2"], "dataset": 1, "source": "API"}',
             id="SO2-SE",
         ),
     ),
@@ -162,32 +135,25 @@ def test_ParquetData_payload(
     pollutants: frozenset[str],
     country: str,
     city: str | None,
-    aggregation_type: AggregationType | None,
     historical: str,
     verified: str,
     unverified: str,
 ):
     assert (
         json.dumps(
-            ParquetData(
-                country, Dataset.Historical, pollutants, city, aggregation_type
-            ).payload()
+            ParquetData(country, Dataset.Historical, pollutants, city).payload()
         )
         == historical
     ), "unexpected historical info"
     assert (
         json.dumps(
-            ParquetData(
-                country, Dataset.Verified, pollutants, city, aggregation_type
-            ).payload()
+            ParquetData(country, Dataset.Verified, pollutants, city).payload()
         )
         == verified
     ), "unexpected verified info"
     assert (
         json.dumps(
-            ParquetData(
-                country, Dataset.Unverified, pollutants, city, aggregation_type
-            ).payload()
+            ParquetData(country, Dataset.Unverified, pollutants, city).payload()
         )
         == unverified
     ), "unexpected unverified info"
@@ -371,13 +337,17 @@ async def test_Session_download_metadata(tmp_path: Path, session: Session):
 async def test_download(tmp_path: Path, session: Session):
     assert not tuple(tmp_path.rglob("*.parquet"))
     assert not tuple(tmp_path.rglob("*.csv"))
-    await download(
-        Dataset.Historical,
-        tmp_path,
-        countries={"MT"},
-        cities={"Valletta"},
-        metadata=True,
-        session=session,
-    )
+    info = request_info(Dataset.Historical, cities={"Valletta"})
+    await download("PARQUET", session, info, tmp_path)
     assert len(tuple(tmp_path.glob("MT/*.parquet"))) == 22
-    assert tmp_path.joinpath("metadata.csv").is_file()
+
+
+@pytest.mark.asyncio
+async def test_download_metadata(tmp_path: Path, session: Session):
+    assert not tuple(tmp_path.rglob("*.parquet"))
+    assert not tuple(tmp_path.rglob("*.csv"))
+    info = request_info(Dataset.Historical, cities={"Valletta"})
+    metadata = tmp_path / "meta.csv"
+    await download("METADATA", session, info, metadata)
+    assert tuple(tmp_path.rglob("*.csv")) == (metadata,)
+    assert not tuple(tmp_path.glob("MT/*.parquet"))
