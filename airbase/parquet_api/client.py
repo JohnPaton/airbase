@@ -38,6 +38,12 @@ from .types import (
 API_BASE_URL = "https://eeadmz1-downloads-api-appservice.azurewebsites.net"
 METADATA_URL = "https://discomap.eea.europa.eu/App/AQViewer/download?fqn=Airquality_Dissem.b2g.measurements&f=csv"
 METADATA_ARCHIVE = "DataExtract.csv.zip"
+try_3_times = retry(
+    retry=retry_if_exception_type(aiohttp.ClientResponseError),
+    stop=stop_after_attempt(3),
+    wait=wait_random_exponential(),
+    reraise=True,
+)
 
 
 class Client(AbstractAsyncContextManager):
@@ -114,11 +120,7 @@ class Client(AbstractAsyncContextManager):
             r.raise_for_status()
             return await r.json(encoding="UTF-8")  # type:ignore[no-any-return]
 
-    @retry(
-        retry=retry_if_exception_type(aiohttp.ClientResponseError),
-        stop=stop_after_attempt(3),
-        wait=wait_random_exponential(),
-    )
+    @try_3_times
     async def download_summary(
         self, payload: ParquetDataJSON
     ) -> DownloadSummaryJSON:
@@ -129,11 +131,7 @@ class Client(AbstractAsyncContextManager):
             r.raise_for_status()
             return await r.json(encoding="UTF-8")  # type:ignore[no-any-return]
 
-    @retry(
-        retry=retry_if_exception_type(aiohttp.ClientResponseError),
-        stop=stop_after_attempt(3),
-        wait=wait_random_exponential(),
-    )
+    @try_3_times
     async def download_urls(self, payload: ParquetDataJSON) -> str:
         """post request to /ParquetFile/urls"""
         async with self._session.post(
@@ -142,11 +140,7 @@ class Client(AbstractAsyncContextManager):
             r.raise_for_status()
             return await r.text(encoding="UTF-8")  # type:ignore[no-any-return]
 
-    @retry(
-        retry=retry_if_exception_type(aiohttp.ClientResponseError),
-        stop=stop_after_attempt(3),
-        wait=wait_random_exponential(),
-    )
+    @try_3_times
     async def download_binary(self, url: str, path: Path) -> Path:
         """get request to `url`, write response body content (in binary form) into a a binary file,
         and return `path` (exactly as the input)"""
@@ -159,11 +153,7 @@ class Client(AbstractAsyncContextManager):
 
         return path
 
-    @retry(
-        retry=retry_if_exception_type(aiohttp.ClientResponseError),
-        stop=stop_after_attempt(3),
-        wait=wait_random_exponential(),
-    )
+    @try_3_times
     async def download_metadata(self, path: Path) -> Path:
         """download compressed metadata file and returns path to uncompressed csv"""
         archive = await self.download_binary(
