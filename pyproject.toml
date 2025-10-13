@@ -41,7 +41,7 @@ Documentation = "https://airbase.readthedocs.io"
 airbase = "airbase.cli:main"
 
 [build-system]
-requires = ["hatchling", "hatch-vcs"]
+requires = ["hatchling", "hatch-vcs", "hatch-build-scripts"]
 build-backend = "hatchling.build"
 
 [dependency-groups]
@@ -61,6 +61,12 @@ docs = ["sphinx>=7.1.2", "sphinx-rtd-theme>=2.0.0"]
 
 [tool.uv]
 index-url = "https://pypi.org/simple"
+cache-keys = [
+    { file = "pyproject.toml" },
+    { file = "scripts/create_summary_db.py" },
+    { file = "airbase/parquet_api/types.py" },
+]
+
 
 [tool.hatch.version]
 source = "vcs"
@@ -68,8 +74,14 @@ source = "vcs"
 [tool.hatch.envs.default]
 installer = "uv"
 
+[tool.hatch.build]
+artifacts = ["airbase/summary/summary.sqlite"]
+
 [tool.hatch.build.targets.wheel]
 packages = ["airbase"]
+
+[[tool.hatch.build.hooks.build-scripts.scripts]]
+commands = ["scripts/create_summary_db.py"]
 
 [tool.pytest.ini_options]
 minversion = "6.0"

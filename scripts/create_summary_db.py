@@ -6,12 +6,14 @@ import sqlite3
 import subprocess
 from contextlib import closing
 from pathlib import Path
+from typing import TYPE_CHECKING
 
-from airbase.parquet_api.types import (
-    CityJSON,
-    CountryJSON,
-    PollutantJSON,
-)
+if TYPE_CHECKING:
+    from airbase.parquet_api.types import (
+        CityJSON,
+        CountryJSON,
+        PollutantJSON,
+    )
 
 BASE_URL = "https://eeadmz1-downloads-api-appservice.azurewebsites.net"
 
@@ -91,7 +93,14 @@ VALUES (:pk, :notation, :id, :url);
 """
 
 
-def main(db_path: Path = Path("airbase/summary/summary.sqlite")):
+def main(
+    db_path: Path = Path("airbase/summary/summary.sqlite"),
+    overwrite: bool = False,
+):
+    if not overwrite and db_path.is_file():
+        print(f"found {db_path}")
+        return
+
     with sqlite3.connect(db_path) as db, closing(db.cursor()) as cur:
         # recreate tables and views
         cur.executescript(CREATE_DB)
