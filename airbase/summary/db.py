@@ -5,8 +5,8 @@ import sys
 from collections.abc import Iterator
 from contextlib import closing, contextmanager
 from functools import cached_property
-from itertools import chain
 from pathlib import Path
+from types import MappingProxyType
 from typing import TYPE_CHECKING, NamedTuple
 
 if sys.version_info >= (3, 11):
@@ -53,6 +53,18 @@ class SummaryDB:
         with closing(cls.db.cursor()) as cur:
             yield cur
 
+    @cached_property
+    def COUNTRY_CODE(self) -> MappingProxyType[str, str]:
+        """Map country name to country codes"""
+        with self.cursor() as cur:
+            cur.execute("SELECT country_name, country_code FROM country;")
+            return MappingProxyType(
+                {
+                    country_name: country_code
+                    for (country_name, country_code) in cur
+                }
+            )
+
     def countries(cls) -> list[str]:
         """
         Unique country codes.
@@ -89,11 +101,6 @@ class SummaryDB:
         """All unique pollutant names/notations"""
         return frozenset(self.pollutants())
 
-    @cached_property
-    def POLLUTANT_IDS(self) -> frozenset[int]:
-        """All unique pollutant IDs"""
-        return frozenset(chain.from_iterable(self.pollutants().values()))
-
     def search_pollutant(
         self, query: str, *, limit: int | None = None
     ) -> Iterator[Pollutant]:
@@ -118,27 +125,6 @@ class SummaryDB:
             )
             for pollutant, pollutant_id in cur.fetchall():
                 yield Pollutant(pollutant, pollutant_id)
-
-    def search_pollutants(self, *pollutants: str) -> Iterator[int]:
-        """
-        Search for a pollutant ID numbers based from exact matches to pollutant names.
-
-        :param pollutants: The pollutant name(s)/notation(s) to search for.
-
-        :return: ID(s) corresponding to the name(s)/notation(s),
-            e.g. "NO" --> 38
-        """
-
-        with self.cursor() as cur:
-            cur.execute(
-                f"""
-                SELECT pollutant_id FROM pollutants
-                WHERE pollutant in ({",".join("?" * len(pollutants))});
-                """,
-                pollutants,
-            )
-            for row in cur.fetchall():
-                yield row[0]
 
     def search_city(self, city: str) -> str | None:
         """
@@ -189,10 +175,19 @@ class SummaryDB:
         https://eeadmz1-downloads-api-appservice.azurewebsites.net/Pollutant
         """
         with self.cursor() as cur:
-            cur.execute("SELECT pollutant, definition_url, pk FROM pollutant;")
+            cur.execute(
+                "SELECT pollutant, definition_url, pk, pollutant_id FROM pollutant;"
+            )
             return [
-                dict(notation=pollutant, id=definition_url, pk=pk)
-                for (pollutant, definition_url, pk) in cur
+                dict(
+                    notation=pollutant,
+                    id=definition_url,
+                    pk=pk,
+                    code=None
+                    if definition_url.endswith("44/view")
+                    else pollutant_id,
+                )
+                for (pollutant, definition_url, pk, pollutant_id) in cur
             ]
 
 

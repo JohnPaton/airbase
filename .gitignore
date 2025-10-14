@@ -114,3 +114,4 @@ activate
 data/**/*.*
 !**/.gitkeep
 .vscode
+summary.sqlite

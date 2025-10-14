@@ -107,7 +107,7 @@ async def test_summary(
 
     async with session:
         await session.summary(
-            ParquetData(country, Dataset.Historical, frozenset({pollutant}))
+            ParquetData(Dataset.Historical, country, frozenset({pollutant}))
         )
         assert session.expected_files == files
         assert session.expected_size == size
@@ -117,7 +117,7 @@ async def test_summary(
 
 @pytest.mark.asyncio
 async def test_url_to_files(session: Session):
-    info = ParquetData("MT", Dataset.Historical, city="Valletta")
+    info = ParquetData(Dataset.Historical, "MT", city="Valletta")
     assert session.number_of_urls == 0
 
     async with session:

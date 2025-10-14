@@ -21,18 +21,14 @@ from tqdm import tqdm
 
 from ..summary import DB
 from .client import Client
-from .dataset import (
-    AggregationType,
-    Dataset,
-    ParquetData,
-    request_info_by_city,
-    request_info_by_country,
-)
+from .dataset import ParquetData
 
 _T = TypeVar("_T")
 
 
 class Session(AbstractAsyncContextManager):
+    """Parquet downloads API session"""
+
     client: Client = Client()
 
     def __init__(
@@ -135,8 +131,9 @@ class Session(AbstractAsyncContextManager):
         payload = await self.client.pollutant()
         ids: defaultdict[str, set[int]] = defaultdict(set)
         for poll in payload:
-            key, val = poll["notation"], pollutant_id_from_url(poll["id"])
-            ids[key].add(val)
+            if poll["code"] is None:
+                continue
+            ids[poll["notation"]].add(poll["code"])
         return ids
 
     async def cities(self, *countries: str) -> defaultdict[str, set[str]]:
@@ -321,110 +318,3 @@ class Session(AbstractAsyncContextManager):
                 if self.raise_for_status:
                     raise
                 warn(str(e), category=RuntimeWarning)
-
-
-def pollutant_id_from_url(url: str) -> int:
-    """
-    numeric pollutant id from urls like
-        http://dd.eionet.europa.eu/vocabulary/aq/pollutant/1
-        http://dd.eionet.europa.eu/vocabularyconcept/aq/pollutant/44/view
-    """
-    if url.endswith("view"):
-        return int(url.split("/")[-2])
-    return int(url.split("/")[-1])
-
-
-async def download(
-    dataset: Dataset,
-    root_path: Path,
-    *,
-    countries: frozenset[str] | set[str],
-    pollutants: frozenset[str] | set[str] | None = None,
-    cities: frozenset[str] | set[str] | None = None,
-    frequency: AggregationType | None = None,
-    summary_only: bool = False,
-    metadata: bool = False,
-    country_subdir: bool = True,
-    overwrite: bool = False,
-    quiet: bool = True,
-    raise_for_status: bool = False,
-    session: Session = Session(),
-):
-    """
-    request file urls by country|city/pollutant and download unique files
-
-    :param dataset: `Dataset.Historical`, `Dataset.Verified` or `Dataset.Unverified`.
-    :param root_path: The directory to save files in (must exist).
-    :param countries: Request observations for these countries.
-    :param pollutants: (optional, default `None`)
-        Limit requests to these specific pollutants.
-    :param cities: (optional, default `None`)
-        Limit requests to these specific cities.
-    :param summary_only: (optional, default `False`)
-        Request total files/size, nothing will be downloaded.
-    :param metadata: (optional, default `False`)
-        Download station metadata into `root_path/"metadata.csv"`.
-    :param country_subdir: (optional, default `True`)
-        Download files for different counties to different `root_path` sub directories.
-        If False, download all files to `root_path`
-    :param overwrite: (optional, default `False`)
-        Re-download existing files in `root_path`.
-        If False, existing files will be skipped.
-        Empty files will be re-downloaded regardless of this option.
-    :param quiet: (optional, default `True`)
-        Disable progress bars.
-    :param raise_for_status: (optional, default `False`)
-        Raise exceptions if any request return "bad" HTTP status codes.
-        If False, a :py:func:`warnings.warn` will be issued instead.
-    """
-    if cities:  # one request for each city/pollutant
-        info = request_info_by_city(
-            dataset, *cities, pollutants=pollutants, frequency=frequency
-        )
-    else:  # one request for each country/pollutant
-        if not countries:
-            countries = DB.COUNTRY_CODES
-        info = request_info_by_country(
-            dataset, *countries, pollutants=pollutants, frequency=frequency
-        )
-
-    if not info:
-        warn(
-            "No data to download, please check the download options",
-            UserWarning,
-        )
-        return
-
-    session.progress = not quiet
-    session.raise_for_status = raise_for_status
-    if summary_only:
-        async with session:
-            await session.summary(*info)
-            print(
-                f"found {session.expected_files:_} file(s), ~{session.expected_size:_} Mb in total",
-                file=sys.stderr,
-            )
-        return
-
-    async with session:
-        if metadata:
-            await session.download_metadata(
-                root_path / "metadata.csv",
-                skip_existing=not overwrite,
-            )
-
-        await session.url_to_files(*info)
-        if session.number_of_urls == 0:
-            warn(
-                "Found no data matching your selection, please try different cites/pollutants"
-                if cities
-                else "Found no data matching your selection, please try different pollutants",
-                UserWarning,
-            )
-            return
-
-        await session.download_to_directory(
-            root_path,
-            country_subdir=country_subdir,
-            skip_existing=not overwrite,
-        )
