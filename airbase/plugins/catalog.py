@@ -43,6 +43,7 @@ def station_metadata(path: Path) -> pl.DataFrame:
         "Kosovo under UNSCR 1244/99": DB.COUNTRY_CODE["Kosovo"],
         "Ukraine": DB.COUNTRY_CODE.get("Ukraine", "UA"),
         "Georgia": DB.COUNTRY_CODE.get("Georgia", "GE"),
+        "Lichtenstein": DB.COUNTRY_CODE.get("Lichtenstein", "LI"),
     }
     time_zone = {
         "UTC-04": "Etc/GMT-4",
